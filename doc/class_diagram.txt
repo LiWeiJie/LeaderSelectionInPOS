@@ -1,0 +1,42 @@
+@startuml
+
+package "model" {
+    MemberModel <|-- BroadcastMember
+}
+
+
+
+class MemberModel {
+    signing_key
+    verify_key
+    mid
+    verify_key_str
+    signing_key_str
+    ==
+    {static} verifykey_to_str(verify_key)
+    {static} str_to_verifykey(vk_str)
+    {static} signingkey_to_str(signing_key)
+    {static} str_to_signingkey(sk_str)
+    ..
+    obj2dict_without_signingkey(cls, member)
+    obj2dict(cls, member)
+    obj2dict_with_signingkey(cls, member)
+    dict2obj(self, key_dict)
+    ..
+    __init__(self, genkey=False, key_path=None, key_pair=None)
+    set_key(self, verify_key, signing_key=None)
+    load_key_from_path(self, path)
+    write_to_path(self, path)
+    sign(self, data, offset=0, length=0)
+    verify(self, data, signature, offset=0, length=0)
+}
+
+class Transaction {
+    inputs
+    outputs
+    hash
+    ==
+
+}
+
+@enduml

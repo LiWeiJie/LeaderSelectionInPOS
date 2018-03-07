@@ -1,0 +1,25 @@
+[
+    {
+        "director": "{\"_verify_key\": \"-----BEGIN PUBLIC KEY-----\\nMEkwEwYHKoZIzj0CAQYIKoZIzj0DAQEDMgAE3ogVztul7qQuZoFYR3bpEFI/fJZ5\\nV2yVy9LD1GjNDxQ9KPRMaz0HCuC4rMqk55DF\\n-----END PUBLIC KEY-----\\n\", \"_signing_key\": null}",
+        "prev_hash": "prev_hash",
+        "q": "b9d4c8776e41ac683e3f9b2fed21108afc2a859905d49661c8eaa31fd24388e7b14b809ad0d7b5bdf67020ab79202b30",
+        "signature": "a24bf667d259716b66f0740dacd8cef52b0683b53b9428143a1e24abb09dcbaf3a9739be4f1844ac0f0ad02dbc50aff1",
+        "txs": "[{\"inputs\": \"[]\", \"outputs\": \"[{\\\"addresses\\\": \\\"-----BEGIN PUBLIC KEY-----\\\\nMEkwEwYHKoZIzj0CAQYIKoZIzj0DAQEDMgAE3ogVztul7qQuZoFYR3bpEFI/fJZ5\\\\nV2yVy9LD1GjNDxQ9KPRMaz0HCuC4rMqk55DF\\\\n-----END PUBLIC KEY-----\\\\n\\\", \\\"value\\\": 1000.0, \\\"script\\\": \\\"verifyKeyStr\\\"}]\"}]",
+        "n_txs": 1,
+        "senates": []
+    },
+    {
+        "director": "{\"_verify_key\": \"-----BEGIN PUBLIC KEY-----\\nMEkwEwYHKoZIzj0CAQYIKoZIzj0DAQEDMgAE3ogVztul7qQuZoFYR3bpEFI/fJZ5\\nV2yVy9LD1GjNDxQ9KPRMaz0HCuC4rMqk55DF\\n-----END PUBLIC KEY-----\\n\", \"_signing_key\": null}",
+        "prev_hash": "046e4d61ab198a217668fc7bc7efa000bd79a549da3244b3880cc88a832b1c47",
+        "q": "d2596bbbdc331ab9f701ad0e929f466e1d7f048c26d5499ca1cff961928c867a097f5474b11c03c7721a9c4cd61af13d",
+        "signature": "fb772bf7003eb6eaaa5eed7e5787ef2c8e26039025b45355b656d4d856a5e4a90cc5214507f862f131b17947bc6ebf38",
+        "txs": "[{\"inputs\": \"[{\\\"script\\\": \\\"068e95eafcafa32f9ba02af7dbdec43f1dd111d03d7be50d2fcd856a0a63c0b78dad176aa29add442add85536f9704da -----BEGIN PUBLIC KEY-----\\\\nMEkwEwYHKoZIzj0CAQYIKoZIzj0DAQEDMgAE3ogVztul7qQuZoFYR3bpEFI/fJZ5\\\\nV2yVy9LD1GjNDxQ9KPRMaz0HCuC4rMqk55DF\\\\n-----END PUBLIC KEY-----\\\\n\\\", \\\"transaction_hash\\\": \\\"b0fff6c1e2a977986615df2a6a6d4bca641c6373496273463905fedb96de0d64\\\", \\\"transaction_idx\\\": 0}]\", \"outputs\": \"[{\\\"addresses\\\": \\\"-----BEGIN PUBLIC KEY-----\\\\nMEkwEwYHKoZIzj0CAQYIKoZIzj0DAQEDMgAE3ogVztul7qQuZoFYR3bpEFI/fJZ5\\\\nV2yVy9LD1GjNDxQ9KPRMaz0HCuC4rMqk55DF\\\\n-----END PUBLIC KEY-----\\\\n\\\", \\\"value\\\": 100, \\\"script\\\": \\\"verifyKeyStr\\\"}, {\\\"addresses\\\": \\\"-----BEGIN PUBLIC KEY-----\\\\nMEkwEwYHKoZIzj0CAQYIKoZIzj0DAQEDMgAEgAHIckYDkpYtH++Hb57p9Da5GwA8\\\\nhfAov2Ada1XCHDYcga+C2Ku4tUkJ+c5lvMN1\\\\n-----END PUBLIC KEY-----\\\\n\\\", \\\"value\\\": 100, \\\"script\\\": \\\"verifyKeyStr\\\"}, {\\\"addresses\\\": \\\"-----BEGIN PUBLIC KEY-----\\\\nMEkwEwYHKoZIzj0CAQYIKoZIzj0DAQEDMgAED6ESDMQaAkEIBNIEQ+nUebyjaFjm\\\\nnEw2PFMARzpC6kfew++/IbBGMDAewI9QGaTT\\\\n-----END PUBLIC KEY-----\\\\n\\\", \\\"value\\\": 100, \\\"script\\\": \\\"verifyKeyStr\\\"}, {\\\"addresses\\\": \\\"-----BEGIN PUBLIC KEY-----\\\\nMEkwEwYHKoZIzj0CAQYIKoZIzj0DAQEDMgAESqCgeAifaY3AU4/d9JWXWHRJjjuf\\\\nDt00lilot6OJ/I8koAF7Jj9whIzuxgeJDiNS\\\\n-----END PUBLIC KEY-----\\\\n\\\", \\\"value\\\": 100, \\\"script\\\": \\\"verifyKeyStr\\\"}, {\\\"addresses\\\": \\\"-----BEGIN PUBLIC KEY-----\\\\nMEkwEwYHKoZIzj0CAQYIKoZIzj0DAQEDMgAEHH1OUqmWueAo1cLG5SSwwlMnJ2tE\\\\nOVfZiIU6larkV7DdbyI5rjqWJSYjXwYun39W\\\\n-----END PUBLIC KEY-----\\\\n\\\", \\\"value\\\": 100, \\\"script\\\": \\\"verifyKeyStr\\\"}, {\\\"addresses\\\": \\\"-----BEGIN PUBLIC KEY-----\\\\nMEkwEwYHKoZIzj0CAQYIKoZIzj0DAQEDMgAE2uahgQfuSHPXtWUOrS4+Ehf+k6YV\\\\neb0ORjxabWHdqyB9bRUocOXGrNxq/likUQoI\\\\n-----END PUBLIC KEY-----\\\\n\\\", \\\"value\\\": 100, \\\"script\\\": \\\"verifyKeyStr\\\"}, {\\\"addresses\\\": \\\"-----BEGIN PUBLIC KEY-----\\\\nMEkwEwYHKoZIzj0CAQYIKoZIzj0DAQEDMgAE9CfKVJ0vwBIBaIb1RPPlhiqTNcD2\\\\n7ftPWSEOKvOvNcoWG3Tm86v02TIg9Euw5xhO\\\\n-----END PUBLIC KEY-----\\\\n\\\", \\\"value\\\": 100, \\\"script\\\": \\\"verifyKeyStr\\\"}, {\\\"addresses\\\": \\\"-----BEGIN PUBLIC KEY-----\\\\nMEkwEwYHKoZIzj0CAQYIKoZIzj0DAQEDMgAE74EtIFfg5clPclHoY59yheeZyXkA\\\\nz1AyD9W+fLxns2EVBMQZHeB0Y8HSIarNV5Pu\\\\n-----END PUBLIC KEY-----\\\\n\\\", \\\"value\\\": 100, \\\"script\\\": \\\"verifyKeyStr\\\"}, {\\\"addresses\\\": \\\"-----BEGIN PUBLIC KEY-----\\\\nMEkwEwYHKoZIzj0CAQYIKoZIzj0DAQEDMgAEInJwiicN9vU4dGGytrICE58L3qKO\\\\nPs6OibKDeZNnhdMXTA+4S5VCmo47EUSaQCdv\\\\n-----END PUBLIC KEY-----\\\\n\\\", \\\"value\\\": 100, \\\"script\\\": \\\"verifyKeyStr\\\"}, {\\\"addresses\\\": \\\"-----BEGIN PUBLIC KEY-----\\\\nMEkwEwYHKoZIzj0CAQYIKoZIzj0DAQEDMgAEFCLqZTYnO4sR8uUXbJABfoYL0QPb\\\\nfTn3ZCzChnExUU3eQK0dVaYcmn9zSaQoXzMh\\\\n-----END PUBLIC KEY-----\\\\n\\\", \\\"value\\\": 100, \\\"script\\\": \\\"verifyKeyStr\\\"}]\"}]",
+        "n_txs": 1,
+        "senates": [
+            [
+                "-----BEGIN PUBLIC KEY-----\nMEkwEwYHKoZIzj0CAQYIKoZIzj0DAQEDMgAE3ogVztul7qQuZoFYR3bpEFI/fJZ5\nV2yVy9LD1GjNDxQ9KPRMaz0HCuC4rMqk55DF\n-----END PUBLIC KEY-----\n",
+                "3044d58b875fbf348509e7a4b6eeee43a06ff4120d6384504346a17547713fbe7e68bd379d61b5f4a3f7d297d2a923eb"
+            ]
+        ]
+    }
+]

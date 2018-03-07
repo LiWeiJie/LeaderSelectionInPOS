@@ -1,0 +1,11 @@
+[
+    {
+        "director": "{\"_verify_key\": \"-----BEGIN PUBLIC KEY-----\\nMEkwEwYHKoZIzj0CAQYIKoZIzj0DAQEDMgAE3ogVztul7qQuZoFYR3bpEFI/fJZ5\\nV2yVy9LD1GjNDxQ9KPRMaz0HCuC4rMqk55DF\\n-----END PUBLIC KEY-----\\n\", \"_signing_key\": null}",
+        "prev_hash": "prev_hash",
+        "q": "b9d4c8776e41ac683e3f9b2fed21108afc2a859905d49661c8eaa31fd24388e7b14b809ad0d7b5bdf67020ab79202b30",
+        "signature": "a24bf667d259716b66f0740dacd8cef52b0683b53b9428143a1e24abb09dcbaf3a9739be4f1844ac0f0ad02dbc50aff1",
+        "txs": "[{\"inputs\": \"[]\", \"outputs\": \"[{\\\"addresses\\\": \\\"-----BEGIN PUBLIC KEY-----\\\\nMEkwEwYHKoZIzj0CAQYIKoZIzj0DAQEDMgAE3ogVztul7qQuZoFYR3bpEFI/fJZ5\\\\nV2yVy9LD1GjNDxQ9KPRMaz0HCuC4rMqk55DF\\\\n-----END PUBLIC KEY-----\\\\n\\\", \\\"value\\\": 1000.0, \\\"script\\\": \\\"verifyKeyStr\\\"}]\"}]",
+        "n_txs": 1,
+        "senates": []
+    }
+]
