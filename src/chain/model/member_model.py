@@ -10,13 +10,55 @@
 # @Last Modified time: 2018-02-20 16:48:48
 
 import json
-import base64
-# from ecdsa import SigningKey, VerifyingKey, BadSignatureError
-import ecdsa
+from base64 import urlsafe_b64encode as b64e
+from base64 import urlsafe_b64decode as b64d
+# from base64 import b64encode as b64e
+# from base64 import b64decode as b64d
+
+
+from ecdsa import SigningKey, VerifyingKey, BadSignatureError
 from os.path import exists
 import binascii
 
 import logging
+
+def signingkey_to_str(signing_key):
+    """signingkey_to_str, using urlsafe_base64 encode"""
+    assert(isinstance(signing_key, SigningKey)), type(signing_key)
+    sks = signing_key.to_string()
+    sks = b64e(sks)
+    return sks
+
+def str_to_signingkey(sk_str):
+    """str_to_signingkey, str from signingkey_to_str"""
+    signing_key_str = b64d(sk_str)
+    signing_key = SigningKey.from_string(signing_key_str)
+    assert(isinstance(signing_key, SigningKey)), type(signing_key)
+    return signing_key
+
+def verifykey_to_str(verify_key):
+    """verifykey_to_str
+
+    convert verifykey to str. encode verify_key_str using base64 then decode it using utf-8
+
+    Args:
+        verify_key: verify_key.
+
+    Returns:
+        verify_key in str format.
+
+    """
+    assert(isinstance(verify_key, VerifyingKey)), type(verify_key)
+    vks = verify_key.to_string()
+    vks = b64e(vks)
+    return vks
+
+def str_to_verifykey(vk_str):
+    """str_to_verifykey, str from verifykey_to_str"""
+    verify_key_str = b64d(vk_str)
+    verify_key = VerifyingKey.from_string(verify_key_str)
+    assert(isinstance(verify_key, VerifyingKey)), type(verify_key)
+    return verify_key
 
 class MemberModel(object):
     """Summary of class here.
@@ -39,55 +81,32 @@ class MemberModel(object):
     @property
     def mid(self):
         """member id"""
+        if not self._mid:
+            if self.verify_key_str:
+                self._mid = self.verify_key_str
         return self._mid
 
     @property
     def verify_key_str(self):
-        return self.verifykey_to_str(self.verify_key)
+        if not self._verify_key_str:
+            if self.verify_key:
+                self._verify_key_str = verifykey_to_str(self.verify_key)
+        return self._verify_key_str
 
     @property
     def signing_key_str(self):
-        return self.signingkey_to_str(self.signing_key_str)
-
-    @staticmethod
-    def verifykey_to_str(verify_key):
-        """verifykey_to_str
-
-        convert verifykey to str. encode verify_key_str using base64 then decode it using utf-8
-
-        Args:
-            verify_key: verify_key.
-
-        Returns:
-            verify_key in str format.
-
-        """
-        vks = verify_key.to_pem()
-        return vks
-
-    @staticmethod
-    def str_to_verifykey(vk_str):
-        """str_to_verifykey, str from verifykey_to_str"""
-        return ecdsa.VerifyingKey.from_pem(vk_str)
-
-    @staticmethod
-    def signingkey_to_str(signing_key):
-        """signingkey_to_str"""
-        sks = signing_key.to_pem()
-        return sks
-
-    @staticmethod
-    def str_to_signingkey(sk_str):
-        """str_to_signingkey, str from signingkey_to_str"""
-        return ecdsa.SigningKey.from_pem(sk_str)
+        if not self._signing_key_str:
+            if self.signing_key:
+                self._signing_key_str = signingkey_to_str(self.signing_key)
+        return self._signing_key_str
 
     @classmethod
     def get_verify_member(cls, verify_key):
         member = None
-        if isinstance(verify_key, ecdsa.VerifyingKey):
+        if isinstance(verify_key, VerifyingKey):
             member = MemberModel(key_pair=(verify_key, None))
         else:
-            vk = cls.str_to_verifykey(verify_key)
+            vk = str_to_verifykey(verify_key)
             member = MemberModel(key_pair=(vk, None))
         return member
 
@@ -95,36 +114,46 @@ class MemberModel(object):
         """if genkey == True, then will generate a new key pair, otherwise depends on the key_path or key_pair
         @key_pair key_pair = (verify_key, signing_key)
         """
-        self._signing_key = self._verify_key = self._mid = None 
+        self._signing_key = self._verify_key = self._mid = self._signing_key_str = self._verify_key_str = None 
+        
         verify_key = signing_key = None
+        
         if key_pair:
             (verify_key, signing_key) = key_pair
-
-        fmt = '%(asctime)s - %(filename)s:%(lineno)s - %(name)s - %(message)s'
-        logging.basicConfig(format=fmt, level=logging.INFO)
-
-        # print self.__class__.__name__
-        # logging = logging.getLogger(self.__class__.__name__)
-
         if genkey:
             # TODO: curve=ecdsa.generator_secp256k1
-            self._signing_key = ecdsa.SigningKey.generate()
+            self._signing_key = SigningKey.generate()
             self._verify_key = self._signing_key.get_verifying_key()
         if key_path:
             self.load_key_from_path(key_path)
         if verify_key:
-            self._verify_key = verify_key
+            if not isinstance(verify_key, VerifyingKey):
+                verify_key = str_to_verifykey(verify_key)
+            assert(isinstance(verify_key, VerifyingKey)), type(verify_key)
+            self._verify_key = verify_key            
         if signing_key:
+            if not isinstance(signing_key, SigningKey):
+                signing_key = str_to_signingkey(signing_key)
+            assert(isinstance(signing_key, SigningKey)), type(signing_key)            
             self._signing_key = signing_key
-        if self._verify_key:
-            self._mid = self.verifykey_to_str(self._verify_key)[27:-26]
+
 
     def set_key(self, verify_key, signing_key=None):
         """set verifykey and secrekey"""
-        self._verify_key = verify_key
-        self._signing_key = signing_key
+        if isinstance(verify_key, VerifyingKey):
+            self._verify_key = verify_key
+            # self._signing_key = signing_key
+        else:
+            self._verify_key = str_to_verifykey(verify_key)
+        assert(isinstance(self._verify_key, VerifyingKey)), type(self._verify_key)
+
+        self._verify_key = None
         if self._verify_key:
-            self._mid = self.verifykey_to_str(self._verify_key)[27:-26]
+            if isinstance(verify_key, VerifyingKey):
+                self._verify_key = verify_key
+            else:
+                self._verify_key = str_to_verifykey(verify_key)
+            assert(isinstance(self.verify_key, VerifyingKey)), type(self.verify_key)    
 
     def load_key_from_path(self, path):
         """load key from the path.
@@ -151,7 +180,7 @@ class MemberModel(object):
         else:
             logging.warn("path or path file not exists, path: %s"%path)
 
-    def write_to_path(self, path):
+    def write_to_path(self, path, except_signing_key=True):
         """write signing key and verify key to the path, in json format"""
         if path:
             # TODO: catch the open exception
@@ -161,7 +190,7 @@ class MemberModel(object):
                 #     "_verify_key": self.verifykey_to_str(verify_key)
                 # }
                 # json.dump(key_dict, key_file)
-                json.dump(self, key_file, default=self.obj2dict_with_signingkey)
+                self.dump(key_file, except_signing_key=except_signing_key)
                 logging.info("successful write_to_path")
                 return True
         else:
@@ -218,7 +247,7 @@ class MemberModel(object):
         if self._verify_key:
             try:
                 return self._verify_key.verify(binascii.unhexlify(signature), data[offset:offset + length])
-            except ecdsa.BadSignatureError:
+            except BadSignatureError:
                 logging.warn("BAD SIGNATURE")
         
         return False
@@ -236,9 +265,9 @@ class MemberModel(object):
         assert isinstance(member, cls), type(member)
         verify_key_str = None
         if member._verify_key:
-            verify_key_str = member.verifykey_to_str(member._verify_key)
+            verify_key_str = member.verify_key_str
         return {
-            "_signing_key": None,   # do not give signing key to others
+            # "_signing_key": None,   # do not give signing key to others
             "_verify_key": verify_key_str,
             # "_mid": member.mid
         }
@@ -251,9 +280,7 @@ class MemberModel(object):
     @classmethod
     def obj2dict_with_signingkey(cls, member):
         assert isinstance(member, cls), type(member)
-        signing_key_str = None
-        if member._signing_key:
-            signing_key_str = cls.signingkey_to_str(member._signing_key)
+        signing_key_str = member.signing_key_str
         m_dict = cls.obj2dict_without_signingkey(member)
         m_dict['_signing_key'] = signing_key_str
         return m_dict
@@ -261,23 +288,36 @@ class MemberModel(object):
     @classmethod
     def dict2obj(self, key_dict):
         assert isinstance(key_dict, dict), type(key_dict)
-        assert key_dict.has_key("_signing_key")
         assert key_dict.has_key("_verify_key")
-        # assert key_dict.has_key("_mid")
-        signing_key = key_dict["_signing_key"]
-        verify_key = key_dict["_verify_key"]
-        mid = None
-        # mid = key_dict["_mid"]
-        if signing_key:
-            signing_key = MemberModel.str_to_signingkey(signing_key)
-            assert isinstance(signing_key, ecdsa.SigningKey), type(signing_key)
-            
-        if verify_key:
-            # mid = verify_key[27:-26]
-            verify_key = MemberModel.str_to_verifykey(verify_key)
-            assert isinstance(verify_key, ecdsa.VerifyingKey), type(verify_key)
-
+        if key_dict.has_key("_signing_key"):
+            signing_key = key_dict["_signing_key"].encode("utf-8")
+        verify_key = key_dict["_verify_key"].encode("utf-8")
         return MemberModel(key_pair=(verify_key, signing_key))
+
+    def dump(self, opened_file, except_signing_key=True):
+        if except_signing_key:
+            json.dump(self, opened_file, default=self.obj2dict_without_signingkey)
+        else:
+            json.dump(self, opened_file, default=self.obj2dict_with_signingkey)
+        return True
+    
+    def dumps(self, except_signing_key=True):
+        if except_signing_key:
+            return json.dumps(self, default=self.obj2dict_without_signingkey)
+        else:
+            return json.dumps(self, default=self.obj2dict_with_signingkey)
+
+    @classmethod
+    def load(cls, opened_file):
+        obj = json.load(opened_file, object_hook=cls.dict2obj)
+        assert(isinstance(obj, cls)), type(obj)
+        return obj
+
+    @classmethod
+    def loads(cls, data):
+        obj = json.loads(data, object_hook=cls.dict2obj)
+        assert(isinstance(obj, cls)), type(obj)
+        return obj
 
 class BroadcastMember(MemberModel):
     def __init__(self):

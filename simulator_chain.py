@@ -26,12 +26,53 @@ import time
 import line_profiler
 import sys
 
-def gen_some_member(path, number=10):
-    import os
-    for no in range(number):
-        detail_path= os.path.join(path, no.__str__())
-        member = member_model.MemberModel(True)
-        member.write_to_path(detail_path)
+import logging
+import sys
+
+def set_logging_stdout():
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+    ch = logging.StreamHandler(sys.stdout)
+    ch.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    ch.setFormatter(formatter)
+    root.addHandler(ch)
+set_logging_stdout()
+
+import json
+def gen_some_member(member_dir, number=10, in_a_file=True):
+    if  in_a_file:
+        datas = []
+        members = []
+        path=os.path.join(member_dir, "members.json")
+        for no in range(number):
+            member = member_model.MemberModel(True)
+            members.append(member)
+            datas.append(member.dumps(except_signing_key=False))
+        with open(path, "w") as f:
+            json.dump(datas, f)
+
+        # check
+        datas = None
+        with open(path, "r") as f:
+            datas = json.load(f)
+        ct = 0
+        for data in datas:
+            m = member_model.MemberModel.loads(data)
+            assert(m.mid == members[ct].mid)
+            ct += 1
+        
+
+    else:
+        for no in range(number):
+            detail_path= os.path.join(member_dir, no.__str__()+".json")
+            member = member_model.MemberModel(True)
+            logging.info("{}".format(member))
+            member.write_to_path(detail_path, except_signing_key=False)
+            # check
+            with open(detail_path, "r") as f:
+                member2 = member_model.MemberModel.load(f)
+                assert(member2.mid == member.mid)
 
 def gen_genic_block(path, owner_path):
     member = member_model.MemberModel(key_path=owner_path)
@@ -48,22 +89,28 @@ def gen_genic_block(path, owner_path):
 # member_path = "config/members/0.json"
 # simulator.gen_genic_block(path, member_path)
 
-
-
 members_notebook = []
-members_dir = config_loader['pre_members_dir']
-members_path = [os.path.join(members_dir, i.__str__()+".json") for i in range(10)]
-blocks_path = config_loader['blocks_path']
-# blocks_path = "config/long_blocks.json"
-members = [member_model.MemberModel(False,  key_path=os.path.join(members_dir, i.__str__()+".json")) for i in range(10)]
-clients = [client.Client(member=member_path, blocks_path=blocks_path) for member_path in members_path ]
+def load_predine_members():
+    members_dir = config_loader['pre_members_dir']
+    members_path = [os.path.join(members_dir, i.__str__()+".json") for i in range(10)]
+    total_member_ct = 10
+    members = [member_model.MemberModel(False,  key_path=os.path.join(members_dir, i.__str__()+".json")) for i in range(total_member_ct)]
+    return members
+
+def load_predine_chains(members):
+    blocks_path = config_loader['blocks_path']
+    # blocks_path = "config/long_blocks.json"
+    clients = [client.Client(member=member, blocks_path=blocks_path) for member in members ]
+    return clients
+
 
 def rreload(module):
     """Recursively reload modules."""
     reload(module)
     for attribute_name in dir(module):
         attribute = getattr(module, attribute_name)
-        if type(attribute) is ModuleType:
+        import types
+        if type(attribute) is types.ModuleType:
             rreload(attribute)
 
 def collect_transaction(clients, verbose=False):
@@ -108,9 +155,11 @@ def collect_senate_sign(clients, block, verbose=False):
     return collects
 
     
-def simulation_one_round(verbose=False):
+def simulation_one_round(clients, verbose=False):
     
-    members_notebook.extend(members)
+    for client in clients:
+        if client.member not in members_notebook:
+            members_notebook.append(member)
 
     #  broadcast senate
 
@@ -209,7 +258,10 @@ if __name__=="__main__":
     # prof.add_module(ledger_model.Ledger.add_blocks)
     # line_profiler.LineProfiler()
     # prof.enable()  # 开始性能分析
-    simulation_one_round()
+
+    members = load_predine_members()
+    clients = load_predine_chains(members)
+    simulation_one_round(clients, verbose=False)
     # prof.disable()  # 停止性能分析
     # prof.print_stats(sys.stdout)
     # with open("analysis.log", 'w') as f:
