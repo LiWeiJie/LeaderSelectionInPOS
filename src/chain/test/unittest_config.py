@@ -14,7 +14,7 @@ import os
 
 tmp_output_dir = 'tmp'
 # config_dir = 'config'
-test_data_dir = "LPOS/test/data"
+test_data_dir = "src/chain/test/data"
 
 members_dir = os.path.join(test_data_dir,  'members')
 blocks_path = os.path.join(test_data_dir,  'blocks.json')

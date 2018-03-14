@@ -9,19 +9,22 @@
 # @Last Modified by: 
 # @Last Modified time: 
 
-from LPOS  import client
+from src.chain  import client
 
-from LPOS.model import member_model
-from LPOS.model import block_model
-from LPOS.model import transaction_model
-from LPOS.utils import hash_utils
+from src.chain.config import config_loader
 
-from LPOS.config import config_loader
+from src.chain.model import member_model
+from src.chain.model import block_model
+from src.chain.model import transaction_model
+from src.chain.model import ledger_model
 
-from LPOS.utils import random_utils
+from src.chain.utils import hash_utils
+from src.chain.utils import random_utils
 
 import os
 import time
+import line_profiler
+import sys
 
 def gen_some_member(path, number=10):
     import os
@@ -200,5 +203,15 @@ def simulation_one_round(verbose=False):
         print "satoshi %d:"%cli.my_satoshi_total, cli.my_satoshi    
     
 if __name__=="__main__":
-    # import simulator
+    # prof = line_profiler.LineProfiler()
+    # prof.add_function(simulation_one_round)
+    # prof.add_module(ledger_model.Ledger.add_block)
+    # prof.add_module(ledger_model.Ledger.add_blocks)
+    # line_profiler.LineProfiler()
+    # prof.enable()  # 开始性能分析
     simulation_one_round()
+    # prof.disable()  # 停止性能分析
+    # prof.print_stats(sys.stdout)
+    # with open("analysis.log", 'w') as f:
+        # prof.print_stats(f)
+    # import simulator
