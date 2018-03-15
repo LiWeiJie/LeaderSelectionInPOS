@@ -234,6 +234,9 @@ class Client(object):
         if not transactions:
             transactions = self.pending_transactions.values()
         block.add_transactions(transactions)
+        # transaction fee and block reward
+        # FUTURE:
+        # FEATURE:INCENTIVE
         self.add_director(block)
         return block
     
