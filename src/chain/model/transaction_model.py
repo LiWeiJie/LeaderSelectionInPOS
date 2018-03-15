@@ -11,6 +11,7 @@
 
 import json
 from ..utils import hash_utils
+import logging
 
 TransactionOutputScriptOP = [
     "verifyKeyStr",    # 0
@@ -60,7 +61,7 @@ class Transaction(object):
         data = self.get_transaction_sign_source()
         inputs = self.inputs
         if inputs.__len__() != prev_outputs.__len__():
-            print "len not equal", inputs.__len__(), prev_outputs.__len__()
+            logging.info("len not equal {}/{}".format(inputs.__len__(), prev_outputs.__len__()))
             return False
         sz = prev_outputs.__len__()
         input_satoshi = 0
@@ -69,10 +70,12 @@ class Transaction(object):
             op = prev_outputs[i]
             
             # FUTURE: find a better way
-            ip_script = ip.script
-            verify_pem_start_pos = ip_script.find('-----BEGIN')
-            ip_sig = ip_script[:verify_pem_start_pos-1]
-            ip_verify_key = ip_script[verify_pem_start_pos:]
+            ip_script = ip.script.split()
+            # verify_pem_start_pos = ip_script.find('-----BEGIN')
+            # ip_sig = ip_script[:verify_pem_start_pos-1]
+            # ip_verify_key = ip_script[verify_pem_start_pos:]
+            ip_sig=ip_script[0]
+            ip_verify_key = ip_script[1]
 
             input_satoshi += op.value
 
@@ -83,22 +86,21 @@ class Transaction(object):
                 # verifyKey
                 if TransactionOutputScriptOP.index(op_script)==0:
                     if op_addresses!=ip_verify_key:
-                        print "verify_key fail"
+                        logging.info("verify_key fail")
                         result = False
                     from . import member_model
                     member = member_model.MemberModel.get_verify_member(ip_verify_key)
                     if not member.verify(data, ip_sig):
-                        print "member fail"
+                        logging.info("member fail")
                         result = False 
                 else:
                     # FUTURE:
                     pass
             else:
-                print "script type fail"
+                logging.info("script type fail")
                 result = False
             if not result:
                 return result
-
 
         for op in self.outputs:
             input_satoshi -= op.value
@@ -106,7 +108,7 @@ class Transaction(object):
         if input_satoshi>=0:
             return True
         else:
-            print "satoshi", input_satoshi
+            logging.info("satoshi {}".format(input_satoshi))
             # for i in range(sz):
             #     print "in:",prev_outputs[i].value
             # for op in self.outputs:
@@ -227,7 +229,7 @@ class Transaction(object):
             self._hash = None
 
         def __repr__(self):
-            return "Input(%s,%d)" % (self.transaction_hash, self.transaction_idx)
+            return "Input(%s,%d,%s)" % (self.transaction_hash, self.transaction_idx, self.script)
 
         @property
         def transaction_hash(self):

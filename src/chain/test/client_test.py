@@ -17,31 +17,26 @@ from .. import client
 from ..payload import payload_base
 from ..model import member_model
 
-from . import unittest_config
-from ..config import config_loader
+from .unittest_config import unittest_chain_config
 
 from ..utils import random_utils
 
 class TestClient(unittest.TestCase):
     
     def setUp(self):
-        members_dir = unittest_config.members_dir
-        members_path = [os.path.join(members_dir, i.__str__()+".json") for i in range(10)]
-        members = [member_model.MemberModel(False,  key_path=os.path.join(members_dir, i.__str__()+".json")) for i in range(10)]
-        clients = [client.Client(member=member_path, blocks_path=unittest_config.genic_block_path) for member_path in members_path ]
+        members = unittest_chain_config.get_members(10)
+        clients = [client.Client(member=member, blocks_path=unittest_chain_config.genic_chain_path) for member in members ]
         self._genic_clients = clients
         self._members = members
 
-        clients = [client.Client(member=member_path, blocks_path=unittest_config.blocks_path) for member_path in members_path ]
+        clients = [client.Client(member=member, blocks_path=unittest_chain_config.ten_rich_man_chain_path) for member in members ]
         self._clients = clients
 
     def tearDown(self):
         pass
     
     def test_load_client_member_path(self):
-        members_dir = config_loader['pre_members_dir']
-        members_path = [os.path.join(members_dir, i.__str__()+".json") for i in range(10)]
-        clients = [client.Client(member=member_path) for member_path in members_path ]
+        clients = [client.Client(member=member) for member in unittest_chain_config.get_members(10) ]
         for cli in clients:
             self.assertIsInstance(cli, client.Client)
             msg = 'abc'
@@ -167,15 +162,14 @@ class TestClient(unittest.TestCase):
                 i += 1
             print("=== test_clients_local ===")
         
-        leader_client.ledger.dump_blocks(os.path.join(unittest_config.tmp_output_dir, "clients_local.json"))
+        leader_client.ledger.dump_blocks(os.path.join(unittest_chain_config.tmp_output_dir, "clients_local.json"))
         
 
 
     def test_load_client(self, verbose=False):
         if verbose:
             print("=== test_load_client ===")        
-        members_dir = config_loader['pre_members_dir']
-        members = [member_model.MemberModel(False, os.path.join(members_dir, i.__str__()+".json")) for i in range(10)]
+        members = unittest_chain_config.get_members(10)
         for member in members:
             self.assertIsNotNone(  member.signing_key   )
         clients = [client.Client(member) for member in members ]
@@ -194,12 +188,9 @@ class TestClient(unittest.TestCase):
             ret = cli.handle_protocols(dests, protocol, data)
             return ret
 
-        members_dir = unittest_config.members_dir
-        blocks_path = unittest_config.blocks_path
+        members = unittest_chain_config.get_members(10)
+        blocks_path = unittest_chain_config.genic_chain_path
 
-      
-        
-        members = [member_model.MemberModel(True, os.path.join(members_dir, i.__str__()+".json")) for i in range(10)]
         clients = [client.Client(member=member, blocks_path= blocks_path) for member in members ]
 
         client0 = clients[0]
@@ -208,13 +199,14 @@ class TestClient(unittest.TestCase):
         member0 = members[0]
         member1 = members[1]
 
-        a = payload_base.PayloadBase(member0, [member_model.BroadcastMember()])
+        a = payload_base.PayloadBase(sender=member0,
+                                                    destination=member_model.BroadcastMember())
         a.add_signature()
         a.verify()
         # print "38 ", a
         dic_a = json.dumps(a, default=payload_base.PayloadBase.obj2dict)
         # print "s ", dic_a
-        
+        print dic_a
         b = json.loads(dic_a, object_hook=payload_base.PayloadBase.dict2obj)
         # print b
 

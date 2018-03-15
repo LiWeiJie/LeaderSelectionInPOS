@@ -69,7 +69,11 @@ class Ledger(object):
         """
         import copy
         utxos_copy = copy.copy(self.utxos)
+        total_in = 0
+        total_out = 0
+        counter = 0
         for tx in block.transactions:
+            counter += 1
             satoshi_income = 0
             satoshi_outcome = 0
             prev_out = []
@@ -82,15 +86,27 @@ class Ledger(object):
                 else:
                     # print ip, "not in utxo"
                     return None
-            if not tx.verify_sig_in_inputs(prev_out):
-                # print("tx.verify_sig_in_inputs fail")            
-                return None
+
             for idx, op in enumerate(tx.outputs):
                 satoshi_outcome += op.value
                 utxo_header = (tx.hash, idx)
                 utxos_copy[utxo_header] = op
-            if satoshi_income<satoshi_outcome:
-                return None
+
+            # FUTURE:
+            # FEATURE:INCENTIVE
+            if satoshi_income==0 and counter==block.transactions.__len__():
+                # transaction fee transaction
+                total_different= total_in-total_out
+                if total_different<satoshi_outcome:
+                    return None
+            else:
+                if not tx.verify_sig_in_inputs(prev_out):
+                    logging.info("tx.verify_sig_in_inputs fail")
+                    return None
+                if satoshi_income<satoshi_outcome:
+                    return None
+            total_in += satoshi_income
+            total_out += satoshi_outcome
         return utxos_copy
         
     def verify_block(self, block, update=False, verbose=False):
@@ -144,8 +160,7 @@ class Ledger(object):
         senates = self.senates
         if senate_verify_key_str not in senates:
                 return False
-        vk = member_model.MemberModel.str_to_verifykey(senate_verify_key_str)
-        m = member_model.MemberModel(key_pair=(vk, None))
+        m = member_model.MemberModel(key_pair=(senate_verify_key_str, None))
         return m.verify(data, senate_signature)
 
     def update_utxo(self, block, update_satoshi_tot=True, verify_prev_block=True):

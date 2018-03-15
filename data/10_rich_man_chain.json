@@ -1,0 +1,25 @@
+[
+    {
+        "director": "{\"_verify_key\": \"CeMzMoWc-ux6Dr21QPZxiMC9T1XaF9m_pOs-S-A7eYnfeJgW2LuJ1NNGaUid6H2D\"}",
+        "prev_hash": "genic_block",
+        "q": "31bb0f8b1f81b659cb6a78c58ff699c4fe29a1cf92378e2dd493b5e30be6e9df8f7a16c06a25261637f8b3b8f4ead23c",
+        "signature": "b2b32583fe500102db6daa9b89dbfbd061ab72b4afeb3d821eedc8da39bce2e284554be918f52383d4e776deb6069099",
+        "txs": "[{\"inputs\": \"[]\", \"outputs\": \"[{\\\"addresses\\\": \\\"CeMzMoWc-ux6Dr21QPZxiMC9T1XaF9m_pOs-S-A7eYnfeJgW2LuJ1NNGaUid6H2D\\\", \\\"value\\\": 1000000, \\\"script\\\": \\\"verifyKeyStr\\\"}]\"}]",
+        "n_txs": 1,
+        "senates": []
+    },
+    {
+        "director": "{\"_verify_key\": \"CeMzMoWc-ux6Dr21QPZxiMC9T1XaF9m_pOs-S-A7eYnfeJgW2LuJ1NNGaUid6H2D\"}",
+        "prev_hash": "8b6f4fa4435c1998839a1e27158bde3b7a95d2c52e95b43d7478b70ec0964861",
+        "q": "8b144b010013a4964f83959d61286f7f63b217d5479d3a3d64e8ee7ea198480c7ce5bbcdb7b6737c78a5d9f04cacd696",
+        "signature": "f53f04413c478df6e4e55233982db86dc0cc0a26e2187d1c5f19aa9dd16c4ccf840c1dbb0a8fb1e4ca89f4b288668a76",
+        "txs": "[{\"inputs\": \"[{\\\"script\\\": \\\"056ed6a1d0ce71c5713b709bd0195ccc909436e0e7e081b2d659e17963c97dd56f64a1aad931ae12cf6a4efd65f93770 CeMzMoWc-ux6Dr21QPZxiMC9T1XaF9m_pOs-S-A7eYnfeJgW2LuJ1NNGaUid6H2D\\\", \\\"transaction_hash\\\": \\\"a944ed5167673b49bd1d2f99d9db02d64f7b2c39fb1e4d8dfc759fbe28041b27\\\", \\\"transaction_idx\\\": 0}]\", \"outputs\": \"[{\\\"addresses\\\": \\\"CeMzMoWc-ux6Dr21QPZxiMC9T1XaF9m_pOs-S-A7eYnfeJgW2LuJ1NNGaUid6H2D\\\", \\\"value\\\": 100000, \\\"script\\\": \\\"verifyKeyStr\\\"}, {\\\"addresses\\\": \\\"br0mEvIf4RN0e7FW_4K-YaK6CDH6fxBkfUEGPJYswm0mo2pAG5l9rf-OUnbX06oV\\\", \\\"value\\\": 100000, \\\"script\\\": \\\"verifyKeyStr\\\"}, {\\\"addresses\\\": \\\"wR-Jlyd0tn_O6TohjBt7tnHZvEf6iAtnvzjv_fwhY0qOkrd-w9lLqSE6Y6oMke0g\\\", \\\"value\\\": 100000, \\\"script\\\": \\\"verifyKeyStr\\\"}, {\\\"addresses\\\": \\\"6lm7M7J7tkm90yl39KQlJxqk5Rdx96ZeWLsbFbWZXUVmek4GUnuxkEC-_dj8vlY3\\\", \\\"value\\\": 100000, \\\"script\\\": \\\"verifyKeyStr\\\"}, {\\\"addresses\\\": \\\"SlMKHdeobktbqXDggOEFdDZ08jcewEfShbdLoHhh-YpHzoSTNIRz3HpaYlo0E0Rr\\\", \\\"value\\\": 100000, \\\"script\\\": \\\"verifyKeyStr\\\"}, {\\\"addresses\\\": \\\"f7B8wMvS5T5yoRg5MC-McSfJ5xzLlD7no_WL10S7AQg7IoOxQ-8uoCczu3i23lnt\\\", \\\"value\\\": 100000, \\\"script\\\": \\\"verifyKeyStr\\\"}, {\\\"addresses\\\": \\\"YUtTJpNt3VYL200pPqh0rRF0XweiBjtll6dHRlKPQrWn2Pjt7n3MtrvMotuXHDHU\\\", \\\"value\\\": 100000, \\\"script\\\": \\\"verifyKeyStr\\\"}, {\\\"addresses\\\": \\\"nUFagETQEaH0BzJhN-yerMidZVpQ_kbBPdC7PRKVQrG0_Dy_s1Np_i_ZK7DWmzCx\\\", \\\"value\\\": 100000, \\\"script\\\": \\\"verifyKeyStr\\\"}, {\\\"addresses\\\": \\\"xfn_E6v-Szxssx9G5yghSMIQWp6o1bZuwM_ALt9e0e_OLvs_3i1Qbx9_VzQjgDEa\\\", \\\"value\\\": 100000, \\\"script\\\": \\\"verifyKeyStr\\\"}, {\\\"addresses\\\": \\\"gP0DCV8_1iz2H8VnEkCO5EbuhedZe5mrOeEt6p3wXfwR6FtX_RpYZeouLuwhDHCH\\\", \\\"value\\\": 100000, \\\"script\\\": \\\"verifyKeyStr\\\"}]\"}]",
+        "n_txs": 1,
+        "senates": [
+            [
+                "CeMzMoWc-ux6Dr21QPZxiMC9T1XaF9m_pOs-S-A7eYnfeJgW2LuJ1NNGaUid6H2D",
+                "5e93f393af151db8b57cd853a07d10a0b7e950534e45456354754d6374a73a955bf029ee4eef4cce059fcb3257e76b7a"
+            ]
+        ]
+    }
+]

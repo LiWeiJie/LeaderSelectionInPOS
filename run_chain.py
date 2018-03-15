@@ -9,8 +9,8 @@
 # @Last Modified by: 
 # @Last Modified time: 
 
-from LPOS.config import config_loader
-from LPOS import client
+from src.chain.config import config_loader
+from src.chain import client
 import os.path
 
 if __name__=="__main__":
