@@ -14,7 +14,7 @@ import json
 import os
 
 from ..model import member_model
-from . import unittest_config
+from .unittest_config import unittest_chain_config
 from .. import config
 from ..utils import hash_utils
 
@@ -56,8 +56,8 @@ class TestMember(unittest.TestCase):
         a = c
         c = b
         # c.verify(msg, a.sign(msg))
-        path = os.path.join(unittest_config.tmp_output_dir, "member_config.txt")
-        c.write_to_path(path)
+        path = os.path.join(unittest_chain_config.tmp_output_dir, "member_config.txt")
+        c.write_to_path(path, except_signing_key=False)
         c = a
         a.load_key_from_path(path)
         self.assertTrue(c.verify(msg, a.sign(msg)))
@@ -166,7 +166,7 @@ class TestBlock(unittest.TestCase):
         self.assertEqual( b.hash, b2.hash)
 
     def test_block_write_down(self):
-        path = os.path.join(unittest_config.tmp_output_dir, "0")
+        path = os.path.join(unittest_chain_config.tmp_output_dir, "0")
         b = get_block()
         block_model.dump_blocks([b], path)
 
@@ -182,7 +182,7 @@ class TestBlock(unittest.TestCase):
 
     def test_get_genic_blocks(self):
         ls = get_genic_blocks()        
-        blocks_path = unittest_config.genic_block_path
+        blocks_path = unittest_chain_config.genic_chain_path
         with open(blocks_path, 'r') as f:
             dic = json.load(f)
         # print dic
@@ -195,7 +195,7 @@ class TestBlock(unittest.TestCase):
 from ..model import ledger_model
 
 def get_genic_blocks():
-    blocks_path = unittest_config.genic_block_path
+    blocks_path = unittest_chain_config.genic_chain_path
     bs = block_model.load_blocks(blocks_path)
     for b in bs:
         assert isinstance(b, block_model.Block)

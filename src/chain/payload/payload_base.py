@@ -109,11 +109,16 @@ class PayloadBase(object):
 
     @classmethod
     def obj2dict(cls, payload):
+        dest = payload.destination
+        if isinstance(dest, member_model.BroadcastMember):
+            dest = None
+        else:
+            dest = json.dumps(dest, default=member_model.MemberModel.obj2dict_without_signingkey)
         return {
             "payload_name": payload.payload_name,
             "authentication": json.dumps(payload.authentication, default=cls.Authentication.obj2dict),
             # "authentication": payload.authentication.authentication2dict(payload.authentication),
-            "destination": json.dumps(payload.destination, default=member_model.MemberModel.obj2dict_without_signingkey),
+            "destination": dest,
             # "destination": [member_model.MemberModel.member2dict_without_signingkey(dest) for dest in payload.destination],
             "timestamp": payload.timestamp,
             "msg": payload.msg
@@ -124,7 +129,12 @@ class PayloadBase(object):
         assert dic.has_key("payload_name")
         payload_name = dic["payload_name"]
         authentication = json.loads(dic["authentication"], object_hook=cls.Authentication.dict2obj)
-        destination = json.loads(dic["destination"], object_hook=member_model.MemberModel.dict2obj) 
+        destination = None
+        if dic["destination"]:
+            print dic["destination"]
+            destination = json.loads(dic["destination"], object_hook=member_model.MemberModel.dict2obj) 
+        else:
+            destination = member_model.BroadcastMember()
         timestamp = dic["timestamp"]
         msg = dic["msg"]
         return cls( payload_name=payload_name,

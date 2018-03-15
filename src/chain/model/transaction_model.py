@@ -11,6 +11,7 @@
 
 import json
 from ..utils import hash_utils
+import logging
 
 TransactionOutputScriptOP = [
     "verifyKeyStr",    # 0
@@ -60,7 +61,7 @@ class Transaction(object):
         data = self.get_transaction_sign_source()
         inputs = self.inputs
         if inputs.__len__() != prev_outputs.__len__():
-            print "len not equal", inputs.__len__(), prev_outputs.__len__()
+            logging.info("len not equal {}/{}".format(inputs.__len__(), prev_outputs.__len__()))
             return False
         sz = prev_outputs.__len__()
         input_satoshi = 0
@@ -85,22 +86,21 @@ class Transaction(object):
                 # verifyKey
                 if TransactionOutputScriptOP.index(op_script)==0:
                     if op_addresses!=ip_verify_key:
-                        print "verify_key fail"
+                        logging.info("verify_key fail")
                         result = False
                     from . import member_model
                     member = member_model.MemberModel.get_verify_member(ip_verify_key)
                     if not member.verify(data, ip_sig):
-                        print "member fail"
+                        logging.info("member fail")
                         result = False 
                 else:
                     # FUTURE:
                     pass
             else:
-                print "script type fail"
+                logging.info("script type fail")
                 result = False
             if not result:
                 return result
-
 
         for op in self.outputs:
             input_satoshi -= op.value
@@ -108,7 +108,7 @@ class Transaction(object):
         if input_satoshi>=0:
             return True
         else:
-            print "satoshi", input_satoshi
+            logging.info("satoshi {}".format(input_satoshi))
             # for i in range(sz):
             #     print "in:",prev_outputs[i].value
             # for op in self.outputs:

@@ -254,6 +254,8 @@ class Client(object):
                 data = block.get_senate_sign_source()
                 member = self.member
                 return (member.verify_key_str, member.sign(data))
+            else :
+                logging.info("senate_sign fail")                
         return False
 
     def director_sign(self, block):
@@ -370,7 +372,7 @@ class Client(object):
         dest = member_model.BroadcastMember()
         message = meta_messages[protocol_name].payload_class(
             sender = self.member,
-            destination= [dest],
+            destination= dest,
             signature=None,
             timestamp=self.timestamp
         )

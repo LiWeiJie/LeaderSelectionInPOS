@@ -83,7 +83,7 @@ class Ledger(object):
                     # print ip, "not in utxo"
                     return None
             if not tx.verify_sig_in_inputs(prev_out):
-                # print("tx.verify_sig_in_inputs fail")            
+                logging.info("tx.verify_sig_in_inputs fail")
                 return None
             for idx, op in enumerate(tx.outputs):
                 satoshi_outcome += op.value

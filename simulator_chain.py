@@ -109,6 +109,8 @@ def rreload(module):
         if type(attribute) is types.ModuleType:
             rreload(attribute)
 
+import math
+
 def collect_transaction(clients, verbose=False):
     collects = []
     for cli in clients:
@@ -131,18 +133,28 @@ def collect_transaction_evenly_distributed(clients, verbose=False):
     collects = []
     for cli in clients:
         m_satoshi = cli.my_satoshi
-        cli_inputs = None
+        cli_inputs = []
         cli_outputs = None
+        tot = 0
         for idx in m_satoshi:
             # Evenly distributed
             utx_header = idx
             output = m_satoshi[idx]       
-            cli_inputs = cli.create_inputs([utx_header])
-            dest = members_notebook
-            out_amount = output.value / members_notebook.__len__()
-            cli_outputs = cli.create_outputs([ (out_amount, TransactionOutputScriptOP[0], m.verify_key_str) for m in members_notebook ])
+            cli_inputs.append(utx_header)
+            tot += output.value
+        cli_inputs = cli.create_inputs(cli_inputs)
+        dest = members_notebook
+        out_amount = math.floor(tot / members_notebook.__len__())
+        out_remain = tot - out_amount*members_notebook.__len__()
+        pre_outputs = [ (out_amount, TransactionOutputScriptOP[0], m.verify_key_str) for m in members_notebook if m.mid != cli.member.mid]
+        pre_outputs.append( (out_remain+out_amount, TransactionOutputScriptOP[0], cli.member.verify_key_str ))
+        # for o in pre_outputs:
+        #     print cli.member.mid, "to", o[2], ":", o[0]
+        # print "total out:", tot
+        cli_outputs = cli.create_outputs(pre_outputs)
         if cli_inputs:
             cli_tx = cli.create_transaction(cli_inputs, cli_outputs)
+            # print "total ", cli.my_satoshi_total
             collects.append(cli_tx)
     return collects
 
@@ -171,7 +183,7 @@ def collect_senate_sign(clients, block, verbose=False):
     return collects
 
     
-def simulation_one_round(clients, verbose=False):
+def simulation_one_round(clients, verbose=False, evenly_transaction=False):
     
     for client in clients:
         if client.member not in members_notebook:
@@ -183,8 +195,10 @@ def simulation_one_round(clients, verbose=False):
     message = []
     while message.__len__() < 1:
         start = time.time()
-        message = collect_transaction(clients, verbose=verbose)
-        # message = collect_transaction_evenly_distributed(clients, verbose=verbose)
+        if evenly_transaction:
+            message = collect_transaction_evenly_distributed(clients, verbose=verbose)
+        else:
+            message = collect_transaction(clients, verbose=verbose)
         end = time.time()
         print "collect_transaction cost", end-start, "secs"
         print "transactions %d:"%message.__len__()
@@ -270,7 +284,7 @@ def simulation_one_round(clients, verbose=False):
     print "add_block cost", end-start, "secs"
 
     for cli in clients:
-        print "satoshi %d:"%cli.my_satoshi_total, cli.my_satoshi    
+        print "satoshi %d:"%cli.my_satoshi_total, cli.my_satoshi, "\n"
     
 if __name__=="__main__":
     # prof = line_profiler.LineProfiler()
@@ -281,7 +295,7 @@ if __name__=="__main__":
     # prof.enable()  # 开始性能分析
 
     members = load_predine_members()
-    clients = load_predine_chains(members)
+    clients = load_predine_chains(members, chain_path=chain_config.ten_rich_man_chain_path)
     simulation_one_round(clients, verbose=False)
     # prof.disable()  # 停止性能分析
     # prof.print_stats(sys.stdout)

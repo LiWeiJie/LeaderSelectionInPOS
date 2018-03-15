@@ -38,7 +38,7 @@ class chain_config(object):
 
     @classmethod
     def get_members(cls, len=None):
-        assert(len>0)
+        assert(len>0 or len==None)
         pre_members = []
         pre_members_path = cls.pre_members_path
         ct = 1
