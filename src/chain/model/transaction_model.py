@@ -69,10 +69,12 @@ class Transaction(object):
             op = prev_outputs[i]
             
             # FUTURE: find a better way
-            ip_script = ip.script
-            verify_pem_start_pos = ip_script.find('-----BEGIN')
-            ip_sig = ip_script[:verify_pem_start_pos-1]
-            ip_verify_key = ip_script[verify_pem_start_pos:]
+            ip_script = ip.script.split()
+            # verify_pem_start_pos = ip_script.find('-----BEGIN')
+            # ip_sig = ip_script[:verify_pem_start_pos-1]
+            # ip_verify_key = ip_script[verify_pem_start_pos:]
+            ip_sig=ip_script[0]
+            ip_verify_key = ip_script[1]
 
             input_satoshi += op.value
 
@@ -227,7 +229,7 @@ class Transaction(object):
             self._hash = None
 
         def __repr__(self):
-            return "Input(%s,%d)" % (self.transaction_hash, self.transaction_idx)
+            return "Input(%s,%d,%s)" % (self.transaction_hash, self.transaction_idx, self.script)
 
         @property
         def transaction_hash(self):

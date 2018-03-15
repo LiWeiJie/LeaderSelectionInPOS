@@ -75,14 +75,14 @@ def gen_some_member(member_dir, number=10, in_a_file=True):
                 member2 = member_model.MemberModel.load(f)
                 assert(member2.mid == member.mid)
 
-def gen_genic_block(path, owner_path):
-    member = member_model.MemberModel(key_path=owner_path)
+from src.chain.model.transaction_model import TransactionOutputScriptOP
+def gen_genic_block(path='genic_block.json', member=chain_config.get_member_by_idx(0)):
     tx = transaction_model.Transaction()
-    op = transaction_model.Transaction.Output(1000.0, "verifyKeyStr", member.verify_key_str)
+    op = transaction_model.Transaction.Output(1000000, TransactionOutputScriptOP[0], member.verify_key_str)
     tx.add_outputs([op])
-    b = block_model.Block("prev_hash", hash_utils.hash_std("genic block"))
+    b = block_model.Block(prev_hash="genic_block")
     b.add_transactions([tx])
-    b.director_sign(member=member, prev_q="prev_q")
+    b.director_sign(member=member, prev_q="genic_block")
     block_model.dump_blocks([b], path)
 
 # import simulator
@@ -91,13 +91,12 @@ def gen_genic_block(path, owner_path):
 # simulator.gen_genic_block(path, member_path)
 
 members_notebook = []
-def load_predine_members():
-    return chain_config.get_members(10)
+def load_predine_members(number=10):
+    return chain_config.get_members(number)
 
-def load_predine_chains(members):
-    blocks_path = chain_config.blocks_path
+def load_predine_chains(members, chain_path=chain_config.genic_chain_path):
     # blocks_path = "config/long_blocks.json"
-    clients = [client.Client(member=member, blocks_path=blocks_path) for member in members ]
+    clients = [client.Client(member=member, blocks_path=chain_path) for member in members ]
     return clients
 
 
@@ -123,10 +122,30 @@ def collect_transaction(clients, verbose=False):
                 rand_out_amount = output.value * random_utils.rand_percent()
                 rand_out_amount = round(rand_out_amount)
                 rand_remains_amount = output.value-rand_out_amount
-                cli_outputs = cli.create_outputs( [(rand_remains_amount, "verifyKeyStr", cli.member.verify_key_str ), (rand_out_amount, "verifyKeyStr", dest.verify_key_str )] )
+                cli_outputs = cli.create_outputs( [(rand_remains_amount, TransactionOutputScriptOP[0], cli.member.verify_key_str ), (rand_out_amount, "verifyKeyStr", dest.verify_key_str )] )
                 cli_tx = cli.create_transaction(cli_inputs, cli_outputs)
                 collects.append(cli_tx)
     return collects
+
+def collect_transaction_evenly_distributed(clients, verbose=False):
+    collects = []
+    for cli in clients:
+        m_satoshi = cli.my_satoshi
+        cli_inputs = None
+        cli_outputs = None
+        for idx in m_satoshi:
+            # Evenly distributed
+            utx_header = idx
+            output = m_satoshi[idx]       
+            cli_inputs = cli.create_inputs([utx_header])
+            dest = members_notebook
+            out_amount = output.value / members_notebook.__len__()
+            cli_outputs = cli.create_outputs([ (out_amount, TransactionOutputScriptOP[0], m.verify_key_str) for m in members_notebook ])
+        if cli_inputs:
+            cli_tx = cli.create_transaction(cli_inputs, cli_outputs)
+            collects.append(cli_tx)
+    return collects
+
 
 def collect_director_competition(clients, verbose=False):
     collects = []
@@ -156,16 +175,19 @@ def simulation_one_round(clients, verbose=False):
     
     for client in clients:
         if client.member not in members_notebook:
-            members_notebook.append(member)
+            members_notebook.append(client.member)
 
     #  broadcast senate
 
     # received transactions
-    start = time.time()
-    message = collect_transaction(clients, verbose=verbose)
-    end = time.time()
-    print "collect_transaction cost", end-start, "secs"
-    print "transactions %d:"%message.__len__()
+    message = []
+    while message.__len__() < 1:
+        start = time.time()
+        message = collect_transaction(clients, verbose=verbose)
+        # message = collect_transaction_evenly_distributed(clients, verbose=verbose)
+        end = time.time()
+        print "collect_transaction cost", end-start, "secs"
+        print "transactions %d:"%message.__len__()
 
     # send to clients
     start = time.time()
@@ -174,12 +196,14 @@ def simulation_one_round(clients, verbose=False):
     end = time.time()
     print "receive_transactions cost", end-start, "secs"
 
-    # competite the director
-    start = time.time()
-    message = collect_director_competition(clients, verbose=verbose)
-    end = time.time()
-    print "collect_director_competition cost", end-start, "secs"
-    print "director competition %d:"%message.__len__(), message
+    message = []
+    while message.__len__() < 1:
+        # competite the director
+        start = time.time()
+        message = collect_director_competition(clients, verbose=verbose)
+        end = time.time()
+        print "collect_director_competition cost", end-start, "secs"
+        print "director competition %d:"%message.__len__(), message
 
     # send to clients
     start = time.time()

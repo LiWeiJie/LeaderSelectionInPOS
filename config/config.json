@@ -1,6 +1,8 @@
 {
     "senates_number": 10,
-    "pre_members_dir": "config/members",
-    "pre_members_path": "config/members/members.json",
-    "blocks_path": "config/blocks.json"
+    "pre_members_dir": "data/members",
+    "pre_members_path": "data/members/members.json",
+    "blocks_path": "data/blocks.json",
+    "genic_chain_path": "data/genic_chain.json",
+    "10_rich_man_chain": "data/10_rich_man_chain.json"
 }

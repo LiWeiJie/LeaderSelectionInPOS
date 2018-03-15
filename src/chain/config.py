@@ -33,6 +33,8 @@ class chain_config(object):
     pre_members_dir = config_loader["pre_members_dir"]
     pre_members_path = config_loader["pre_members_path"]
     blocks_path = config_loader["blocks_path"]
+    genic_chain_path = config_loader["genic_chain_path"]
+    ten_rich_man_chain_path = config_loader["10_rich_man_chain"]
 
     @classmethod
     def get_members(cls, len=None):
@@ -57,9 +59,18 @@ class chain_config(object):
         assert(idx>=0 and idx <300)
         pre_member = None
         pre_members_path = cls.pre_members_path
-        if cls.pre_members_path and os.path.exists(pre_members_path):
+        if pre_members_path and os.path.exists(pre_members_path):
             with open(pre_members_path, 'r') as f:
                 j = json.load(f)
                 pre_member = member_model.MemberModel.loads( j[idx] )
         return pre_member 
+
+        # @classmethod
+        # def get_genic_chain(cls):
+        #     genic_chain = cls.genic_chain
+        #     if genic_chain and os.path.exists(genic_chain):
+        #     with open(genic_chain, 'r') as f:
+        #         j = json.load(f)
+        #         pre_member = member_model.MemberModel.loads( j[idx] )
+        # return pre_member 
 

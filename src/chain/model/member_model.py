@@ -31,6 +31,8 @@ def signingkey_to_str(signing_key):
 
 def str_to_signingkey(sk_str):
     """str_to_signingkey, str from signingkey_to_str"""
+    if isinstance(sk_str, unicode):
+        sk_str = sk_str.encode("utf-8")
     signing_key_str = b64d(sk_str)
     signing_key = SigningKey.from_string(signing_key_str)
     assert(isinstance(signing_key, SigningKey)), type(signing_key)
@@ -55,7 +57,13 @@ def verifykey_to_str(verify_key):
 
 def str_to_verifykey(vk_str):
     """str_to_verifykey, str from verifykey_to_str"""
-    verify_key_str = b64d(vk_str)
+    if isinstance(vk_str, unicode):
+        vk_str = vk_str.encode("utf-8")
+    try:
+        verify_key_str = b64d(vk_str)
+    except TypeError as e:
+        print vk_str, e
+        raise e
     verify_key = VerifyingKey.from_string(verify_key_str)
     assert(isinstance(verify_key, VerifyingKey)), type(verify_key)
     return verify_key
@@ -289,6 +297,7 @@ class MemberModel(object):
     def dict2obj(self, key_dict):
         assert isinstance(key_dict, dict), type(key_dict)
         assert key_dict.has_key("_verify_key")
+        signing_key = None
         if key_dict.has_key("_signing_key"):
             signing_key = key_dict["_signing_key"].encode("utf-8")
         verify_key = key_dict["_verify_key"].encode("utf-8")

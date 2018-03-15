@@ -144,8 +144,7 @@ class Ledger(object):
         senates = self.senates
         if senate_verify_key_str not in senates:
                 return False
-        vk = member_model.MemberModel.str_to_verifykey(senate_verify_key_str)
-        m = member_model.MemberModel(key_pair=(vk, None))
+        m = member_model.MemberModel(key_pair=(senate_verify_key_str, None))
         return m.verify(data, senate_signature)
 
     def update_utxo(self, block, update_satoshi_tot=True, verify_prev_block=True):
