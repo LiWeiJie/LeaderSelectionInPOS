@@ -12,6 +12,7 @@
 from src.chain  import client
 
 from src.chain.config import config_loader
+from src.chain.config import chain_config
 
 from src.chain.model import member_model
 from src.chain.model import block_model
@@ -91,14 +92,10 @@ def gen_genic_block(path, owner_path):
 
 members_notebook = []
 def load_predine_members():
-    members_dir = config_loader['pre_members_dir']
-    members_path = [os.path.join(members_dir, i.__str__()+".json") for i in range(10)]
-    total_member_ct = 10
-    members = [member_model.MemberModel(False,  key_path=os.path.join(members_dir, i.__str__()+".json")) for i in range(total_member_ct)]
-    return members
+    return chain_config.get_members(10)
 
 def load_predine_chains(members):
-    blocks_path = config_loader['blocks_path']
+    blocks_path = chain_config.blocks_path
     # blocks_path = "config/long_blocks.json"
     clients = [client.Client(member=member, blocks_path=blocks_path) for member in members ]
     return clients

@@ -1,5 +1,6 @@
 {
     "senates_number": 10,
     "pre_members_dir": "config/members",
+    "pre_members_path": "config/members/members.json",
     "blocks_path": "config/blocks.json"
 }
