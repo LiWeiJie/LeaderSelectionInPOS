@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+
+message Discover {
+    bytes vk = 1;
+    int32 port = 2;
+}
+
+message DiscoverReply {
+    // they key should be base64 encoded node vk
+    map<string, string> nodes = 1;
+}
+
+message Instruction {
+    string instruction = 1;
+    int32 delay = 2;
+    string param = 3;
+}
+
+message Ping {
+    bytes vk = 1;
+    int32 port = 2;
+}
+
+message Pong {
+    bytes vk = 1;
+    int32 port = 2;
+}
+
+
+message Signature {
+    bytes vk_str = 1;
+    bytes signature = 2;
+}
+
+message Member {
+    string vk_str = 1;
+    string sk_str = 2;
+}
+
+message TxInput {
+    string tx_hash = 1;
+    int32 tx_idx = 2;
+    string script = 3;
+}
+
+message TxOutput {
+    enum ScriptType {
+        VK = 0;
+    }
+    string value = 1;
+    ScriptType script = 2;
+    string address = 3;
+}
+
+message Transaction {
+    repeated TxInput inputs = 1;
+    repeated TxOutput outputs = 2;
+}
+
+message Block {
+    string prev_hash = 1;
+    string q = 2;
+    string merkle_root = 3;
+    string director = 4;
+    repeated Transaction txs = 5;
+
+    // senates  sign from above
+    repeated Signature senates_signature = 6;
+
+    // director sign from above
+    Signature director_signature = 7;
+}
+
+message Chain {
+    int32 senate_number = 1;
+    int32 failure_boundary = 2;
+    repeated Block blocks = 3;
+}
