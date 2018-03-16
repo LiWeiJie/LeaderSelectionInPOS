@@ -22,6 +22,8 @@ from src.chain.model import ledger_model
 from src.utils import hash_utils
 from src.utils import random_utils
 
+import src.messages.messages_pb2 as pb
+
 import os
 import time
 import line_profiler
@@ -47,7 +49,7 @@ def gen_some_member(member_dir, number=10, in_a_file=True):
         members = []
         path=os.path.join(member_dir, "members.json")
         for no in range(number):
-            member = member_model.MemberModel(True)
+            member = member_model.MemberModel.new(True)
             members.append(member)
             datas.append(member.dumps(except_signing_key=False))
         with open(path, "w") as f:
@@ -67,7 +69,7 @@ def gen_some_member(member_dir, number=10, in_a_file=True):
     else:
         for no in range(number):
             detail_path= os.path.join(member_dir, no.__str__()+".json")
-            member = member_model.MemberModel(True)
+            member = member_model.MemberModel.new(True)
             logging.info("{}".format(member))
             member.write_to_path(detail_path, except_signing_key=False)
             # check
@@ -75,10 +77,9 @@ def gen_some_member(member_dir, number=10, in_a_file=True):
                 member2 = member_model.MemberModel.load(f)
                 assert(member2.mid == member.mid)
 
-from src.chain.model.transaction_model import TransactionOutputScriptOP
 def gen_genic_block(path='genic_block.json', member=chain_config.get_member_by_idx(0)):
     tx = transaction_model.Transaction()
-    op = transaction_model.Transaction.Output(1000000, TransactionOutputScriptOP[0], member.verify_key_str)
+    op = transaction_model.Transaction.Output.new(1000000, pb.SCRIPT_TYPE_VK, member.verify_key_str)
     tx.add_outputs([op])
     b = block_model.Block(prev_hash="genic_block")
     b.add_transactions([tx])
@@ -122,11 +123,12 @@ def collect_transaction(clients, verbose=False):
                 dest = random_utils.rand_one(members_notebook)
                 cli_inputs = cli.create_inputs([utx_header])
                 rand_out_amount = output.value * random_utils.rand_percent()
-                rand_out_amount = round(rand_out_amount)
+                rand_out_amount = int(math.floor(rand_out_amount))
                 rand_remains_amount = output.value-rand_out_amount
-                cli_outputs = cli.create_outputs( [(rand_remains_amount, TransactionOutputScriptOP[0], cli.member.verify_key_str ), (rand_out_amount, "verifyKeyStr", dest.verify_key_str )] )
+                cli_outputs = cli.create_outputs( [(rand_remains_amount, pb.SCRIPT_TYPE_VK, cli.member.verify_key_str ), (rand_out_amount, pb.SCRIPT_TYPE_VK, dest.verify_key_str )] )
                 cli_tx = cli.create_transaction(cli_inputs, cli_outputs)
                 collects.append(cli_tx)
+     
     return collects
 
 def collect_transaction_evenly_distributed(clients, verbose=False):
@@ -144,10 +146,10 @@ def collect_transaction_evenly_distributed(clients, verbose=False):
             tot += output.value
         cli_inputs = cli.create_inputs(cli_inputs)
         dest = members_notebook
-        out_amount = math.floor(tot / members_notebook.__len__())
+        out_amount = int(math.floor(tot / members_notebook.__len__()))
         out_remain = tot - out_amount*members_notebook.__len__()
-        pre_outputs = [ (out_amount, TransactionOutputScriptOP[0], m.verify_key_str) for m in members_notebook if m.mid != cli.member.mid]
-        pre_outputs.append( (out_remain+out_amount, TransactionOutputScriptOP[0], cli.member.verify_key_str ))
+        pre_outputs = [ (out_amount, pb.SCRIPT_TYPE_VK, m.verify_key_str) for m in members_notebook if m.mid != cli.member.mid]
+        pre_outputs.append( (out_remain+out_amount, pb.SCRIPT_TYPE_VK, cli.member.verify_key_str ))
         # for o in pre_outputs:
         #     print cli.member.mid, "to", o[2], ":", o[0]
         # print "total out:", tot
@@ -203,12 +205,14 @@ def simulation_one_round(clients, verbose=False, evenly_transaction=False):
         print "collect_transaction cost", end-start, "secs"
         print "transactions %d:"%message.__len__()
 
+
     # send to clients
     start = time.time()
     for cli in clients:
         cli.receive_transactions(message)
     end = time.time()
     print "receive_transactions cost", end-start, "secs"
+
 
     message = []
     while message.__len__() < 1:

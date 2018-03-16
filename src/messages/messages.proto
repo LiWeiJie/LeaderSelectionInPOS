@@ -39,17 +39,17 @@ message Member {
 }
 
 message TxInput {
-    string tx_hash = 1;
-    int32 tx_idx = 2;
+    string transaction_hash = 1;
+    int32 transaction_idx = 2;
     string script = 3;
 }
 
 enum ScriptType {
-    VK = 0;
+    SCRIPT_TYPE_VK = 0;
 }
 
 message TxOutput {
-    string value = 1;
+    int32 value = 1;
     ScriptType script = 2;
     string address = 3;
 }

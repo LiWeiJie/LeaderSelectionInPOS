@@ -53,7 +53,7 @@ class Ledger(object):
     @property
     def senates(self):
         """ senates = {}
-            utxo.addresses: [0, 1, 2],   #(senate serial number, for example)
+            utxo.address: [0, 1, 2],   #(senate serial number, for example)
             ...
         }
         """
@@ -299,11 +299,11 @@ class Ledger(object):
                 current_op = current_utxo[1]
                 satoshi_ct += current_op.value
             
-            if result.has_key(current_op.addresses):
+            if result.has_key(current_op.address):
                 # record the No. of senate
-                result[current_op.addresses].append(senate[0])
+                result[current_op.address].append(senate[0])
             else:
-                result[current_op.addresses] = [senate[0]]
+                result[current_op.address] = [senate[0]]
         if verbose:            
             print "cal_senates():  ", result
             print "cal_senates():  sorted_utxo", sorted_utxos

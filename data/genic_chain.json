@@ -2,9 +2,9 @@
     {
         "director": "{\"_verify_key\": \"CeMzMoWc-ux6Dr21QPZxiMC9T1XaF9m_pOs-S-A7eYnfeJgW2LuJ1NNGaUid6H2D\"}",
         "prev_hash": "genic_block",
-        "q": "31bb0f8b1f81b659cb6a78c58ff699c4fe29a1cf92378e2dd493b5e30be6e9df8f7a16c06a25261637f8b3b8f4ead23c",
-        "signature": "b2b32583fe500102db6daa9b89dbfbd061ab72b4afeb3d821eedc8da39bce2e284554be918f52383d4e776deb6069099",
-        "txs": "[{\"inputs\": \"[]\", \"outputs\": \"[{\\\"addresses\\\": \\\"CeMzMoWc-ux6Dr21QPZxiMC9T1XaF9m_pOs-S-A7eYnfeJgW2LuJ1NNGaUid6H2D\\\", \\\"value\\\": 1000000, \\\"script\\\": \\\"verifyKeyStr\\\"}]\"}]",
+        "q": "76db802c81ed8c72cab6029051ef1f78e834f9657db99060fb3d427f5048f1f70ea51d00d49799e55ab069d73f0cd132",
+        "signature": "504bbe5946385cefe70d2653ca15de233d0fbf996eb434040d752fcf47290525db404acd56182ff1084398d5450c5fc5",
+        "txs": "[{\"inputs\": \"[]\", \"outputs\": \"[{\\\"address\\\": \\\"CeMzMoWc-ux6Dr21QPZxiMC9T1XaF9m_pOs-S-A7eYnfeJgW2LuJ1NNGaUid6H2D\\\", \\\"value\\\": 1000000, \\\"script\\\": 0}]\"}]",
         "n_txs": 1,
         "senates": []
     }

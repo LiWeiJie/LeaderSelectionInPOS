@@ -31,10 +31,10 @@ from .model import member_model
 from .model import block_model
 from .model import transaction_model
 from .model import ledger_model
-from .model import transaction_output_index
 
 from src.utils import message
 from src.utils import hash_utils
+import src.messages.messages_pb2 as pb
         
 class Client(object):
 
@@ -160,7 +160,7 @@ class Client(object):
         m_satoshi_total = 0
         for  (key, transaction_output) in utxos.items():
             
-            if transaction_output.addresses == member.verify_key_str:
+            if transaction_output.address == member.verify_key_str:
                 m_satoshi[ key ] = transaction_output
                 m_satoshi_total += transaction_output.value
         self._m_satoshi = m_satoshi
@@ -172,17 +172,16 @@ class Client(object):
         """
         ips = []
         for (transaction_hash, transaction_idx) in transaction_info:
-            ips.append(transaction_model.Transaction.Input(transaction_hash, transaction_idx))
+            ips.append(transaction_model.Transaction.Input.new(transaction_hash, transaction_idx))
         return ips
 
     def create_outputs(self, transaction_info):
         """
-        @transaction_info list of tuples (value, script, addresses)
+        @transaction_info list of tuples (value, script, address)
         """
         ops = []
-        for (value, script, addresses) in transaction_info:
-            assert script in transaction_model.TransactionOutputScriptOP
-            ops.append( transaction_model.Transaction.Output(value, script, addresses))
+        for (value, script, address) in transaction_info:
+            ops.append( transaction_model.Transaction.Output.new(value, script, address))
         return ops
 
     def create_transaction(self, inputs, outputs):
@@ -310,7 +309,7 @@ class Client(object):
         ret = self.ledger.get_director_competition_signature_source(txo_idx.transaction_hash, txo_idx.transaction_idx)
         if ret:
             source, __txo_idx, op = ret
-            verify_key_str = op.addresses
+            verify_key_str = op.address
             m = member_model.MemberModel.get_verify_member(verify_key_str)
             if m.verify(source, signature):
                 return m
@@ -413,7 +412,7 @@ def gen_some_member(path, number=10):
 def gen_genic_block(path, owner_path):
     member = member_model.MemberModel(key_path=owner_path)
     tx = transaction_model.Transaction()
-    op = transaction_model.Transaction.Output(1000.0, "verifyKeyStr", member.verify_key_str)
+    op = transaction_model.Transaction.Output.new(1000, pb.SCRIPT_TYPE_VK, member.verify_key_str)
     tx.add_outputs([op])
     b = block_model.Block(None, hash_utils.hash_std("genic block"))
     b.add_transactions([tx])

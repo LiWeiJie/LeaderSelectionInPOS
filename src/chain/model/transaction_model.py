@@ -15,58 +15,68 @@ import src.messages.messages_pb2 as pb
 from src.protobufwrapper import ProtobufWrapper
 import logging
 
-TransactionOutputScriptOP = [
-    "verifyKeyStr",    # 0
-]
+# TransactionOutputScriptOP = [
+#     "verifyKeyStr",  # 0
+# ]
+
 
 class Transaction(ProtobufWrapper):
 
-
-    def __init__(self):
-        self._inputs = []
-        self._outputs = []
+    def __init__(self, pbo=None):
+        if pbo == None:
+            pbo = pb.Transaction()
+        assert (isinstance(pbo, pb.Transaction)), type(pbo)
+        super(self.__class__, self).__init__(pbo)
+        self._inputs = [Transaction.Input(x) for x in pbo.inputs]
+        self._outputs = [Transaction.Output(x) for x in pbo.outputs]
         # self._version = None
         # self._locktime = None
-        self._hash = None
 
     def on_change(self):
-        self.clean_hash()
+        super(self.__class__, self).on_change()
 
     def add_inputs(self, inputs):
-        order_list = []
-        order = self._inputs.__len__()
+        # order_list = []
+        # order = self._inputs.__len__()
         for input in inputs:
             assert isinstance(input, Transaction.Input), type(input)
-            self._inputs.append(input)
-            order_list.append(order)
-            order += 1
+            self.pb.inputs.extend([input.pb])
+            last_pb = self.pb.inputs[-1]
+            self._inputs.append(Transaction.Input(last_pb))
+            # order_list.append(order)
+            # order += 1
         self.on_change()
-        return order_list
+        # return order_list
 
     def add_input_script(self, input_idx, signature, signatory):
         """
         script =  signature + " " + signatory
         """
         script = signature + " " + signatory
-        self.inputs[input_idx].set_script(script)
+        target = self.inputs[input_idx]
+        target.set_script(script)
         self.on_change()
 
     def add_outputs(self, outputs):
         for output in outputs:
             assert isinstance(output, Transaction.Output), type(output)
-            self._outputs.append(output)
+            self.pb.outputs.extend([output.pb])
+            last_pb = self.pb.outputs[-1]
+            self._outputs.append(Transaction.Output(last_pb))
         self.on_change()
 
     def get_transaction_sign_source(self):
-        data = []
+        data_str = ""
         for ip in self.inputs:
-            data.append((ip.transaction_hash, ip.transaction_idx))
-        
+            ip.pb.script = ""
+            data_str += ip.pb.SerializeToString()
+            ip.pb.script = ip.script
+
         for op in self.outputs:
-            data.append((op.value, op.script, op.addresses))
-        
-        return json.dumps(data)
-        
+            data_str += op.hash
+
+        return data_str
+
     def verify_sig_in_inputs(self, prev_outputs):
         """
         @prev_outputs corresponding to the inputs
@@ -75,68 +85,55 @@ class Transaction(ProtobufWrapper):
         data = self.get_transaction_sign_source()
         inputs = self.inputs
         if inputs.__len__() != prev_outputs.__len__():
-            logging.info("len not equal {}/{}".format(inputs.__len__(), prev_outputs.__len__()))
+            logging.info("TX: len not equal {}/{}".format(inputs.__len__(), prev_outputs.__len__()))
             return False
         sz = prev_outputs.__len__()
         input_satoshi = 0
         for i in range(sz):
             ip = inputs[i]
             op = prev_outputs[i]
-            
+
             # FUTURE: find a better way
             ip_script = ip.script.split()
             # verify_pem_start_pos = ip_script.find('-----BEGIN')
             # ip_sig = ip_script[:verify_pem_start_pos-1]
             # ip_verify_key = ip_script[verify_pem_start_pos:]
-            ip_sig=ip_script[0]
+            ip_sig = ip_script[0]
             ip_verify_key = ip_script[1]
 
             input_satoshi += op.value
-
             op_script = op.script
-            op_addresses = op.addresses
+            op_addresses = op.address
             result = True
-            if op_script in TransactionOutputScriptOP:
-                # verifyKey
-                if TransactionOutputScriptOP.index(op_script)==0:
-                    if op_addresses!=ip_verify_key:
-                        logging.info("verify_key fail")
-                        result = False
-                    from . import member_model
-                    member = member_model.MemberModel.get_verify_member(ip_verify_key)
-                    if not member.verify(data, ip_sig):
-                        logging.info("member fail")
-                        result = False 
-                else:
-                    # FUTURE:
-                    pass
+            # verifyKey
+            if op_script == pb.SCRIPT_TYPE_VK:
+                if op_addresses != ip_verify_key:
+                    logging.info("TX: verify_key fail")
+                    result = False
+                from . import member_model
+                member = member_model.MemberModel.get_verify_member(ip_verify_key)
+                if not member.verify(data, ip_sig):
+                    logging.info("TX: member fail")
+                    result = False
             else:
-                logging.info("script type fail")
-                result = False
+                # FUTURE:
+                pass
+
             if not result:
                 return result
 
         for op in self.outputs:
             input_satoshi -= op.value
-        
-        if input_satoshi>=0:
+
+        if input_satoshi >= 0:
             return True
         else:
-            logging.info("satoshi {}".format(input_satoshi))
+            logging.info("TX: satoshi {}".format(input_satoshi))
             # for i in range(sz):
             #     print "in:",prev_outputs[i].value
             # for op in self.outputs:
             #     print "out:", op.value
             return False
-
-    def clean_hash(self):
-        self._hash = None
-
-    @property
-    def hash(self):
-        if not self._hash:
-            self.cal_hash()
-        return self._hash
 
     @property
     def inputs(self):
@@ -151,14 +148,14 @@ class Transaction(ProtobufWrapper):
         ]
         """
         return self._inputs
-    
+
     @property
     def outputs(self):
         """outputs = [
             output = {
                 value,
                 script,
-                addresses
+                address
                 hash // cal by itself
             }
             ...
@@ -193,16 +190,16 @@ class Transaction(ProtobufWrapper):
         for output in self.outputs:
             head_data += output.hash
 
-        self._hash = hash_utils.hash_std( head_data)
+        self._hash = hash_utils.hash_std(head_data)
 
     def get_input(self, idx):
-        if idx<=self.n_inputs:
+        if idx <= self.n_inputs:
             return self._inputs[idx]
         else:
             return None
-            
+
     def get_output(self, idx):
-        if idx<=self.n_outputs:
+        if idx <= self.n_outputs:
             return self._outputs[idx]
         else:
             return None
@@ -220,20 +217,27 @@ class Transaction(ProtobufWrapper):
         t = Transaction()
         t.add_inputs(json.loads(dic['inputs'], object_hook=Transaction.Input.dict2obj))
         t.add_outputs(json.loads(dic['outputs'], object_hook=Transaction.Output.dict2obj))
-
         return t
 
-    class Input(object):
+    class Input(ProtobufWrapper):
         """Represents a transaction input"""
 
-        def __init__(self, transaction_hash, transaction_idx, script=None):
-            self._transaction_hash = transaction_hash
-            self._transaction_idx = transaction_idx
-            self._script = script
-            self._hash = None
+        def __init__(self, pbo):
+            assert (isinstance(pbo, pb.TxInput)), type(pbo)
+            super(self.__class__, self).__init__(pbo)
+            self._transaction_hash = pbo.transaction_hash
+            self._transaction_idx = pbo.transaction_idx
+            self._script = pbo.script
 
-        def __repr__(self):
-            return "Input(%s,%d,%s)" % (self.transaction_hash, self.transaction_idx, self.script)
+        @classmethod
+        def new(cls, transaction_hash, transaction_idx, script=""):
+            pbti = pb.TxInput(transaction_hash=transaction_hash,
+                              transaction_idx=transaction_idx,
+                              script=script)
+            return cls(pbti)
+
+        # def __repr__(self):
+        #     return "Input(%s,%d,%s)" % (self.transaction_hash, self.transaction_idx, self.script)
 
         @property
         def transaction_hash(self):
@@ -252,21 +256,13 @@ class Transaction(ProtobufWrapper):
             """Returns a Script object representing the redeem script"""
             return self._script
 
-        @property
-        def hash(self):
-            if not self._hash:
-                self.cal_hash()
-            return self._hash      
+        def on_change(self):
+            super(self.__class__, self).on_change()
 
         def set_script(self, script):
             self._script = script
-            self._hash = None
-
-        def cal_hash(self):
-            # header = [self.transaction_hash, self.transaction_idx, self.script]
-            # head_data = json.dumps(header, sort_keys=True)
-            head_data = self.transaction_hash + str(self.transaction_idx) + self.script
-            self._hash = hash_utils.hash_std(head_data)
+            self.pb.script = script
+            self.on_change()
 
         @classmethod
         def obj2dict(cls, obj):
@@ -276,32 +272,36 @@ class Transaction(ProtobufWrapper):
                 "script": obj.script
             }
 
-
         @classmethod
         def dict2obj(cls, dic):
-            ip = Transaction.Input( dic['transaction_hash'], 
-                                    dic['transaction_idx'],
-                                    dic['script'])
+            ip = Transaction.Input.new(transaction_hash=dic['transaction_hash'],
+                                       transaction_idx=dic['transaction_idx'],
+                                       script=dic['script'])
             return ip
-       
 
-    class Output(object):
+    class Output(ProtobufWrapper):
         """Represents a Transaction output"""
 
-        def __init__(self, value, script, address):
+        def __init__(self, pbo):
             """
             @value float or int
             @script in TransactionOutputScriptOP
             @address verify_key_str
             """
-            self._value = value
-            assert(script in TransactionOutputScriptOP)
-            self._script = script
-            self._addresses = address
-            self._hash = None
+            assert(isinstance(pbo, pb.TxOutput)), type(pbo)
+            super(self.__class__, self).__init__(pbo)
+            self._value = pbo.value
+            self._script = pbo.script
+            self._address = pbo.address
 
-        def __repr__(self):
-            return "Output(satoshis=%d)" % self.value
+        @classmethod
+        def new(cls, value, script, address):
+            return cls(pb.TxOutput(value=value,
+                                   script=script,
+                                   address=address))
+
+        # def __repr__(self):
+        #     return "Output(satoshis=%d)" % self.value
 
         def __cmp__(self, other):
             return cmp(self.hash, other.hash)
@@ -316,52 +316,54 @@ class Transaction(ProtobufWrapper):
             return self._script
 
         @property
-        def addresses(self):
-            """Returns a list containing all the addresses mentionned
+        def address(self):
+            """Returns a list containing all the address mentionned
             in the output's script
             """
-            return self._addresses
+            return self._address
 
-        @property
-        def hash(self):
-            if not self._hash:
-                self.cal_hash()
-            return self._hash
-           
-        def cal_hash(self):
-            # header = [self.value, self.script, self.addresses]
-            # head_data = json.dumps(header, sort_keys=True)
-            head_data = str(self.value) + self.script + self.addresses
-            self._hash = hash_utils.hash_std(head_data)
+        # @property
+        # def hash(self):
+        #     if not self._hash:
+        #         self.cal_hash()
+        #     return self._hash
+        #
+        # def cal_hash(self):
+        #     # header = [self.value, self.script, self.address]
+        #     # head_data = json.dumps(header, sort_keys=True)
+        #     head_data = str(self.value) + self.script + self.address
+        #     self._hash = hash_utils.hash_std(head_data)
 
         @classmethod
         def obj2dict(cls, obj):
             return {
                 "value": obj.value,
                 "script": obj.script,
-                "addresses": obj.addresses
+                "address": obj.address
             }
 
         @classmethod
         def dict2obj(cls, dic):
-            op = Transaction.Output(dic['value'], 
-                                    dic['script'],
-                                    dic['addresses'])
+            op = Transaction.Output.new(
+                value=dic['value'],
+                script=dic['script'],
+                address=dic['address'])
             return op
+
 
 class TxoIndex(object):
 
     def __init__(self, transaction_hash, transaction_idx):
         self._transaction_hash = transaction_hash
         self._transaction_idx = transaction_idx
-    
+
     def to_str(self):
-        return self.transaction_hash+str(self.transaction_idx)
-    
+        return self.transaction_hash + str(self.transaction_idx)
+
     @property
     def transaction_hash(self):
         return self._transaction_hash
-    
+
     @property
     def transaction_idx(self):
         return self._transaction_idx
@@ -369,8 +371,8 @@ class TxoIndex(object):
     @classmethod
     def obj2dict(cls, obj):
         return {
-            "transaction_hash": self.transaction_hash,
-            "transaction_idx": self.transaction_idx
+            "transaction_hash": cls.transaction_hash,
+            "transaction_idx": cls.transaction_idx
         }
 
     @classmethod
