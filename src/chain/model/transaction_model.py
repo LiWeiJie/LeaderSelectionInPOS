@@ -10,7 +10,7 @@
 # @Last Modified time: 
 
 import json
-from ..utils import hash_utils
+from src.utils import hash_utils
 import logging
 
 TransactionOutputScriptOP = [

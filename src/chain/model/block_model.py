@@ -13,7 +13,7 @@ import json
 
 from . import transaction_model
 from . import member_model
-from ..utils import hash_utils
+from src.utils import hash_utils
 
 def load_blocks(path):
     with open(path, 'r') as f:

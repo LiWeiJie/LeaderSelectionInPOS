@@ -16,7 +16,7 @@ import os
 from ..model import member_model
 from .unittest_config import unittest_chain_config
 from .. import config
-from ..utils import hash_utils
+from src.utils import hash_utils
 
 def get_member():
     return member_model.MemberModel(genkey=True)

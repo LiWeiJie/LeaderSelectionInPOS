@@ -33,8 +33,8 @@ from .model import transaction_model
 from .model import ledger_model
 from .model import transaction_output_index
 
-from .utils import message
-from .utils import hash_utils
+from src.utils import message
+from src.utils import hash_utils
         
 class Client(object):
 
@@ -103,13 +103,13 @@ class Client(object):
                 return True
         return False
 
-    def __init__(self, member=None, blocks_path=None, factory=None):
+    def __init__(self, member=None, blocks_path=None):
         """
 
         :param member: MemberModel or member_path , if None , will generate a random member
         :param blocks_path:
         """
-        self._factory = factory
+
         self._timestamp = 0
         self._leader_serial_number = 0
         self._status = Client.STATUS.Sleeping
@@ -234,10 +234,8 @@ class Client(object):
         if not transactions:
             transactions = self.pending_transactions.values()
         block.add_transactions(transactions)
-        # transaction fee and block reward
-        # FUTURE:
-        # FEATURE:INCENTIVE
         self.add_director(block)
+        
         return block
     
     def set_cooking_block(self, block):

@@ -15,7 +15,7 @@ import json
 import binascii
 import logging
 
-from ..utils import hash_utils
+from src.utils import hash_utils
 
 class PayloadBase(object):
 

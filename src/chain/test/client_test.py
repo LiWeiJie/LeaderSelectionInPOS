@@ -19,7 +19,7 @@ from ..model import member_model
 
 from .unittest_config import unittest_chain_config
 
-from ..utils import random_utils
+from src.utils import random_utils
 
 class TestClient(unittest.TestCase):
     

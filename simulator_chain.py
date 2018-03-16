@@ -19,8 +19,8 @@ from src.chain.model import block_model
 from src.chain.model import transaction_model
 from src.chain.model import ledger_model
 
-from src.chain.utils import hash_utils
-from src.chain.utils import random_utils
+from src.utils import hash_utils
+from src.utils import random_utils
 
 import os
 import time
