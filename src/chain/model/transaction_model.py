@@ -11,22 +11,23 @@
 
 import json
 from src.utils import hash_utils
+import src.messages.messages_pb2 as pb
+from src.protobufwrapper import ProtobufWrapper
 import logging
 
 TransactionOutputScriptOP = [
     "verifyKeyStr",    # 0
 ]
 
-class Transaction(object):
+class Transaction(ProtobufWrapper):
+
 
     def __init__(self):
-        self._hash = None
         self._inputs = []
         self._outputs = []
         # self._version = None
         # self._locktime = None
-        self.n_inputs = 0
-        self.n_outputs = 0
+        self._hash = None
 
     def on_change(self):
         self.clean_hash()
@@ -39,9 +40,22 @@ class Transaction(object):
             self._inputs.append(input)
             order_list.append(order)
             order += 1
-            self.n_inputs += 1
         self.on_change()
         return order_list
+
+    def add_input_script(self, input_idx, signature, signatory):
+        """
+        script =  signature + " " + signatory
+        """
+        script = signature + " " + signatory
+        self.inputs[input_idx].set_script(script)
+        self.on_change()
+
+    def add_outputs(self, outputs):
+        for output in outputs:
+            assert isinstance(output, Transaction.Output), type(output)
+            self._outputs.append(output)
+        self.on_change()
 
     def get_transaction_sign_source(self):
         data = []
@@ -115,22 +129,6 @@ class Transaction(object):
             #     print "out:", op.value
             return False
 
-    def add_input_script(self, input_idx, signature, signatory):
-        """
-        script =  signature + " " + signatory
-        """
-        script = signature + " " + signatory
-        self.inputs[input_idx].set_script(script)
-        self.on_change()
-    
-    def add_outputs(self, outputs):
-        for output in outputs:
-            assert isinstance(output, Transaction.Output), type(output)
-            self._outputs.append(output)
-            self.n_outputs += 1
-        
-        self.on_change()
-
     def clean_hash(self):
         self._hash = None
 
@@ -167,6 +165,14 @@ class Transaction(object):
         ]
         """
         return self._outputs
+
+    @property
+    def n_inputs(self):
+        return self.inputs.__len__()
+
+    @property
+    def n_outputs(self):
+        return self.outputs.__len__()
 
     def cal_hash(self):
         # header = []
@@ -206,17 +212,15 @@ class Transaction(object):
         return {
             "inputs": json.dumps(obj.inputs, default=Transaction.Input.obj2dict),
             "outputs": json.dumps(obj.outputs, default=Transaction.Output.obj2dict),
-            # "n_inputs": obj.n_inputs,
-            # "n_outputs": obj.n_outputs,
+
         }
 
     @classmethod
     def dict2obj(cls, dic):
         t = Transaction()
-        t._inputs = json.loads(dic['inputs'], object_hook=Transaction.Input.dict2obj)        
-        t._outputs = json.loads(dic['outputs'], object_hook=Transaction.Output.dict2obj)
-        t._n_input = t._inputs.__len__()
-        t._n_output = t._outputs.__len__()
+        t.add_inputs(json.loads(dic['inputs'], object_hook=Transaction.Input.dict2obj))
+        t.add_outputs(json.loads(dic['outputs'], object_hook=Transaction.Output.dict2obj))
+
         return t
 
     class Input(object):
