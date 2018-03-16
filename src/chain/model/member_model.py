@@ -14,11 +14,13 @@ from base64 import urlsafe_b64encode as b64e
 from base64 import urlsafe_b64decode as b64d
 # from base64 import b64encode as b64e
 # from base64 import b64decode as b64d
+import src.messages.messages_pb2 as pb
+from src.protobufwrapper import ProtobufWrapper 
 
 
+import binascii
 from ecdsa import SigningKey, VerifyingKey, BadSignatureError
 from os.path import exists
-import binascii
 
 import logging
 
@@ -68,7 +70,7 @@ def str_to_verifykey(vk_str):
     assert(isinstance(verify_key, VerifyingKey)), type(verify_key)
     return verify_key
 
-class MemberModel(object):
+class MemberModel(ProtobufWrapper):
     """Summary of class here.
 
     MemberModel
@@ -111,40 +113,55 @@ class MemberModel(object):
     @classmethod
     def get_verify_member(cls, verify_key):
         member = None
-        if isinstance(verify_key, VerifyingKey):
-            member = MemberModel(key_pair=(verify_key, None))
-        else:
-            vk = str_to_verifykey(verify_key)
-            member = MemberModel(key_pair=(vk, None))
+        member = MemberModel.new(key_pair=(verify_key, None))
         return member
 
-    def __init__(self, genkey=False, key_path=None, key_pair=None):
+    def __init__(self, pbo):
         """if genkey == True, then will generate a new key pair, otherwise depends on the key_path or key_pair
         @key_pair key_pair = (verify_key, signing_key)
         """
-        self._signing_key = self._verify_key = self._mid = self._signing_key_str = self._verify_key_str = None 
+        assert(isinstance(pbo, pb.Member)), type(pbo)
+        super(self.__class__, self).__init__(pbo)
+        self._signing_key = self._verify_key = None
+        if pbo.sk_str:
+            self._signing_key = str_to_signingkey(pbo.sk_str)
+        if pbo.vk_str:
+            self._verify_key = str_to_verifykey(pbo.vk_str)
+        self._mid = self._signing_key_str = self._verify_key_str = None 
+
+    @classmethod
+    def new(cls, genkey=False, key_path=None, key_pair=None):
+        """if genkey == True, then will generate a new key pair, otherwise depends on the key_path or key_pair
+        @key_pair key_pair = (verify_key, signing_key)
+        """
         
         verify_key = signing_key = None
+        verify_key_str = signing_key_str = ""
         
         if key_pair:
             (verify_key, signing_key) = key_pair
         if genkey:
             # TODO: curve=ecdsa.generator_secp256k1
-            self._signing_key = SigningKey.generate()
-            self._verify_key = self._signing_key.get_verifying_key()
-        if key_path:
-            self.load_key_from_path(key_path)
-        if verify_key:
-            if not isinstance(verify_key, VerifyingKey):
-                verify_key = str_to_verifykey(verify_key)
-            assert(isinstance(verify_key, VerifyingKey)), type(verify_key)
-            self._verify_key = verify_key            
-        if signing_key:
-            if not isinstance(signing_key, SigningKey):
-                signing_key = str_to_signingkey(signing_key)
-            assert(isinstance(signing_key, SigningKey)), type(signing_key)            
-            self._signing_key = signing_key
+            signing_key = SigningKey.generate()
+            verify_key = signing_key.get_verifying_key()
 
+        if key_path:
+            return cls.load_key_from_path(key_path)
+
+        if verify_key:
+            if isinstance(verify_key, VerifyingKey):
+                verify_key_str = verifykey_to_str(verify_key)
+            else:
+                verify_key_str = verify_key
+            assert(isinstance(verify_key_str, (str,unicode) )), type(verify_key_str)
+        if signing_key:
+            if isinstance(signing_key, SigningKey):
+                signing_key_str = signingkey_to_str(signing_key)
+            else:
+                signing_key_str = signing_key
+            assert(isinstance(signing_key_str, (str,unicode) )), type(signing_key_str)            
+
+        return cls(pb.Member(vk_str=verify_key_str, sk_str=signing_key_str))
 
     def set_key(self, verify_key, signing_key=None):
         """set verifykey and secrekey"""
@@ -163,7 +180,8 @@ class MemberModel(object):
                 self._verify_key = str_to_verifykey(verify_key)
             assert(isinstance(self.verify_key, VerifyingKey)), type(self.verify_key)    
 
-    def load_key_from_path(self, path):
+    @classmethod
+    def load_key_from_path(cls, path):
         """load key from the path.
         
         the file should be json format
@@ -181,10 +199,8 @@ class MemberModel(object):
         if path and exists(path):
             # TODO: catch the open exception
             with open(path, "r") as key_file:
-                obj = json.load(key_file, object_hook=self.dict2obj)
-                self._signing_key = obj._signing_key
-                self._verify_key = obj._verify_key
-                self._mid = obj._mid
+                obj = json.load(key_file, object_hook=cls.dict2obj)
+                return obj
         else:
             logging.warn("path or path file not exists, path: %s"%path)
 
@@ -294,14 +310,14 @@ class MemberModel(object):
         return m_dict
 
     @classmethod
-    def dict2obj(self, key_dict):
+    def dict2obj(cls, key_dict):
         assert isinstance(key_dict, dict), type(key_dict)
         assert key_dict.has_key("_verify_key")
         signing_key = None
         if key_dict.has_key("_signing_key"):
             signing_key = key_dict["_signing_key"].encode("utf-8")
         verify_key = key_dict["_verify_key"].encode("utf-8")
-        return MemberModel(key_pair=(verify_key, signing_key))
+        return cls.new(key_pair=(verify_key, signing_key))
 
     def dump(self, opened_file, except_signing_key=True):
         if except_signing_key:
@@ -328,7 +344,3 @@ class MemberModel(object):
         assert(isinstance(obj, cls)), type(obj)
         return obj
 
-class BroadcastMember(MemberModel):
-    def __init__(self):
-        super(BroadcastMember, self).__init__()
-        

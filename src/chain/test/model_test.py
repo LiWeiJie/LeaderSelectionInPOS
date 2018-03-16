@@ -19,7 +19,7 @@ from .. import config
 from src.utils import hash_utils
 
 def get_member():
-    return member_model.MemberModel(genkey=True)
+    return member_model.MemberModel.new(genkey=True)
 
 def get_random_hash():
     return hash_utils.hash_std("sad")
@@ -59,11 +59,9 @@ class TestMember(unittest.TestCase):
         path = os.path.join(unittest_chain_config.tmp_output_dir, "member_config.txt")
         c.write_to_path(path, except_signing_key=False)
         c = a
-        a.load_key_from_path(path)
+        a = member_model.MemberModel.new(False, path)
         self.assertTrue(c.verify(msg, a.sign(msg)))
-        a = member_model.MemberModel(False, path)
-        self.assertTrue(c.verify(msg, a.sign(msg)))
-        a = member_model.MemberModel(True)
+        a = member_model.MemberModel.new(True)
         self.assertFalse(c.verify(msg, a.sign(msg)))
         os.remove(path)
 
@@ -136,7 +134,7 @@ class TestTransaction(unittest.TestCase):
 def get_block():
     b = block_model.Block("prev_hash", "q")
     b.add_transactions([get_tx(), get_tx()])
-    member = member_model.MemberModel(genkey=True)
+    member = member_model.MemberModel.new(genkey=True)
     b.director_sign(member, "prev_q")
     return b
 

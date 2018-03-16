@@ -126,7 +126,7 @@ class Client(object):
             if not isinstance(member, member_model.MemberModel):
                 member_path = member
                 member = member_model.MemberModel()
-                member.load_key_from_path(member_path)
+                member.new(key_path=member_path)
         assert isinstance(member, member_model.MemberModel), type(member)
 
         self._member = member

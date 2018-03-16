@@ -180,47 +180,47 @@ class TestClient(unittest.TestCase):
             print("=== test_load_client ===")
         
     
-    def test_client_handle_senate(self, verbose=False):
-        if verbose:        
-            print("=== test_client_handle_senate ===")
+    # def test_client_handle_senate(self, verbose=False):
+    #     if verbose:        
+    #         print("=== test_client_handle_senate ===")
 
-        def send_protocols(cli, dests, protocol, data):
-            ret = cli.handle_protocols(dests, protocol, data)
-            return ret
+    #     def send_protocols(cli, dests, protocol, data):
+    #         ret = cli.handle_protocols(dests, protocol, data)
+    #         return ret
 
-        members = unittest_chain_config.get_members(10)
-        blocks_path = unittest_chain_config.genic_chain_path
+    #     members = unittest_chain_config.get_members(10)
+    #     blocks_path = unittest_chain_config.genic_chain_path
 
-        clients = [client.Client(member=member, blocks_path= blocks_path) for member in members ]
+    #     clients = [client.Client(member=member, blocks_path= blocks_path) for member in members ]
 
-        client0 = clients[0]
-        client1 = clients[1]
+    #     client0 = clients[0]
+    #     client1 = clients[1]
         
-        member0 = members[0]
-        member1 = members[1]
+    #     member0 = members[0]
+    #     member1 = members[1]
 
-        a = payload_base.PayloadBase(sender=member0,
-                                                    destination=member_model.BroadcastMember())
-        a.add_signature()
-        a.verify()
-        # print "38 ", a
-        dic_a = json.dumps(a, default=payload_base.PayloadBase.obj2dict)
-        # print "s ", dic_a
-        print dic_a
-        b = json.loads(dic_a, object_hook=payload_base.PayloadBase.dict2obj)
-        # print b
+    #     a = payload_base.PayloadBase(sender=member0,
+    #                                                 destination=member_model.BroadcastMember())
+    #     a.add_signature()
+    #     a.verify()
+    #     # print "38 ", a
+    #     dic_a = json.dumps(a, default=payload_base.PayloadBase.obj2dict)
+    #     # print "s ", dic_a
+    #     print dic_a
+    #     b = json.loads(dic_a, object_hook=payload_base.PayloadBase.dict2obj)
+    #     # print b
 
 
-        dest, protocol, data = client0.send_senate_broadcast()
-        # print "f ", data
-        if dest:
-            sender, (dest, protocol, data) = ret = send_protocols(client0, dest, protocol, data)
-            # all None
-            self.assertEqual(sender, client0.member.verify_key_str)
-            self.assertEqual(dest, protocol)
-            self.assertEqual(dest, data)
-            if verbose:        
-                print ret
-        if verbose:        
-            print("=== test_client_handle_senate ===")
+    #     dest, protocol, data = client0.send_senate_broadcast()
+    #     # print "f ", data
+    #     if dest:
+    #         sender, (dest, protocol, data) = ret = send_protocols(client0, dest, protocol, data)
+    #         # all None
+    #         self.assertEqual(sender, client0.member.verify_key_str)
+    #         self.assertEqual(dest, protocol)
+    #         self.assertEqual(dest, data)
+    #         if verbose:        
+    #             print ret
+    #     if verbose:        
+    #         print("=== test_client_handle_senate ===")
         
