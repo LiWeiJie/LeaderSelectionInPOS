@@ -171,26 +171,26 @@ class Transaction(ProtobufWrapper):
     def n_outputs(self):
         return self.outputs.__len__()
 
-    def cal_hash(self):
-        # header = []
+    # def cal_hash(self):
+    #     # header = []
+    #
+    #     # inputs = self._inputs
+    #     # outputs = self._outputs
+    #
+    #     # for input in inputs:
+    #     #     header.append(input.hash)
+    #     # for output in outputs:
+    #     #     header.append(output.hash)
+    #
+    #     # head_data = json.dumps(header, sort_keys=True)
+    #
+    #     head_data = ""
+    #     for input in self.inputs:
+    #         head_data += input.hash
+    #     for output in self.outputs:
+    #         head_data += output.hash
 
-        # inputs = self._inputs
-        # outputs = self._outputs
-
-        # for input in inputs:
-        #     header.append(input.hash)
-        # for output in outputs:
-        #     header.append(output.hash)
-
-        # head_data = json.dumps(header, sort_keys=True)
-
-        head_data = ""
-        for input in self.inputs:
-            head_data += input.hash
-        for output in self.outputs:
-            head_data += output.hash
-
-        self._hash = hash_utils.hash_std(head_data)
+        # self._hash = hash_utils.hash_std(head_data)
 
     def get_input(self, idx):
         if idx <= self.n_inputs:

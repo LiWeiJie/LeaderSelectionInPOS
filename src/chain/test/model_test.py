@@ -17,6 +17,7 @@ from ..model import member_model
 from .unittest_config import unittest_chain_config
 from .. import config
 from src.utils import hash_utils
+import src.messages.messages_pb2 as pb
 
 def get_member():
     return member_model.MemberModel.new(genkey=True)
@@ -68,18 +69,17 @@ class TestMember(unittest.TestCase):
 from ..model import transaction_model
 
 def get_input():
-    ip = transaction_model.Transaction.Input("transaction_hash", 0, "script")
+    ip = transaction_model.Transaction.Input.new("transaction_hash", pb.SCRIPT_TYPE_VK, "script")
     return ip
 
 def get_output():
-    op = transaction_model.Transaction.Output(1, "verifyKeyStr", "address")
+    op = transaction_model.Transaction.Output.new(1, pb.SCRIPT_TYPE_VK, "address")
     return op
 
 def get_tx():
     tx = transaction_model.Transaction()
     tx.add_inputs([get_input()])
     tx.add_outputs([get_output()])
-    tx.cal_hash()
     return tx
     
 class TestTransaction(unittest.TestCase):
@@ -88,7 +88,6 @@ class TestTransaction(unittest.TestCase):
         tx = get_tx()
         tx_str = json.dumps(tx, default=tx.obj2dict)
         t2 = json.loads(tx_str, object_hook=tx.dict2obj)
-        t2.cal_hash()
         tx2_str = json.dumps(t2, default=t2.obj2dict)
         self.assertEqual(tx.hash, t2.hash)
 
@@ -104,7 +103,6 @@ class TestTransaction(unittest.TestCase):
         tx = get_tx()
         tx.add_inputs([ip])
         tx.add_outputs([op])
-        tx.cal_hash()     
 
     def test_output_init(self):
         op = get_output()
@@ -160,7 +158,6 @@ class TestBlock(unittest.TestCase):
         b = get_block()
         bjd = json.dumps(b, default=block_model.Block.obj2dict)
         b2 = json.loads(bjd, object_hook=block_model.Block.dict2obj)
-        b2.cal_hash()
         self.assertEqual( b.hash, b2.hash)
 
     def test_block_write_down(self):
@@ -186,9 +183,9 @@ class TestBlock(unittest.TestCase):
         # print dic
         dic_obj = [ls[0].dict2obj(x) for x in dic ]
         for i in range(ls.__len__()):
-            ls[i].cal_hash()
-            dic_obj[i].cal_hash()
-        self.assertEqual(dic_obj[i].hash, ls[i].hash)
+            # ls[i].cal_hash()
+            # dic_obj[i].cal_hash()
+            self.assertEqual(dic_obj[i].hash, ls[i].hash)
 
 from ..model import ledger_model
 
