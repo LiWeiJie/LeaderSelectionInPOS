@@ -112,7 +112,6 @@ class MemberModel(ProtobufWrapper):
 
     @classmethod
     def get_verify_member(cls, verify_key):
-        member = None
         member = MemberModel.new(key_pair=(verify_key, None))
         return member
 
@@ -162,23 +161,6 @@ class MemberModel(ProtobufWrapper):
             assert(isinstance(signing_key_str, (str,unicode) )), type(signing_key_str)            
 
         return cls(pb.Member(vk_str=verify_key_str, sk_str=signing_key_str))
-
-    def set_key(self, verify_key, signing_key=None):
-        """set verifykey and secrekey"""
-        if isinstance(verify_key, VerifyingKey):
-            self._verify_key = verify_key
-            # self._signing_key = signing_key
-        else:
-            self._verify_key = str_to_verifykey(verify_key)
-        assert(isinstance(self._verify_key, VerifyingKey)), type(self._verify_key)
-
-        self._verify_key = None
-        if self._verify_key:
-            if isinstance(verify_key, VerifyingKey):
-                self._verify_key = verify_key
-            else:
-                self._verify_key = str_to_verifykey(verify_key)
-            assert(isinstance(self.verify_key, VerifyingKey)), type(self.verify_key)    
 
     @classmethod
     def load_key_from_path(cls, path):
@@ -343,4 +325,23 @@ class MemberModel(ProtobufWrapper):
         obj = json.loads(data, object_hook=cls.dict2obj)
         assert(isinstance(obj, cls)), type(obj)
         return obj
+
+    # def set_key(self, verify_key, signing_key=None):
+    #     """set verifykey and secrekey"""
+    #     if isinstance(verify_key, VerifyingKey):
+    #         self._verify_key = verify_key
+    #         # self._signing_key = signing_key
+    #     else:
+    #         self._verify_key = str_to_verifykey(verify_key)
+    #     assert(isinstance(self._verify_key, VerifyingKey)), type(self._verify_key)
+
+    #     self._verify_key = None
+    #     if self._verify_key:
+    #         if isinstance(verify_key, VerifyingKey):
+    #             self._verify_key = verify_key
+    #         else:
+    #             self._verify_key = str_to_verifykey(verify_key)
+    #         assert(isinstance(self.verify_key, VerifyingKey)), type(self.verify_key)
+
+    # end of class
 

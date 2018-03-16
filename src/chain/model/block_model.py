@@ -31,6 +31,7 @@ def dump_blocks(blocks, path):
 
 def dumps_blocks(blocks):
     return json.dumps(blocks, default=Block.obj2dict)
+
 class Block(object):
 
     def __init__(self, prev_hash, q = None):

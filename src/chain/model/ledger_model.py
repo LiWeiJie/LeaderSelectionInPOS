@@ -14,6 +14,7 @@ import logging
 from . import block_model
 from . import member_model
 from . import transaction_output_index
+from transaction_model import TxoIndex
 
 from ..config import config_loader
 from src.utils import hash_utils
@@ -241,7 +242,7 @@ class Ledger(object):
         prev_block_star = self.last_block.get_block_star_info_source()
         utxo_header = (transaction_hash, transaction_idx)
         if utxo_header in self.utxos:
-            txo_idx = transaction_output_index.TxoIndex(transaction_hash, transaction_idx)
+            txo_idx = TxoIndex(transaction_hash, transaction_idx)
             data = prev_block_star + txo_idx.to_str()
             data = hash_utils.hash_std(data)
             return data, txo_idx, self.utxos[utxo_header]
