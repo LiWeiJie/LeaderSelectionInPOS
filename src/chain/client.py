@@ -103,13 +103,13 @@ class Client(object):
                 return True
         return False
 
-    def __init__(self, member=None, blocks_path=None):
+    def __init__(self, member=None, blocks_path=None, factory=None):
         """
 
         :param member: MemberModel or member_path , if None , will generate a random member
         :param blocks_path:
         """
-
+        self._factory = factory
         self._timestamp = 0
         self._leader_serial_number = 0
         self._status = Client.STATUS.Sleeping

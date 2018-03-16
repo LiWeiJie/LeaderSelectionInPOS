@@ -19,90 +19,28 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='messages.proto',
   package='',
   syntax='proto3',
-  serialized_pb=_b('\n\x0emessages.proto\"\x12\n\x05\x44ummy\x12\t\n\x01m\x18\x01 \x01(\t\"$\n\x08\x44iscover\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\"g\n\rDiscoverReply\x12(\n\x05nodes\x18\x01 \x03(\x0b\x32\x19.DiscoverReply.NodesEntry\x1a,\n\nNodesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"@\n\x0bInstruction\x12\x13\n\x0binstruction\x18\x01 \x01(\t\x12\r\n\x05\x64\x65lay\x18\x02 \x01(\x05\x12\r\n\x05param\x18\x03 \x01(\t\" \n\x04Ping\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\" \n\x04Pong\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\"k\n\x06\x42racha\x12\x18\n\x02ty\x18\x01 \x01(\x0e\x32\x0c.Bracha.Type\x12\x0e\n\x06\x64igest\x18\x02 \x01(\x0c\x12\x10\n\x08\x66ragment\x18\x03 \x01(\x0c\"%\n\x04Type\x12\x08\n\x04INIT\x10\x00\x12\x08\n\x04\x45\x43HO\x10\x01\x12\t\n\x05READY\x10\x02\"N\n\x04Mo14\x12\x16\n\x02ty\x18\x01 \x01(\x0e\x32\n.Mo14.Type\x12\t\n\x01r\x18\x02 \x01(\x05\x12\t\n\x01v\x18\x03 \x01(\x05\"\x18\n\x04Type\x12\x07\n\x03\x45ST\x10\x00\x12\x07\n\x03\x41UX\x10\x01\"`\n\x03\x41\x43S\x12\x10\n\x08instance\x18\x01 \x01(\x0c\x12\r\n\x05round\x18\x02 \x01(\x05\x12\x19\n\x06\x62racha\x18\x03 \x01(\x0b\x32\x07.BrachaH\x00\x12\x15\n\x04mo14\x18\x04 \x01(\x0b\x32\x05.Mo14H\x00\x42\x06\n\x04\x62ody\"\x93\x01\n\x07TxBlock\x12\x1d\n\x05inner\x18\x01 \x01(\x0b\x32\x0e.TxBlock.Inner\x12\x15\n\x01s\x18\x02 \x01(\x0b\x32\n.Signature\x1aR\n\x05Inner\x12\x0c\n\x04prev\x18\x01 \x01(\x0c\x12\x0b\n\x03seq\x18\x02 \x01(\x05\x12\x14\n\x0c\x63ounterparty\x18\x03 \x01(\x0c\x12\r\n\x05nonce\x18\x04 \x01(\x0c\x12\t\n\x01m\x18\x05 \x01(\t\"\x1d\n\x05TxReq\x12\x14\n\x02tx\x18\x01 \x01(\x0b\x32\x08.TxBlock\"+\n\x06TxResp\x12\x14\n\x02tx\x18\x01 \x01(\x0b\x32\x08.TxBlock\x12\x0b\n\x03seq\x18\x02 \x01(\x05\"\xa8\x01\n\x07\x43pBlock\x12\x1d\n\x05inner\x18\x01 \x01(\x0b\x32\x0e.CpBlock.Inner\x12\x15\n\x01s\x18\x02 \x01(\x0b\x32\n.Signature\x1ag\n\x05Inner\x12\x0c\n\x04prev\x18\x01 \x01(\x0c\x12\x0b\n\x03seq\x18\x02 \x01(\x05\x12\r\n\x05round\x18\x03 \x01(\x05\x12\x11\n\tcons_hash\x18\x04 \x01(\x0c\x12\x16\n\x02ss\x18\x05 \x03(\x0b\x32\n.Signature\x12\t\n\x01p\x18\x06 \x01(\x05\"!\n\x08\x43pBlocks\x12\x15\n\x03\x63ps\x18\x01 \x03(\x0b\x32\x08.CpBlock\"0\n\tSignature\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x17\n\x0fsigned_document\x18\x02 \x01(\x0c\"0\n\x0cSigWithRound\x12\x15\n\x01s\x18\x01 \x01(\x0b\x32\n.Signature\x12\t\n\x01r\x18\x02 \x01(\x05\"/\n\x04\x43ons\x12\r\n\x05round\x18\x01 \x01(\x05\x12\x18\n\x06\x62locks\x18\x02 \x03(\x0b\x32\x08.CpBlock\"\x14\n\x07\x41skCons\x12\t\n\x01r\x18\x01 \x01(\x05\"+\n\rValidationReq\x12\x0b\n\x03seq\x18\x01 \x01(\x05\x12\r\n\x05seq_r\x18\x02 \x01(\x05\"|\n\x0c\x43ompactBlock\x12\"\n\x05inner\x18\x01 \x01(\x0b\x32\x13.CompactBlock.Inner\x12\x0b\n\x03seq\x18\x02 \x01(\x05\x12\x14\n\x0c\x61greed_round\x18\x03 \x01(\x05\x1a%\n\x05Inner\x12\x0e\n\x06\x64igest\x18\x01 \x01(\x0c\x12\x0c\n\x04prev\x18\x02 \x01(\x0c\"K\n\x0eValidationResp\x12\x0b\n\x03seq\x18\x01 \x01(\x05\x12\r\n\x05seq_r\x18\x02 \x01(\x05\x12\x1d\n\x06pieces\x18\x03 \x03(\x0b\x32\r.CompactBlockb\x06proto3')
+  serialized_pb=_b('\n\x0emessages.proto\"$\n\x08\x44iscover\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\"g\n\rDiscoverReply\x12(\n\x05nodes\x18\x01 \x03(\x0b\x32\x19.DiscoverReply.NodesEntry\x1a,\n\nNodesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"@\n\x0bInstruction\x12\x13\n\x0binstruction\x18\x01 \x01(\t\x12\r\n\x05\x64\x65lay\x18\x02 \x01(\x05\x12\r\n\x05param\x18\x03 \x01(\t\" \n\x04Ping\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\" \n\x04Pong\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\".\n\tSignature\x12\x0e\n\x06vk_str\x18\x01 \x01(\x0c\x12\x11\n\tsignature\x18\x02 \x01(\x0c\"(\n\x06Member\x12\x0e\n\x06vk_str\x18\x01 \x01(\t\x12\x0e\n\x06sk_str\x18\x02 \x01(\t\":\n\x07TxInput\x12\x0f\n\x07tx_hash\x18\x01 \x01(\t\x12\x0e\n\x06tx_idx\x18\x02 \x01(\x05\x12\x0e\n\x06script\x18\x03 \x01(\t\"f\n\x08TxOutput\x12\r\n\x05value\x18\x01 \x01(\t\x12$\n\x06script\x18\x02 \x01(\x0e\x32\x14.TxOutput.ScriptType\x12\x0f\n\x07\x61\x64\x64ress\x18\x03 \x01(\t\"\x14\n\nScriptType\x12\x06\n\x02VK\x10\x00\"C\n\x0bTransaction\x12\x18\n\x06inputs\x18\x01 \x03(\x0b\x32\x08.TxInput\x12\x1a\n\x07outputs\x18\x02 \x03(\x0b\x32\t.TxOutput\"\xb6\x01\n\x05\x42lock\x12\x11\n\tprev_hash\x18\x01 \x01(\t\x12\t\n\x01q\x18\x02 \x01(\t\x12\x13\n\x0bmerkle_root\x18\x03 \x01(\t\x12\x10\n\x08\x64irector\x18\x04 \x01(\t\x12\x19\n\x03txs\x18\x05 \x03(\x0b\x32\x0c.Transaction\x12%\n\x11senates_signature\x18\x06 \x03(\x0b\x32\n.Signature\x12&\n\x12\x64irector_signature\x18\x07 \x01(\x0b\x32\n.Signature\"P\n\x05\x43hain\x12\x15\n\rsenate_number\x18\x01 \x01(\x05\x12\x18\n\x10\x66\x61ilure_boundary\x18\x02 \x01(\x05\x12\x16\n\x06\x62locks\x18\x03 \x03(\x0b\x32\x06.Blockb\x06proto3')
 )
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 
-_BRACHA_TYPE = _descriptor.EnumDescriptor(
-  name='Type',
-  full_name='Bracha.Type',
+_TXOUTPUT_SCRIPTTYPE = _descriptor.EnumDescriptor(
+  name='ScriptType',
+  full_name='TxOutput.ScriptType',
   filename=None,
   file=DESCRIPTOR,
   values=[
     _descriptor.EnumValueDescriptor(
-      name='INIT', index=0, number=0,
-      options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='ECHO', index=1, number=1,
-      options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='READY', index=2, number=2,
+      name='VK', index=0, number=0,
       options=None,
       type=None),
   ],
   containing_type=None,
   options=None,
-  serialized_start=385,
-  serialized_end=422,
+  serialized_start=527,
+  serialized_end=547,
 )
-_sym_db.RegisterEnumDescriptor(_BRACHA_TYPE)
-
-_MO14_TYPE = _descriptor.EnumDescriptor(
-  name='Type',
-  full_name='Mo14.Type',
-  filename=None,
-  file=DESCRIPTOR,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='EST', index=0, number=0,
-      options=None,
-      type=None),
-    _descriptor.EnumValueDescriptor(
-      name='AUX', index=1, number=1,
-      options=None,
-      type=None),
-  ],
-  containing_type=None,
-  options=None,
-  serialized_start=478,
-  serialized_end=502,
-)
-_sym_db.RegisterEnumDescriptor(_MO14_TYPE)
-
-
-_DUMMY = _descriptor.Descriptor(
-  name='Dummy',
-  full_name='Dummy',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='m', full_name='Dummy.m', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=18,
-  serialized_end=36,
-)
+_sym_db.RegisterEnumDescriptor(_TXOUTPUT_SCRIPTTYPE)
 
 
 _DISCOVER = _descriptor.Descriptor(
@@ -118,14 +56,14 @@ _DISCOVER = _descriptor.Descriptor(
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='port', full_name='Discover.port', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -138,8 +76,8 @@ _DISCOVER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=38,
-  serialized_end=74,
+  serialized_start=18,
+  serialized_end=54,
 )
 
 
@@ -156,14 +94,14 @@ _DISCOVERREPLY_NODESENTRY = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='value', full_name='DiscoverReply.NodesEntry.value', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -176,8 +114,8 @@ _DISCOVERREPLY_NODESENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=135,
-  serialized_end=179,
+  serialized_start=115,
+  serialized_end=159,
 )
 
 _DISCOVERREPLY = _descriptor.Descriptor(
@@ -193,7 +131,7 @@ _DISCOVERREPLY = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -206,8 +144,8 @@ _DISCOVERREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=76,
-  serialized_end=179,
+  serialized_start=56,
+  serialized_end=159,
 )
 
 
@@ -224,21 +162,21 @@ _INSTRUCTION = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='delay', full_name='Instruction.delay', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='param', full_name='Instruction.param', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -251,8 +189,8 @@ _INSTRUCTION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=181,
-  serialized_end=245,
+  serialized_start=161,
+  serialized_end=225,
 )
 
 
@@ -269,14 +207,14 @@ _PING = _descriptor.Descriptor(
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='port', full_name='Ping.port', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -289,8 +227,8 @@ _PING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=247,
-  serialized_end=279,
+  serialized_start=227,
+  serialized_end=259,
 )
 
 
@@ -307,14 +245,14 @@ _PONG = _descriptor.Descriptor(
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='port', full_name='Pong.port', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -327,454 +265,8 @@ _PONG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=281,
-  serialized_end=313,
-)
-
-
-_BRACHA = _descriptor.Descriptor(
-  name='Bracha',
-  full_name='Bracha',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='ty', full_name='Bracha.ty', index=0,
-      number=1, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='digest', full_name='Bracha.digest', index=1,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='fragment', full_name='Bracha.fragment', index=2,
-      number=3, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-    _BRACHA_TYPE,
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=315,
-  serialized_end=422,
-)
-
-
-_MO14 = _descriptor.Descriptor(
-  name='Mo14',
-  full_name='Mo14',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='ty', full_name='Mo14.ty', index=0,
-      number=1, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='r', full_name='Mo14.r', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='v', full_name='Mo14.v', index=2,
-      number=3, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-    _MO14_TYPE,
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=424,
-  serialized_end=502,
-)
-
-
-_ACS = _descriptor.Descriptor(
-  name='ACS',
-  full_name='ACS',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='instance', full_name='ACS.instance', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='round', full_name='ACS.round', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='bracha', full_name='ACS.bracha', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='mo14', full_name='ACS.mo14', index=3,
-      number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-    _descriptor.OneofDescriptor(
-      name='body', full_name='ACS.body',
-      index=0, containing_type=None, fields=[]),
-  ],
-  serialized_start=504,
-  serialized_end=600,
-)
-
-
-_TXBLOCK_INNER = _descriptor.Descriptor(
-  name='Inner',
-  full_name='TxBlock.Inner',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='prev', full_name='TxBlock.Inner.prev', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='seq', full_name='TxBlock.Inner.seq', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='counterparty', full_name='TxBlock.Inner.counterparty', index=2,
-      number=3, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='nonce', full_name='TxBlock.Inner.nonce', index=3,
-      number=4, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='m', full_name='TxBlock.Inner.m', index=4,
-      number=5, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=668,
-  serialized_end=750,
-)
-
-_TXBLOCK = _descriptor.Descriptor(
-  name='TxBlock',
-  full_name='TxBlock',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='inner', full_name='TxBlock.inner', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='s', full_name='TxBlock.s', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[_TXBLOCK_INNER, ],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=603,
-  serialized_end=750,
-)
-
-
-_TXREQ = _descriptor.Descriptor(
-  name='TxReq',
-  full_name='TxReq',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='tx', full_name='TxReq.tx', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=752,
-  serialized_end=781,
-)
-
-
-_TXRESP = _descriptor.Descriptor(
-  name='TxResp',
-  full_name='TxResp',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='tx', full_name='TxResp.tx', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='seq', full_name='TxResp.seq', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=783,
-  serialized_end=826,
-)
-
-
-_CPBLOCK_INNER = _descriptor.Descriptor(
-  name='Inner',
-  full_name='CpBlock.Inner',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='prev', full_name='CpBlock.Inner.prev', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='seq', full_name='CpBlock.Inner.seq', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='round', full_name='CpBlock.Inner.round', index=2,
-      number=3, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='cons_hash', full_name='CpBlock.Inner.cons_hash', index=3,
-      number=4, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='ss', full_name='CpBlock.Inner.ss', index=4,
-      number=5, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='p', full_name='CpBlock.Inner.p', index=5,
-      number=6, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=894,
-  serialized_end=997,
-)
-
-_CPBLOCK = _descriptor.Descriptor(
-  name='CpBlock',
-  full_name='CpBlock',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='inner', full_name='CpBlock.inner', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='s', full_name='CpBlock.s', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[_CPBLOCK_INNER, ],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=829,
-  serialized_end=997,
-)
-
-
-_CPBLOCKS = _descriptor.Descriptor(
-  name='CpBlocks',
-  full_name='CpBlocks',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='cps', full_name='CpBlocks.cps', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=999,
-  serialized_end=1032,
+  serialized_start=261,
+  serialized_end=293,
 )
 
 
@@ -786,19 +278,19 @@ _SIGNATURE = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='vk', full_name='Signature.vk', index=0,
+      name='vk_str', full_name='Signature.vk_str', index=0,
       number=1, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='signed_document', full_name='Signature.signed_document', index=1,
+      name='signature', full_name='Signature.signature', index=1,
       number=2, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -811,32 +303,77 @@ _SIGNATURE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1034,
-  serialized_end=1082,
+  serialized_start=295,
+  serialized_end=341,
 )
 
 
-_SIGWITHROUND = _descriptor.Descriptor(
-  name='SigWithRound',
-  full_name='SigWithRound',
+_MEMBER = _descriptor.Descriptor(
+  name='Member',
+  full_name='Member',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='s', full_name='SigWithRound.s', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
+      name='vk_str', full_name='Member.vk_str', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='r', full_name='SigWithRound.r', index=1,
+      name='sk_str', full_name='Member.sk_str', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=343,
+  serialized_end=383,
+)
+
+
+_TXINPUT = _descriptor.Descriptor(
+  name='TxInput',
+  full_name='TxInput',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='tx_hash', full_name='TxInput.tx_hash', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='tx_idx', full_name='TxInput.tx_idx', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='script', full_name='TxInput.script', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -849,32 +386,78 @@ _SIGWITHROUND = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1084,
-  serialized_end=1132,
+  serialized_start=385,
+  serialized_end=443,
 )
 
 
-_CONS = _descriptor.Descriptor(
-  name='Cons',
-  full_name='Cons',
+_TXOUTPUT = _descriptor.Descriptor(
+  name='TxOutput',
+  full_name='TxOutput',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='round', full_name='Cons.round', index=0,
-      number=1, type=5, cpp_type=1, label=1,
+      name='value', full_name='TxOutput.value', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='script', full_name='TxOutput.script', index=1,
+      number=2, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='blocks', full_name='Cons.blocks', index=1,
+      name='address', full_name='TxOutput.address', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+    _TXOUTPUT_SCRIPTTYPE,
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=445,
+  serialized_end=547,
+)
+
+
+_TRANSACTION = _descriptor.Descriptor(
+  name='Transaction',
+  full_name='Transaction',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='inputs', full_name='Transaction.inputs', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='outputs', full_name='Transaction.outputs', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -887,149 +470,71 @@ _CONS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1134,
-  serialized_end=1181,
+  serialized_start=549,
+  serialized_end=616,
 )
 
 
-_ASKCONS = _descriptor.Descriptor(
-  name='AskCons',
-  full_name='AskCons',
+_BLOCK = _descriptor.Descriptor(
+  name='Block',
+  full_name='Block',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='r', full_name='AskCons.r', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
+      name='prev_hash', full_name='Block.prev_hash', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1183,
-  serialized_end=1203,
-)
-
-
-_VALIDATIONREQ = _descriptor.Descriptor(
-  name='ValidationReq',
-  full_name='ValidationReq',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='seq', full_name='ValidationReq.seq', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
+      name='q', full_name='Block.q', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='seq_r', full_name='ValidationReq.seq_r', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
+      name='merkle_root', full_name='Block.merkle_root', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1205,
-  serialized_end=1248,
-)
-
-
-_COMPACTBLOCK_INNER = _descriptor.Descriptor(
-  name='Inner',
-  full_name='CompactBlock.Inner',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='digest', full_name='CompactBlock.Inner.digest', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
+      name='director', full_name='Block.director', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='prev', full_name='CompactBlock.Inner.prev', index=1,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
+      name='txs', full_name='Block.txs', index=4,
+      number=5, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1337,
-  serialized_end=1374,
-)
-
-_COMPACTBLOCK = _descriptor.Descriptor(
-  name='CompactBlock',
-  full_name='CompactBlock',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='inner', full_name='CompactBlock.inner', index=0,
-      number=1, type=11, cpp_type=10, label=1,
+      name='senates_signature', full_name='Block.senates_signature', index=5,
+      number=6, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='director_signature', full_name='Block.director_signature', index=6,
+      number=7, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='seq', full_name='CompactBlock.seq', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='agreed_round', full_name='CompactBlock.agreed_round', index=2,
-      number=3, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
-  nested_types=[_COMPACTBLOCK_INNER, ],
+  nested_types=[],
   enum_types=[
   ],
   options=None,
@@ -1038,39 +543,39 @@ _COMPACTBLOCK = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1250,
-  serialized_end=1374,
+  serialized_start=619,
+  serialized_end=801,
 )
 
 
-_VALIDATIONRESP = _descriptor.Descriptor(
-  name='ValidationResp',
-  full_name='ValidationResp',
+_CHAIN = _descriptor.Descriptor(
+  name='Chain',
+  full_name='Chain',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='seq', full_name='ValidationResp.seq', index=0,
+      name='senate_number', full_name='Chain.senate_number', index=0,
       number=1, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='seq_r', full_name='ValidationResp.seq_r', index=1,
+      name='failure_boundary', full_name='Chain.failure_boundary', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='pieces', full_name='ValidationResp.pieces', index=2,
+      name='blocks', full_name='Chain.blocks', index=2,
       number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -1083,67 +588,33 @@ _VALIDATIONRESP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1376,
-  serialized_end=1451,
+  serialized_start=803,
+  serialized_end=883,
 )
 
 _DISCOVERREPLY_NODESENTRY.containing_type = _DISCOVERREPLY
 _DISCOVERREPLY.fields_by_name['nodes'].message_type = _DISCOVERREPLY_NODESENTRY
-_BRACHA.fields_by_name['ty'].enum_type = _BRACHA_TYPE
-_BRACHA_TYPE.containing_type = _BRACHA
-_MO14.fields_by_name['ty'].enum_type = _MO14_TYPE
-_MO14_TYPE.containing_type = _MO14
-_ACS.fields_by_name['bracha'].message_type = _BRACHA
-_ACS.fields_by_name['mo14'].message_type = _MO14
-_ACS.oneofs_by_name['body'].fields.append(
-  _ACS.fields_by_name['bracha'])
-_ACS.fields_by_name['bracha'].containing_oneof = _ACS.oneofs_by_name['body']
-_ACS.oneofs_by_name['body'].fields.append(
-  _ACS.fields_by_name['mo14'])
-_ACS.fields_by_name['mo14'].containing_oneof = _ACS.oneofs_by_name['body']
-_TXBLOCK_INNER.containing_type = _TXBLOCK
-_TXBLOCK.fields_by_name['inner'].message_type = _TXBLOCK_INNER
-_TXBLOCK.fields_by_name['s'].message_type = _SIGNATURE
-_TXREQ.fields_by_name['tx'].message_type = _TXBLOCK
-_TXRESP.fields_by_name['tx'].message_type = _TXBLOCK
-_CPBLOCK_INNER.fields_by_name['ss'].message_type = _SIGNATURE
-_CPBLOCK_INNER.containing_type = _CPBLOCK
-_CPBLOCK.fields_by_name['inner'].message_type = _CPBLOCK_INNER
-_CPBLOCK.fields_by_name['s'].message_type = _SIGNATURE
-_CPBLOCKS.fields_by_name['cps'].message_type = _CPBLOCK
-_SIGWITHROUND.fields_by_name['s'].message_type = _SIGNATURE
-_CONS.fields_by_name['blocks'].message_type = _CPBLOCK
-_COMPACTBLOCK_INNER.containing_type = _COMPACTBLOCK
-_COMPACTBLOCK.fields_by_name['inner'].message_type = _COMPACTBLOCK_INNER
-_VALIDATIONRESP.fields_by_name['pieces'].message_type = _COMPACTBLOCK
-DESCRIPTOR.message_types_by_name['Dummy'] = _DUMMY
+_TXOUTPUT.fields_by_name['script'].enum_type = _TXOUTPUT_SCRIPTTYPE
+_TXOUTPUT_SCRIPTTYPE.containing_type = _TXOUTPUT
+_TRANSACTION.fields_by_name['inputs'].message_type = _TXINPUT
+_TRANSACTION.fields_by_name['outputs'].message_type = _TXOUTPUT
+_BLOCK.fields_by_name['txs'].message_type = _TRANSACTION
+_BLOCK.fields_by_name['senates_signature'].message_type = _SIGNATURE
+_BLOCK.fields_by_name['director_signature'].message_type = _SIGNATURE
+_CHAIN.fields_by_name['blocks'].message_type = _BLOCK
 DESCRIPTOR.message_types_by_name['Discover'] = _DISCOVER
 DESCRIPTOR.message_types_by_name['DiscoverReply'] = _DISCOVERREPLY
 DESCRIPTOR.message_types_by_name['Instruction'] = _INSTRUCTION
 DESCRIPTOR.message_types_by_name['Ping'] = _PING
 DESCRIPTOR.message_types_by_name['Pong'] = _PONG
-DESCRIPTOR.message_types_by_name['Bracha'] = _BRACHA
-DESCRIPTOR.message_types_by_name['Mo14'] = _MO14
-DESCRIPTOR.message_types_by_name['ACS'] = _ACS
-DESCRIPTOR.message_types_by_name['TxBlock'] = _TXBLOCK
-DESCRIPTOR.message_types_by_name['TxReq'] = _TXREQ
-DESCRIPTOR.message_types_by_name['TxResp'] = _TXRESP
-DESCRIPTOR.message_types_by_name['CpBlock'] = _CPBLOCK
-DESCRIPTOR.message_types_by_name['CpBlocks'] = _CPBLOCKS
 DESCRIPTOR.message_types_by_name['Signature'] = _SIGNATURE
-DESCRIPTOR.message_types_by_name['SigWithRound'] = _SIGWITHROUND
-DESCRIPTOR.message_types_by_name['Cons'] = _CONS
-DESCRIPTOR.message_types_by_name['AskCons'] = _ASKCONS
-DESCRIPTOR.message_types_by_name['ValidationReq'] = _VALIDATIONREQ
-DESCRIPTOR.message_types_by_name['CompactBlock'] = _COMPACTBLOCK
-DESCRIPTOR.message_types_by_name['ValidationResp'] = _VALIDATIONRESP
-
-Dummy = _reflection.GeneratedProtocolMessageType('Dummy', (_message.Message,), dict(
-  DESCRIPTOR = _DUMMY,
-  __module__ = 'messages_pb2'
-  # @@protoc_insertion_point(class_scope:Dummy)
-  ))
-_sym_db.RegisterMessage(Dummy)
+DESCRIPTOR.message_types_by_name['Member'] = _MEMBER
+DESCRIPTOR.message_types_by_name['TxInput'] = _TXINPUT
+DESCRIPTOR.message_types_by_name['TxOutput'] = _TXOUTPUT
+DESCRIPTOR.message_types_by_name['Transaction'] = _TRANSACTION
+DESCRIPTOR.message_types_by_name['Block'] = _BLOCK
+DESCRIPTOR.message_types_by_name['Chain'] = _CHAIN
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 Discover = _reflection.GeneratedProtocolMessageType('Discover', (_message.Message,), dict(
   DESCRIPTOR = _DISCOVER,
@@ -1188,78 +659,6 @@ Pong = _reflection.GeneratedProtocolMessageType('Pong', (_message.Message,), dic
   ))
 _sym_db.RegisterMessage(Pong)
 
-Bracha = _reflection.GeneratedProtocolMessageType('Bracha', (_message.Message,), dict(
-  DESCRIPTOR = _BRACHA,
-  __module__ = 'messages_pb2'
-  # @@protoc_insertion_point(class_scope:Bracha)
-  ))
-_sym_db.RegisterMessage(Bracha)
-
-Mo14 = _reflection.GeneratedProtocolMessageType('Mo14', (_message.Message,), dict(
-  DESCRIPTOR = _MO14,
-  __module__ = 'messages_pb2'
-  # @@protoc_insertion_point(class_scope:Mo14)
-  ))
-_sym_db.RegisterMessage(Mo14)
-
-ACS = _reflection.GeneratedProtocolMessageType('ACS', (_message.Message,), dict(
-  DESCRIPTOR = _ACS,
-  __module__ = 'messages_pb2'
-  # @@protoc_insertion_point(class_scope:ACS)
-  ))
-_sym_db.RegisterMessage(ACS)
-
-TxBlock = _reflection.GeneratedProtocolMessageType('TxBlock', (_message.Message,), dict(
-
-  Inner = _reflection.GeneratedProtocolMessageType('Inner', (_message.Message,), dict(
-    DESCRIPTOR = _TXBLOCK_INNER,
-    __module__ = 'messages_pb2'
-    # @@protoc_insertion_point(class_scope:TxBlock.Inner)
-    ))
-  ,
-  DESCRIPTOR = _TXBLOCK,
-  __module__ = 'messages_pb2'
-  # @@protoc_insertion_point(class_scope:TxBlock)
-  ))
-_sym_db.RegisterMessage(TxBlock)
-_sym_db.RegisterMessage(TxBlock.Inner)
-
-TxReq = _reflection.GeneratedProtocolMessageType('TxReq', (_message.Message,), dict(
-  DESCRIPTOR = _TXREQ,
-  __module__ = 'messages_pb2'
-  # @@protoc_insertion_point(class_scope:TxReq)
-  ))
-_sym_db.RegisterMessage(TxReq)
-
-TxResp = _reflection.GeneratedProtocolMessageType('TxResp', (_message.Message,), dict(
-  DESCRIPTOR = _TXRESP,
-  __module__ = 'messages_pb2'
-  # @@protoc_insertion_point(class_scope:TxResp)
-  ))
-_sym_db.RegisterMessage(TxResp)
-
-CpBlock = _reflection.GeneratedProtocolMessageType('CpBlock', (_message.Message,), dict(
-
-  Inner = _reflection.GeneratedProtocolMessageType('Inner', (_message.Message,), dict(
-    DESCRIPTOR = _CPBLOCK_INNER,
-    __module__ = 'messages_pb2'
-    # @@protoc_insertion_point(class_scope:CpBlock.Inner)
-    ))
-  ,
-  DESCRIPTOR = _CPBLOCK,
-  __module__ = 'messages_pb2'
-  # @@protoc_insertion_point(class_scope:CpBlock)
-  ))
-_sym_db.RegisterMessage(CpBlock)
-_sym_db.RegisterMessage(CpBlock.Inner)
-
-CpBlocks = _reflection.GeneratedProtocolMessageType('CpBlocks', (_message.Message,), dict(
-  DESCRIPTOR = _CPBLOCKS,
-  __module__ = 'messages_pb2'
-  # @@protoc_insertion_point(class_scope:CpBlocks)
-  ))
-_sym_db.RegisterMessage(CpBlocks)
-
 Signature = _reflection.GeneratedProtocolMessageType('Signature', (_message.Message,), dict(
   DESCRIPTOR = _SIGNATURE,
   __module__ = 'messages_pb2'
@@ -1267,55 +666,47 @@ Signature = _reflection.GeneratedProtocolMessageType('Signature', (_message.Mess
   ))
 _sym_db.RegisterMessage(Signature)
 
-SigWithRound = _reflection.GeneratedProtocolMessageType('SigWithRound', (_message.Message,), dict(
-  DESCRIPTOR = _SIGWITHROUND,
+Member = _reflection.GeneratedProtocolMessageType('Member', (_message.Message,), dict(
+  DESCRIPTOR = _MEMBER,
   __module__ = 'messages_pb2'
-  # @@protoc_insertion_point(class_scope:SigWithRound)
+  # @@protoc_insertion_point(class_scope:Member)
   ))
-_sym_db.RegisterMessage(SigWithRound)
+_sym_db.RegisterMessage(Member)
 
-Cons = _reflection.GeneratedProtocolMessageType('Cons', (_message.Message,), dict(
-  DESCRIPTOR = _CONS,
+TxInput = _reflection.GeneratedProtocolMessageType('TxInput', (_message.Message,), dict(
+  DESCRIPTOR = _TXINPUT,
   __module__ = 'messages_pb2'
-  # @@protoc_insertion_point(class_scope:Cons)
+  # @@protoc_insertion_point(class_scope:TxInput)
   ))
-_sym_db.RegisterMessage(Cons)
+_sym_db.RegisterMessage(TxInput)
 
-AskCons = _reflection.GeneratedProtocolMessageType('AskCons', (_message.Message,), dict(
-  DESCRIPTOR = _ASKCONS,
+TxOutput = _reflection.GeneratedProtocolMessageType('TxOutput', (_message.Message,), dict(
+  DESCRIPTOR = _TXOUTPUT,
   __module__ = 'messages_pb2'
-  # @@protoc_insertion_point(class_scope:AskCons)
+  # @@protoc_insertion_point(class_scope:TxOutput)
   ))
-_sym_db.RegisterMessage(AskCons)
+_sym_db.RegisterMessage(TxOutput)
 
-ValidationReq = _reflection.GeneratedProtocolMessageType('ValidationReq', (_message.Message,), dict(
-  DESCRIPTOR = _VALIDATIONREQ,
+Transaction = _reflection.GeneratedProtocolMessageType('Transaction', (_message.Message,), dict(
+  DESCRIPTOR = _TRANSACTION,
   __module__ = 'messages_pb2'
-  # @@protoc_insertion_point(class_scope:ValidationReq)
+  # @@protoc_insertion_point(class_scope:Transaction)
   ))
-_sym_db.RegisterMessage(ValidationReq)
+_sym_db.RegisterMessage(Transaction)
 
-CompactBlock = _reflection.GeneratedProtocolMessageType('CompactBlock', (_message.Message,), dict(
-
-  Inner = _reflection.GeneratedProtocolMessageType('Inner', (_message.Message,), dict(
-    DESCRIPTOR = _COMPACTBLOCK_INNER,
-    __module__ = 'messages_pb2'
-    # @@protoc_insertion_point(class_scope:CompactBlock.Inner)
-    ))
-  ,
-  DESCRIPTOR = _COMPACTBLOCK,
+Block = _reflection.GeneratedProtocolMessageType('Block', (_message.Message,), dict(
+  DESCRIPTOR = _BLOCK,
   __module__ = 'messages_pb2'
-  # @@protoc_insertion_point(class_scope:CompactBlock)
+  # @@protoc_insertion_point(class_scope:Block)
   ))
-_sym_db.RegisterMessage(CompactBlock)
-_sym_db.RegisterMessage(CompactBlock.Inner)
+_sym_db.RegisterMessage(Block)
 
-ValidationResp = _reflection.GeneratedProtocolMessageType('ValidationResp', (_message.Message,), dict(
-  DESCRIPTOR = _VALIDATIONRESP,
+Chain = _reflection.GeneratedProtocolMessageType('Chain', (_message.Message,), dict(
+  DESCRIPTOR = _CHAIN,
   __module__ = 'messages_pb2'
-  # @@protoc_insertion_point(class_scope:ValidationResp)
+  # @@protoc_insertion_point(class_scope:Chain)
   ))
-_sym_db.RegisterMessage(ValidationResp)
+_sym_db.RegisterMessage(Chain)
 
 
 _DISCOVERREPLY_NODESENTRY.has_options = True

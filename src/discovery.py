@@ -156,6 +156,7 @@ def run(port, n, t, m, inst):
     logging.info("Discovery server running on {}".format(port))
     reactor.run()
 
+# python -m src.discovery -n $n -t $t -m $GUMBY_das4_instances_to_run --inst $delay $experiment $param"
 if __name__ == '__main__':
     set_logging(logging.DEBUG)
 

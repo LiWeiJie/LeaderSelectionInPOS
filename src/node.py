@@ -14,10 +14,7 @@ from typing import Dict, Tuple
 
 import src.messages.messages_pb2 as pb
 from src.protobufreceiver import ProtobufReceiver
-# from src.consensus.acs import ACS
-# from src.consensus.bracha import Bracha
-# from src.consensus.mo14 import Mo14
-# from src.trustchain.trustchain_runner import TrustChainRunner
+
 from chain.client import Client as ChainRunner
 from src.utils import Replay, Handled, set_logging, my_err_back, call_later, stop_reactor
 from src.discovery import Discovery, got_discovery
@@ -75,44 +72,41 @@ class MyProto(ProtobufReceiver):
         elif isinstance(obj, pb.Pong):
             self.handle_pong(obj)
 
-        elif isinstance(obj, pb.ACS):
-            if self.factory.config.failure != 'omission':
-                res = self.factory.acs.handle(obj, self.remote_vk)
-                self.process_acs_res(res, obj)
+        elif isinstance(obj, pb.)
 
-        elif isinstance(obj, pb.TxReq):
-            self.factory.tc_runner.handle_tx_req(obj, self.remote_vk)
+        # old
 
-        elif isinstance(obj, pb.TxResp):
-            self.factory.tc_runner.handle_tx_resp(obj, self.remote_vk)
-
-        elif isinstance(obj, pb.ValidationReq):
-            self.factory.tc_runner.handle_validation_req(obj, self.remote_vk)
-
-        elif isinstance(obj, pb.ValidationResp):
-            self.factory.tc_runner.handle_validation_resp(obj, self.remote_vk)
-
-        elif isinstance(obj, pb.SigWithRound):
-            self.factory.tc_runner.handle_sig(obj, self.remote_vk)
-
-        elif isinstance(obj, pb.CpBlock):
-            self.factory.tc_runner.handle_cp(obj, self.remote_vk)
-
-        elif isinstance(obj, pb.Cons):
-            self.factory.tc_runner.handle_cons(obj, self.remote_vk)
-
-        elif isinstance(obj, pb.AskCons):
-            self.factory.tc_runner.handle_ask_cons(obj, self.remote_vk)
+        # elif isinstance(obj, pb.ACS):
+        #     if self.factory.config.failure != 'omission':
+        #         res = self.factory.acs.handle(obj, self.remote_vk)
+        #         self.process_acs_res(res, obj)
+        #
+        # elif isinstance(obj, pb.TxReq):
+        #     self.factory.tc_runner.handle_tx_req(obj, self.remote_vk)
+        #
+        # elif isinstance(obj, pb.TxResp):
+        #     self.factory.tc_runner.handle_tx_resp(obj, self.remote_vk)
+        #
+        # elif isinstance(obj, pb.ValidationReq):
+        #     self.factory.tc_runner.handle_validation_req(obj, self.remote_vk)
+        #
+        # elif isinstance(obj, pb.ValidationResp):
+        #     self.factory.tc_runner.handle_validation_resp(obj, self.remote_vk)
+        #
+        # elif isinstance(obj, pb.SigWithRound):
+        #     self.factory.tc_runner.handle_sig(obj, self.remote_vk)
+        #
+        # elif isinstance(obj, pb.CpBlock):
+        #     self.factory.tc_runner.handle_cp(obj, self.remote_vk)
+        #
+        # elif isinstance(obj, pb.Cons):
+        #     self.factory.tc_runner.handle_cons(obj, self.remote_vk)
+        #
+        # elif isinstance(obj, pb.AskCons):
+        #     self.factory.tc_runner.handle_ask_cons(obj, self.remote_vk)
 
         # NOTE messages below are for testing, bracha/mo14 is normally handled by acs
 
-        elif isinstance(obj, pb.Bracha):
-            if self.factory.config.failure != 'omission':
-                self.factory.bracha.handle(obj, self.remote_vk)
-
-        elif isinstance(obj, pb.Mo14):
-            if self.factory.config.failure != 'omission':
-                self.factory.mo14.handle(obj, self.remote_vk)
 
         elif isinstance(obj, pb.Dummy):
             logging.info("NODE: got dummy message from {}".format(b64encode(self.remote_vk)))
@@ -191,10 +185,9 @@ class MyFactory(Factory):
         self.peers = {}  # type: Dict[str, Tuple[str, int, MyProto]]
         self.promoters = []
         self.config = config
-        self.bracha = Bracha(self)  # just for testing
-        self.mo14 = Mo14(self)  # just for testing
-        self.acs = ACS(self)
-        self.tc_runner = TrustChainRunner(self)
+
+        # self.tc_runner = TrustChainRunner(self)
+        self.chain_runner = ChainRunner(self)
         self.vk = self.tc_runner.tc.vk
         self.q = Queue.Queue()  # (str, msg)
         self.first_disconnect_logged = False
@@ -446,20 +439,20 @@ def run(config, bcast, discovery_addr):
     # we use call later to wait until the nodes are registered
     if config.test == 'dummy':
         call_later(5, f.bcast, pb.Dummy(m='z'))
-    elif config.test == 'bracha':
-        call_later(6, f.bracha.bcast_init)
-    elif config.test == 'mo14':
-        call_later(6, f.mo14.start, config.value)
-    elif config.test == 'acs':
-        # use port number (unique on local network) as test message
-        call_later(6, f.acs.start, str(config.port), 1)
-    elif config.test == 'tc':
-        call_later(5, f.tc_runner.make_tx, 1.0 / config.tx_rate, True)
-        # optionally use validate
-        if config.validate:
-            call_later(10, f.tc_runner.make_validation)
-    elif config.test == 'bootstrap':
-        call_later(5, f.tc_runner.bootstrap_promoters)
+    # elif config.test == 'bracha':
+    #     call_later(6, f.bracha.bcast_init)
+    # elif config.test == 'mo14':
+    #     call_later(6, f.mo14.start, config.value)
+    # elif config.test == 'acs':
+    #     # use port number (unique on local network) as test message
+    #     call_later(6, f.acs.start, str(config.port), 1)
+    # elif config.test == 'tc':
+    #     call_later(5, f.tc_runner.make_tx, 1.0 / config.tx_rate, True)
+    #     # optionally use validate
+    #     if config.validate:
+    #         call_later(10, f.tc_runner.make_validation)
+    # elif config.test == 'bootstrap':
+    #     call_later(5, f.tc_runner.bootstrap_promoters)
 
     logging.info("NODE: reactor starting on port {}".format(config.port))
     reactor.run()

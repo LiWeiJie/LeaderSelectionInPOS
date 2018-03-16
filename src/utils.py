@@ -3,8 +3,7 @@ from base64 import b64encode
 
 import logging
 import sys
-import libnacl
-
+from chain.utils.hash_utils import hash_std
 
 def byteify(inp):
     """
@@ -51,11 +50,12 @@ def set_logging(lvl, stream=sys.stdout):
     logging.basicConfig(stream=stream, level=lvl, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-def dictionary_hash(d):
+def dictionary_cbc_hash(d):
     digest = ''
     for key in sorted(d):
-        digest = libnacl.crypto_hash_sha256(digest + key + d[key])
+        digest = hash_std(digest + key + d[key])
     return digest
+
 
 
 def flatten(l):
