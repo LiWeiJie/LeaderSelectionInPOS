@@ -7,7 +7,9 @@
 # @Author: Weijie Li
 # @Created time: 2018-03-16 13:27:07
 # @Last Modified by: 
-# @Last Modified time: 
+# @Last Modified time:
+
+from utils import hash_utils
 
 class ProtobufWrapper(object):
     def __init__(self, x):
@@ -31,7 +33,10 @@ class ProtobufWrapper(object):
 
     # def __hash__(self):
     #     return hash(self.SerializeToString())
-    
+
+    def on_change(self):
+        self._str = None
+        self._hash = None
 
     def SerializeToString(self):
         if self._str is None:
@@ -46,5 +51,5 @@ class ProtobufWrapper(object):
         # type: () -> str
         # return hash(self.SerializeToString())
         if self._hash is None:
-            self._hash = libnacl.crypto_hash_sha256(self.SerializeToString())
+            self._hash = hash_utils.hash_std(self.SerializeToString())
         return self._hash

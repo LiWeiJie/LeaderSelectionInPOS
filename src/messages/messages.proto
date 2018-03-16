@@ -44,10 +44,11 @@ message TxInput {
     string script = 3;
 }
 
+enum ScriptType {
+    VK = 0;
+}
+
 message TxOutput {
-    enum ScriptType {
-        VK = 0;
-    }
     string value = 1;
     ScriptType script = 2;
     string address = 3;
