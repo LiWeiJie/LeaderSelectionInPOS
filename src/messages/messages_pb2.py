@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='messages.proto',
   package='',
   syntax='proto3',
-  serialized_pb=_b('\n\x0emessages.proto\"$\n\x08\x44iscover\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\"g\n\rDiscoverReply\x12(\n\x05nodes\x18\x01 \x03(\x0b\x32\x19.DiscoverReply.NodesEntry\x1a,\n\nNodesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"@\n\x0bInstruction\x12\x13\n\x0binstruction\x18\x01 \x01(\t\x12\r\n\x05\x64\x65lay\x18\x02 \x01(\x05\x12\r\n\x05param\x18\x03 \x01(\t\" \n\x04Ping\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\" \n\x04Pong\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\".\n\tSignature\x12\x0e\n\x06vk_str\x18\x01 \x01(\x0c\x12\x11\n\tsignature\x18\x02 \x01(\x0c\"(\n\x06Member\x12\x0e\n\x06vk_str\x18\x01 \x01(\t\x12\x0e\n\x06sk_str\x18\x02 \x01(\t\"L\n\x07TxInput\x12\x18\n\x10transaction_hash\x18\x01 \x01(\t\x12\x17\n\x0ftransaction_idx\x18\x02 \x01(\x05\x12\x0e\n\x06script\x18\x03 \x01(\t\"G\n\x08TxOutput\x12\r\n\x05value\x18\x01 \x01(\x05\x12\x1b\n\x06script\x18\x02 \x01(\x0e\x32\x0b.ScriptType\x12\x0f\n\x07\x61\x64\x64ress\x18\x03 \x01(\t\"C\n\x0bTransaction\x12\x18\n\x06inputs\x18\x01 \x03(\x0b\x32\x08.TxInput\x12\x1a\n\x07outputs\x18\x02 \x03(\x0b\x32\t.TxOutput\"\xb6\x01\n\x05\x42lock\x12\x11\n\tprev_hash\x18\x01 \x01(\t\x12\t\n\x01q\x18\x02 \x01(\t\x12\x13\n\x0bmerkle_root\x18\x03 \x01(\t\x12\x10\n\x08\x64irector\x18\x04 \x01(\t\x12\x19\n\x03txs\x18\x05 \x03(\x0b\x32\x0c.Transaction\x12%\n\x11senates_signature\x18\x06 \x03(\x0b\x32\n.Signature\x12&\n\x12\x64irector_signature\x18\x07 \x01(\x0b\x32\n.Signature\"P\n\x05\x43hain\x12\x15\n\rsenate_number\x18\x01 \x01(\x05\x12\x18\n\x10\x66\x61ilure_boundary\x18\x02 \x01(\x05\x12\x16\n\x06\x62locks\x18\x03 \x03(\x0b\x32\x06.Block* \n\nScriptType\x12\x12\n\x0eSCRIPT_TYPE_VK\x10\x00\x62\x06proto3')
+  serialized_pb=_b('\n\x0emessages.proto\"$\n\x08\x44iscover\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\"g\n\rDiscoverReply\x12(\n\x05nodes\x18\x01 \x03(\x0b\x32\x19.DiscoverReply.NodesEntry\x1a,\n\nNodesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"@\n\x0bInstruction\x12\x13\n\x0binstruction\x18\x01 \x01(\t\x12\r\n\x05\x64\x65lay\x18\x02 \x01(\x05\x12\r\n\x05param\x18\x03 \x01(\t\" \n\x04Ping\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\" \n\x04Pong\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\".\n\tSignature\x12\x0e\n\x06signer\x18\x01 \x01(\x0c\x12\x11\n\tsignature\x18\x02 \x01(\x0c\"(\n\x06Member\x12\x0e\n\x06vk_str\x18\x01 \x01(\x0c\x12\x0e\n\x06sk_str\x18\x02 \x01(\x0c\"L\n\x07TxInput\x12\x18\n\x10transaction_hash\x18\x01 \x01(\t\x12\x17\n\x0ftransaction_idx\x18\x02 \x01(\x05\x12\x0e\n\x06script\x18\x03 \x01(\t\"G\n\x08TxOutput\x12\r\n\x05value\x18\x01 \x01(\x05\x12\x1b\n\x06script\x18\x02 \x01(\x0e\x32\x0b.ScriptType\x12\x0f\n\x07\x61\x64\x64ress\x18\x03 \x01(\t\"C\n\x0bTransaction\x12\x18\n\x06inputs\x18\x01 \x03(\x0b\x32\x08.TxInput\x12\x1a\n\x07outputs\x18\x02 \x03(\x0b\x32\t.TxOutput\"\xa4\x01\n\x05\x42lock\x12\x11\n\tprev_hash\x18\x01 \x01(\t\x12\t\n\x01q\x18\x02 \x01(\t\x12\x13\n\x0bmerkle_root\x18\x03 \x01(\t\x12\x19\n\x03txs\x18\x04 \x03(\x0b\x32\x0c.Transaction\x12%\n\x11senates_signature\x18\x05 \x03(\x0b\x32\n.Signature\x12&\n\x12\x64irector_signature\x18\x06 \x01(\x0b\x32\n.Signature\"P\n\x05\x43hain\x12\x15\n\rsenate_number\x18\x01 \x01(\x05\x12\x18\n\x10\x66\x61ilure_boundary\x18\x02 \x01(\x05\x12\x16\n\x06\x62locks\x18\x03 \x03(\x0b\x32\x06.Block* \n\nScriptType\x12\x12\n\x0eSCRIPT_TYPE_VK\x10\x00\x62\x06proto3')
 )
 
 _SCRIPTTYPE = _descriptor.EnumDescriptor(
@@ -36,8 +36,8 @@ _SCRIPTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=872,
-  serialized_end=904,
+  serialized_start=854,
+  serialized_end=886,
 )
 _sym_db.RegisterEnumDescriptor(_SCRIPTTYPE)
 
@@ -281,7 +281,7 @@ _SIGNATURE = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='vk_str', full_name='Signature.vk_str', index=0,
+      name='signer', full_name='Signature.signer', index=0,
       number=1, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
@@ -320,15 +320,15 @@ _MEMBER = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='vk_str', full_name='Member.vk_str', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
+      number=1, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='sk_str', full_name='Member.sk_str', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
+      number=2, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
@@ -506,29 +506,22 @@ _BLOCK = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='director', full_name='Block.director', index=3,
-      number=4, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
+      name='txs', full_name='Block.txs', index=3,
+      number=4, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='txs', full_name='Block.txs', index=4,
+      name='senates_signature', full_name='Block.senates_signature', index=4,
       number=5, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='senates_signature', full_name='Block.senates_signature', index=5,
-      number=6, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='director_signature', full_name='Block.director_signature', index=6,
-      number=7, type=11, cpp_type=10, label=1,
+      name='director_signature', full_name='Block.director_signature', index=5,
+      number=6, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -546,7 +539,7 @@ _BLOCK = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=606,
-  serialized_end=788,
+  serialized_end=770,
 )
 
 
@@ -590,8 +583,8 @@ _CHAIN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=790,
-  serialized_end=870,
+  serialized_start=772,
+  serialized_end=852,
 )
 
 _DISCOVERREPLY_NODESENTRY.containing_type = _DISCOVERREPLY

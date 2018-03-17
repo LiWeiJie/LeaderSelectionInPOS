@@ -29,13 +29,13 @@ message Pong {
 
 
 message Signature {
-    bytes vk_str = 1;
+    bytes signer = 1;
     bytes signature = 2;
 }
 
 message Member {
-    string vk_str = 1;
-    string sk_str = 2;
+    bytes vk_str = 1;
+    bytes sk_str = 2;
 }
 
 message TxInput {
@@ -62,15 +62,14 @@ message Transaction {
 message Block {
     string prev_hash = 1;
     string q = 2;
-    string merkle_root = 3;
-    string director = 4;
-    repeated Transaction txs = 5;
+    string merkle_root = 3; // optional for the efficient
+    repeated Transaction txs = 4;
 
     // senates  sign from above
-    repeated Signature senates_signature = 6;
+    repeated Signature senates_signature = 5;
 
     // director sign from above
-    Signature director_signature = 7;
+    Signature director_signature = 6;
 }
 
 message Chain {

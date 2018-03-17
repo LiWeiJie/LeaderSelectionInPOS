@@ -81,7 +81,7 @@ def gen_genic_block(path='genic_block.json', member=chain_config.get_member_by_i
     tx = transaction_model.Transaction()
     op = transaction_model.Transaction.Output.new(1000000, pb.SCRIPT_TYPE_VK, member.verify_key_str)
     tx.add_outputs([op])
-    b = block_model.Block(prev_hash="genic_block")
+    b = block_model.Block.new(prev_hash="genic_block")
     b.add_transactions([tx])
     b.director_sign(member=member, prev_q="genic_block")
     block_model.dump_blocks([b], path)

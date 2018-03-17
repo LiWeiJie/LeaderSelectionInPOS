@@ -133,7 +133,7 @@ class Ledger(object):
         senates = self.senates
         senates_boundary = self._senates_boundary
     
-        senate_sign_source = block.get_senate_sign_source()
+        senate_sign_source = block.get_senate_sign_data_source()
         senates_signed_data = block.senates
         signed_ct = 0
         for (verify_key_str, signature) in senates_signed_data:
@@ -239,7 +239,7 @@ class Ledger(object):
 
     def get_director_competition_signature_source(self, transaction_hash, transaction_idx):
         """return source, txo_idx, Transaction.Output"""
-        prev_block_star = self.last_block.get_block_star_info_source()
+        prev_block_star = self.last_block.get_director_competition_data_source()
         utxo_header = (transaction_hash, transaction_idx)
         if utxo_header in self.utxos:
             txo_idx = TxoIndex(transaction_hash, transaction_idx)

@@ -64,7 +64,7 @@ class PayloadBase(object):
         def obj2dict(cls, obj):
             return {
                 "sender": json.dumps(obj.sender, default=member_model.MemberModel.obj2dict),
-                "signature": obj.signature
+                "signature": obj.director_signature
             }
     
         @classmethod
@@ -137,12 +137,12 @@ class PayloadBase(object):
             destination = member_model.BroadcastMember()
         timestamp = dic["timestamp"]
         msg = dic["msg"]
-        return cls( payload_name=payload_name,
-                            sender=authentication.sender,
-                            destination=destination,
-                            signature=authentication.signature,
-                            timestamp=timestamp,
-                            msg=msg)
+        return cls(payload_name=payload_name,
+                   sender=authentication.sender,
+                   destination=destination,
+                   signature=authentication.director_signature,
+                   timestamp=timestamp,
+                   msg=msg)
 
 
 

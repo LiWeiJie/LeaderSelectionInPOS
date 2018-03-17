@@ -130,7 +130,7 @@ class TestTransaction(unittest.TestCase):
     
         
 def get_block():
-    b = block_model.Block("prev_hash", "q")
+    b = block_model.Block.new("prev_hash", "q")
     b.add_transactions([get_tx(), get_tx()])
     member = member_model.MemberModel.new(genkey=True)
     b.director_sign(member, "prev_q")
@@ -140,7 +140,7 @@ from ..model import block_model
 class TestBlock(unittest.TestCase):
     
     def test_init(self):
-        b = block_model.Block("prev_hash","q")
+        b = block_model.Block.new("prev_hash","q")
 
     def test_get_merkle_root(self):
         b = get_block()

@@ -229,7 +229,7 @@ class Client(object):
     def create_block(self, transactions=None):
         """create by accepted transactions"""
         last_block = self.last_block
-        block = block_model.Block(last_block.hash)
+        block = block_model.Block.new(last_block.hash)
         if not transactions:
             transactions = self.pending_transactions.values()
         block.add_transactions(transactions)
@@ -251,7 +251,7 @@ class Client(object):
         if self.is_senate:
             ledger = self.ledger
             if ledger.verify_transactions(block)!=None:
-                data = block.get_senate_sign_source()
+                data = block.get_senate_sign_data_source()
                 member = self.member
                 return (member.verify_key_str, member.sign(data))
             else :
@@ -414,7 +414,7 @@ def gen_genic_block(path, owner_path):
     tx = transaction_model.Transaction()
     op = transaction_model.Transaction.Output.new(1000, pb.SCRIPT_TYPE_VK, member.verify_key_str)
     tx.add_outputs([op])
-    b = block_model.Block(None, hash_utils.hash_std("genic block"))
+    b = block_model.Block.new(None, hash_utils.hash_std("genic block"))
     b.add_transactions([tx])
     b.director_sign(member)
     block_model.dump_blocks([b], path)
