@@ -75,7 +75,8 @@ class TestClient(unittest.TestCase):
         cli_ret = []
         for cli in clients:
             if cli.is_senate_leader:
-                cli_ret.append(leader_client.create_block([c_tx]) )
+                cli_ret.append(cli.create_block([c_tx]) )
+        # print cli_ret
         self.assertEqual(cli_ret.__len__(), 1)
         b1 = cli_ret[0]
         # method 2

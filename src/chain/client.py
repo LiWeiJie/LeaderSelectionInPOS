@@ -117,7 +117,7 @@ class Client(object):
         self._status = Client.STATUS.Sleeping
         self._cooking_food = {}
 
-        self._ledger = ledger_model.Ledger()
+        self._ledger = ledger_model.Chain.new()
         
         # the pending transactions 
         self._pending_transactions = {}

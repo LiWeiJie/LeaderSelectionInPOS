@@ -82,7 +82,10 @@ message Block {
 }
 
 message Chain {
-    int32 senate_number = 1;
-    int32 failure_boundary = 2;
-    repeated Block blocks = 3;
+    repeated Block blocks = 1;
+    int32 senates_number = 2;
+    int32 failure_boundary = 3;
+    // maybe in client
+    // int32 director_competition_timeout_in_secs = 4;
+    // int32 senate_communication_timeout_in_secs = 5;
 }

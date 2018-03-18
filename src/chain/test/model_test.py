@@ -197,7 +197,7 @@ def get_genic_blocks():
     return bs
 
 def get_ledger():
-    ledger = ledger_model.Ledger()
+    ledger = ledger_model.Chain.new()
     bs = get_genic_blocks()
     ledger.set_ledger(bs, None)
     return ledger
@@ -206,7 +206,7 @@ class TestLedger(unittest.TestCase):
 
     def test_get_ledger(self):
         l = get_ledger()        
-        self.assertIsInstance(l, ledger_model.Ledger)
+        self.assertIsInstance(l, ledger_model.Chain)
         b = l.last_block
         self.assertEquals(b.transactions.__len__(), 1)
         tx = b.transactions[-1]
