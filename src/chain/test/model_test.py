@@ -69,11 +69,11 @@ class TestMember(unittest.TestCase):
 from ..model import transaction_model
 
 def get_input():
-    ip = transaction_model.Transaction.Input.new("transaction_hash", pb.SCRIPT_TYPE_VK, "script")
+    ip = transaction_model.Transaction.Input.new(transaction_hash="transaction_hash", transaction_idx=0, script=pb.Script())
     return ip
 
 def get_output():
-    op = transaction_model.Transaction.Output.new(1, pb.SCRIPT_TYPE_VK, "address")
+    op = transaction_model.Transaction.Output.new(1, pb.Script())
     return op
 
 def get_tx():

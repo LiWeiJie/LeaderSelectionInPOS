@@ -268,14 +268,14 @@ class Transaction(ProtobufWrapper):
             return {
                 "transaction_hash": json_bytes_dumps(obj.transaction_hash),
                 "transaction_idx": obj.transaction_idx,
-                "script": obj.script.SerializeToString()
+                "script": json_bytes_dumps(obj.script.SerializeToString())
             }
 
         @classmethod
         def dict2obj(cls, dic):
             ip = Transaction.Input.new(transaction_hash=json_bytes_loads(dic['transaction_hash']),
                                        transaction_idx=dic['transaction_idx'],
-                                       script=pb.Script.FromString(dic['script']))
+                                       script=pb.Script.FromString(json_bytes_loads(dic['script'])))
             return ip
 
     class Output(ProtobufWrapper):

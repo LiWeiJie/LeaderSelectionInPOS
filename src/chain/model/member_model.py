@@ -12,6 +12,10 @@
 import json
 from base64 import urlsafe_b64encode as b64e
 from base64 import urlsafe_b64decode as b64d
+
+from src.utils.encode_utils import json_bytes_loads
+from src.utils.encode_utils import json_bytes_dumps
+
 # from base64 import b64encode as b64e
 # from base64 import b64decode as b64d
 import src.messages.messages_pb2 as pb
@@ -72,7 +76,7 @@ def str_to_verifykey(vk_str):
 
 def verify(signer, signature, data):
     vk = str_to_verifykey(signer)
-    return vk.verify(b64d(signature), data)
+    return vk.verify(signature, data)
 
 
 class MemberModel(ProtobufWrapper):
@@ -98,7 +102,7 @@ class MemberModel(ProtobufWrapper):
         """member id"""
         if not self._mid:
             if self.verify_key_str:
-                self._mid = b64e(self.verify_key_str)
+                self._mid = json_bytes_dumps(self.verify_key_str)
         return self._mid
 
     @property
@@ -227,7 +231,7 @@ class MemberModel(ProtobufWrapper):
 
         if self.signing_key:
             # return binascii.hexlify(self._signing_key.sign(data[offset:offset + length])).encode('utf-8')
-            return b64e(self.signing_key.sign(data[offset:offset + length]))
+            return self.signing_key.sign(data[offset:offset + length])
         else:
             raise RuntimeError("unable to sign data without the signing key")
 
@@ -258,7 +262,7 @@ class MemberModel(ProtobufWrapper):
 
         if self.verify_key:
             try:
-                return self.verify_key.verify(b64d(signature), data[offset:offset + length])
+                return self.verify_key.verify(signature, data[offset:offset + length])
             except BadSignatureError:
                 logging.warn("BAD SIGNATURE")
         
@@ -280,7 +284,7 @@ class MemberModel(ProtobufWrapper):
         verify_key_str = member.verify_key_str
         return {
             # "_signing_key": None,   # do not give signing key to others
-            "verify_key": b64e(verify_key_str),
+            "verify_key": json_bytes_dumps(verify_key_str),
             # "_mid": member.mid
         }
 
@@ -294,7 +298,7 @@ class MemberModel(ProtobufWrapper):
         assert isinstance(member, cls), type(member)
         signing_key_str = member.signing_key_str
         m_dict = cls.obj2dict_without_signingkey(member)
-        m_dict['signing_key'] = b64e(signing_key_str)
+        m_dict['signing_key'] = json_bytes_dumps(signing_key_str)
         return m_dict
 
     @classmethod
@@ -303,8 +307,8 @@ class MemberModel(ProtobufWrapper):
         assert "verify_key" in key_dict
         signing_key = None
         if "signing_key" in key_dict:
-            signing_key = b64d(key_dict["signing_key"].encode('utf-8'))
-        verify_key = b64d(key_dict["verify_key"].encode('utf-8'))
+            signing_key = json_bytes_loads(key_dict["signing_key"])
+        verify_key = json_bytes_loads(key_dict["verify_key"])
         return cls.new(key_pair=(verify_key, signing_key))
 
     def dump(self, opened_file, except_signing_key=True):

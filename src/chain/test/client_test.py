@@ -22,6 +22,10 @@ from .unittest_config import unittest_chain_config
 from src.utils import random_utils
 
 import src.messages.messages_pb2 as pb
+from src.utils.script_utils import script_to_verify_key
+from src.utils.script_utils import script_to_member
+from src.utils.script_utils import script_to_sig
+
 
 class TestClient(unittest.TestCase):
     
@@ -60,10 +64,10 @@ class TestClient(unittest.TestCase):
         spend_token = spend_satoshi[0]
         spend_txo = spend_satoshi[1]
         ips = leader_client.create_inputs( [spend_token])
-        ops = leader_client.create_outputs( [(100, pb.SCRIPT_TYPE_VK, client.member.verify_key_str ) for client in clients] )
+        ops = leader_client.create_outputs( [(100, script_to_member(client.member) ) for client in clients] )
         c_tx = leader_client.create_transaction(ips, ops)
         sign_source = c_tx.get_transaction_sign_source()
-        c_tx.add_input_script(0 , leader_client.member.sign(sign_source), leader_client.member.verify_key_str)
+        c_tx.add_input_script(0, script_to_sig(leader_client.member, sign_source))
         self.assertTrue(c_tx.verify_sig_in_inputs([spend_txo]))
 
         # two method create block

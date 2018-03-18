@@ -21,6 +21,7 @@ from src.chain.model import ledger_model
 
 from src.utils import hash_utils
 from src.utils import random_utils
+from src.utils.script_utils import script_to_member
 
 import src.messages.messages_pb2 as pb
 
@@ -117,11 +118,6 @@ def rreload(module):
             rreload(attribute)
 
 import math
-
-
-def script_to_member(member):
-    return pb.Script(body=[pb.ScriptUnit(type=pb.SCRIPT_DATA, data=member.verify_key_str),
-                           pb.ScriptUnit(type=pb.SCRIPT_CHECK_SIG)])
 
 def collect_transaction(clients, verbose=False):
     collects = []
