@@ -17,7 +17,7 @@ from src.chain.config import chain_config
 from src.chain.model import member_model
 from src.chain.model import block_model
 from src.chain.model import transaction_model
-from src.chain.model import ledger_model
+from src.chain.model import chain_model
 
 from src.utils import hash_utils
 from src.utils import random_utils

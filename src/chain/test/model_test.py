@@ -187,7 +187,7 @@ class TestBlock(unittest.TestCase):
             # dic_obj[i].cal_hash()
             self.assertEqual(dic_obj[i].hash, ls[i].hash)
 
-from ..model import ledger_model
+from ..model import chain_model
 
 def get_genic_blocks():
     blocks_path = unittest_chain_config.genic_chain_path
@@ -197,7 +197,7 @@ def get_genic_blocks():
     return bs
 
 def get_ledger():
-    ledger = ledger_model.Chain.new()
+    ledger = chain_model.Chain.new()
     bs = get_genic_blocks()
     ledger.set_ledger(bs, None)
     return ledger
@@ -206,7 +206,7 @@ class TestLedger(unittest.TestCase):
 
     def test_get_ledger(self):
         l = get_ledger()        
-        self.assertIsInstance(l, ledger_model.Chain)
+        self.assertIsInstance(l, chain_model.Chain)
         b = l.last_block
         self.assertEquals(b.transactions.__len__(), 1)
         tx = b.transactions[-1]

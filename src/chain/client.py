@@ -30,7 +30,7 @@ from payload import payload_base
 from .model import member_model
 from .model import block_model
 from .model import transaction_model
-from .model import ledger_model
+from .model import chain_model
 
 from src.utils import message
 from src.utils import hash_utils
@@ -117,7 +117,7 @@ class Client(object):
         self._status = Client.STATUS.Sleeping
         self._cooking_food = {}
 
-        self._ledger = ledger_model.Chain.new()
+        self._ledger = chain_model.Chain.new()
         
         # the pending transactions 
         self._pending_transactions = {}

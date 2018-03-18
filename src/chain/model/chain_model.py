@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-# ledger_model.py ---
+# chain_model.py ---
 #
-# @Filename: ledger_model.py
+# @Filename: chain_model.py
 # @Description: 
 # @Author: Weijie Li
 # @Created time: 2018-02-27 14:42:00
