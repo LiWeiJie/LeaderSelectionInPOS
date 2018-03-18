@@ -14,6 +14,8 @@ from src.utils import hash_utils
 import src.messages.messages_pb2 as pb
 from src.protobufwrapper import ProtobufWrapper
 import logging
+from src.chain.model.member_model import verify
+
 
 # TransactionOutputScriptOP = [
 #     "verifyKeyStr",  # 0
@@ -38,9 +40,10 @@ class Transaction(ProtobufWrapper):
     def add_inputs(self, inputs):
         # order_list = []
         # order = self._inputs.__len__()
-        for input in inputs:
-            assert isinstance(input, Transaction.Input), type(input)
-            self.pb.inputs.extend([input.pb])
+        # MARK: Consider a more efficient method
+        for ip in inputs:
+            assert isinstance(ip, Transaction.Input), type(ip)
+            self.pb.inputs.extend([ip.pb])
             last_pb = self.pb.inputs[-1]
             self._inputs.append(Transaction.Input(last_pb))
             # order_list.append(order)
@@ -48,16 +51,15 @@ class Transaction(ProtobufWrapper):
         self.on_change()
         # return order_list
 
-    def add_input_script(self, input_idx, signature, signatory):
+    def add_input_script(self, input_idx, script):
         """
-        script =  signature + " " + signatory
         """
-        script = signature + " " + signatory
         target = self.inputs[input_idx]
         target.set_script(script)
         self.on_change()
 
     def add_outputs(self, outputs):
+        # MARK: Consider a more efficient method
         for output in outputs:
             assert isinstance(output, Transaction.Output), type(output)
             self.pb.outputs.extend([output.pb])
@@ -68,12 +70,12 @@ class Transaction(ProtobufWrapper):
     def get_transaction_sign_source(self):
         data_str = ""
         for ip in self.inputs:
-            ip.pb.script = ""
-            data_str += ip.pb.SerializeToString()
-            ip.pb.script = ip.script
+            cp = pb.TxInput.CopyFrom(ip.pb)
+            cp.script.clear()
+            data_str += cp.SerializeToString()
 
         for op in self.outputs:
-            data_str += op.hash
+            data_str += op.pb.SerializeToString()
 
         return data_str
 
@@ -93,34 +95,23 @@ class Transaction(ProtobufWrapper):
             ip = inputs[i]
             op = prev_outputs[i]
 
-            # FUTURE: find a better way
-            ip_script = ip.script.split()
-            # verify_pem_start_pos = ip_script.find('-----BEGIN')
-            # ip_sig = ip_script[:verify_pem_start_pos-1]
-            # ip_verify_key = ip_script[verify_pem_start_pos:]
-            ip_sig = ip_script[0]
-            ip_verify_key = ip_script[1]
-
-            input_satoshi += op.value
-            op_script = op.script
-            op_addresses = op.address
             result = True
-            # verifyKey
-            if op_script == pb.SCRIPT_TYPE_VK:
-                if op_addresses != ip_verify_key:
-                    logging.info("TX: verify_key fail")
-                    result = False
-                from . import member_model
-                member = member_model.MemberModel.get_verify_member(ip_verify_key)
-                if not member.verify(data, ip_sig):
-                    logging.info("TX: member fail")
-                    result = False
-            else:
-                # FUTURE:
-                pass
-
-            if not result:
-                return result
+            stack = input.script.body
+            for item in op.script.body:
+                if item.type == pb.SCRIPT_DATA:
+                    stack.append(item)
+                elif item.type == pb.SCRIPT_CHECK_SIG:
+                    verify_key = stack.pop()
+                    signature = stack.pop()
+                    if not verify(signer=verify_key,
+                                  signature=signature):
+                        logging.info("TX: signature invalid")
+                        result = False
+                if not result:
+                    return result
+            if stack.__len__() != 0:
+                logging.info("TX: script invalid")
+                return False
 
         for op in self.outputs:
             input_satoshi -= op.value
@@ -189,8 +180,8 @@ class Transaction(ProtobufWrapper):
     #         head_data += input.hash
     #     for output in self.outputs:
     #         head_data += output.hash
-
-        # self._hash = hash_utils.hash_std(head_data)
+    #
+    #     self._hash = hash_utils.hash_std(head_data)
 
     def get_input(self, idx):
         if idx <= self.n_inputs:
@@ -206,10 +197,11 @@ class Transaction(ProtobufWrapper):
 
     @classmethod
     def obj2dict(cls, obj):
+        logging.info("tx: obj2dict {}".format(obj.inputs))
+        logging.info("tx: obj2dict {}".format(obj.outputs))
         return {
             "inputs": json.dumps(obj.inputs, default=Transaction.Input.obj2dict),
             "outputs": json.dumps(obj.outputs, default=Transaction.Output.obj2dict),
-
         }
 
     @classmethod
@@ -225,12 +217,14 @@ class Transaction(ProtobufWrapper):
         def __init__(self, pbo):
             assert (isinstance(pbo, pb.TxInput)), type(pbo)
             super(self.__class__, self).__init__(pbo)
-            self._transaction_hash = pbo.transaction_hash
-            self._transaction_idx = pbo.transaction_idx
-            self._script = pbo.script
+            # self._transaction_hash = pbo.transaction_hash
+            # self._transaction_idx = pbo.transaction_idx
+            # self._script = pbo.script
 
         @classmethod
-        def new(cls, transaction_hash, transaction_idx, script=""):
+        def new(cls, transaction_hash, transaction_idx, script=None):
+            if not script:
+                script = pb.Script()
             pbti = pb.TxInput(transaction_hash=transaction_hash,
                               transaction_idx=transaction_idx,
                               script=script)
@@ -243,25 +237,24 @@ class Transaction(ProtobufWrapper):
         def transaction_hash(self):
             """Returns the hash of the transaction containing the output
             redeemed by this input"""
-            return self._transaction_hash
+            return self.pb.transaction_hash
 
         @property
         def transaction_idx(self):
             """Returns the index of the output inside the transaction that is
             redeemed by this input"""
-            return self._transaction_idx
+            return self.transaction_idx
 
         @property
         def script(self):
             """Returns a Script object representing the redeem script"""
-            return self._script
+            return self.pb.script
 
         def on_change(self):
             super(self.__class__, self).on_change()
 
         def set_script(self, script):
-            self._script = script
-            self.pb.script = script
+            self.pb.script.CopyFrom(script)
             self.on_change()
 
         @classmethod
@@ -269,14 +262,14 @@ class Transaction(ProtobufWrapper):
             return {
                 "transaction_hash": obj.transaction_hash,
                 "transaction_idx": obj.transaction_idx,
-                "script": obj.script
+                "script": obj.script.SerializeToString()
             }
 
         @classmethod
         def dict2obj(cls, dic):
             ip = Transaction.Input.new(transaction_hash=dic['transaction_hash'],
                                        transaction_idx=dic['transaction_idx'],
-                                       script=dic['script'])
+                                       script=pb.Script.FromString(dic['script']))
             return ip
 
     class Output(ProtobufWrapper):
@@ -288,17 +281,17 @@ class Transaction(ProtobufWrapper):
             @script in TransactionOutputScriptOP
             @address verify_key_str
             """
-            assert(isinstance(pbo, pb.TxOutput)), type(pbo)
+            assert (isinstance(pbo, pb.TxOutput)), type(pbo)
             super(self.__class__, self).__init__(pbo)
-            self._value = pbo.value
-            self._script = pbo.script
-            self._address = pbo.address
+            # self._value = pbo.value
+            # self._script = pbo.script
+            # self._address = pbo.address
 
         @classmethod
-        def new(cls, value, script, address):
+        def new(cls, value, script):
             return cls(pb.TxOutput(value=value,
-                                   script=script,
-                                   address=address))
+                                   script=script
+                                   ))
 
         # def __repr__(self):
         #     return "Output(satoshis=%d)" % self.value
@@ -309,18 +302,11 @@ class Transaction(ProtobufWrapper):
         @property
         def value(self):
             """Returns the value of the output exprimed in satoshis"""
-            return self._value
+            return self.pb.value
 
         @property
         def script(self):
-            return self._script
-
-        @property
-        def address(self):
-            """Returns a list containing all the address mentionned
-            in the output's script
-            """
-            return self._address
+            return self.pb.script
 
         # @property
         # def hash(self):
@@ -336,18 +322,19 @@ class Transaction(ProtobufWrapper):
 
         @classmethod
         def obj2dict(cls, obj):
+            from base64 import urlsafe_b64encode as b64e
+
             return {
                 "value": obj.value,
-                "script": obj.script,
-                "address": obj.address
+                "script": b64e(obj.script.SerializeToString()),
             }
 
         @classmethod
         def dict2obj(cls, dic):
+            from base64 import urlsafe_b64decode as b64d
             op = Transaction.Output.new(
                 value=dic['value'],
-                script=dic['script'],
-                address=dic['address'])
+                script=pb.Script.FromString(b64d(dic['script'].encode('utf-8'))))
             return op
 
 

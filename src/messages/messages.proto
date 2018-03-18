@@ -41,17 +41,26 @@ message Member {
 message TxInput {
     string transaction_hash = 1;
     int32 transaction_idx = 2;
-    string script = 3;
+    Script script = 3;
 }
 
-enum ScriptType {
-    SCRIPT_TYPE_VK = 0;
+enum ScriptUnitType {
+    SCRIPT_DATA  = 0;
+    SCRIPT_CHECK_SIG  = 1;
+}
+
+message ScriptUnit {
+    ScriptUnitType type = 1;
+    bytes data = 2;
+}
+
+message Script {
+    repeated ScriptUnit body = 1;
 }
 
 message TxOutput {
     int32 value = 1;
-    ScriptType script = 2;
-    string address = 3;
+    Script script = 2;
 }
 
 message Transaction {

@@ -160,7 +160,7 @@ class Client(object):
         m_satoshi_total = 0
         for  (key, transaction_output) in utxos.items():
             
-            if transaction_output.address == member.verify_key_str:
+            if transaction_output.script.body[0] == member.verify_key_str:
                 m_satoshi[ key ] = transaction_output
                 m_satoshi_total += transaction_output.value
         self._m_satoshi = m_satoshi
@@ -180,8 +180,8 @@ class Client(object):
         @transaction_info list of tuples (value, script, address)
         """
         ops = []
-        for (value, script, address) in transaction_info:
-            ops.append( transaction_model.Transaction.Output.new(value, script, address))
+        for (value, script) in transaction_info:
+            ops.append(transaction_model.Transaction.Output.new(value=value, script=script))
         return ops
 
     def create_transaction(self, inputs, outputs):
@@ -189,8 +189,9 @@ class Client(object):
         tx.add_inputs(inputs)
         tx.add_outputs(outputs)
         source = tx.get_transaction_sign_source()
+        # MARK: deprecated in future
         for i in range(inputs.__len__()):
-            tx.add_input_script(i, self.member.sign(source), self.member.verify_key_str)
+            tx.add_input_script(i, pb.Script(body=[pb.ScriptUnit(type=pb.SCRIPT_DATA, data=self.member.sign(source))]))
         return tx
 
     def update_pending_transactions(self, block):

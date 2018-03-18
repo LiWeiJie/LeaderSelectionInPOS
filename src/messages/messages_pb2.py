@@ -20,29 +20,34 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='messages.proto',
   package='',
   syntax='proto3',
-  serialized_pb=_b('\n\x0emessages.proto\"$\n\x08\x44iscover\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\"g\n\rDiscoverReply\x12(\n\x05nodes\x18\x01 \x03(\x0b\x32\x19.DiscoverReply.NodesEntry\x1a,\n\nNodesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"@\n\x0bInstruction\x12\x13\n\x0binstruction\x18\x01 \x01(\t\x12\r\n\x05\x64\x65lay\x18\x02 \x01(\x05\x12\r\n\x05param\x18\x03 \x01(\t\" \n\x04Ping\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\" \n\x04Pong\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\".\n\tSignature\x12\x0e\n\x06signer\x18\x01 \x01(\x0c\x12\x11\n\tsignature\x18\x02 \x01(\x0c\"(\n\x06Member\x12\x0e\n\x06vk_str\x18\x01 \x01(\x0c\x12\x0e\n\x06sk_str\x18\x02 \x01(\x0c\"L\n\x07TxInput\x12\x18\n\x10transaction_hash\x18\x01 \x01(\t\x12\x17\n\x0ftransaction_idx\x18\x02 \x01(\x05\x12\x0e\n\x06script\x18\x03 \x01(\t\"G\n\x08TxOutput\x12\r\n\x05value\x18\x01 \x01(\x05\x12\x1b\n\x06script\x18\x02 \x01(\x0e\x32\x0b.ScriptType\x12\x0f\n\x07\x61\x64\x64ress\x18\x03 \x01(\t\"C\n\x0bTransaction\x12\x18\n\x06inputs\x18\x01 \x03(\x0b\x32\x08.TxInput\x12\x1a\n\x07outputs\x18\x02 \x03(\x0b\x32\t.TxOutput\"\xa4\x01\n\x05\x42lock\x12\x11\n\tprev_hash\x18\x01 \x01(\t\x12\t\n\x01q\x18\x02 \x01(\t\x12\x13\n\x0bmerkle_root\x18\x03 \x01(\t\x12\x19\n\x03txs\x18\x04 \x03(\x0b\x32\x0c.Transaction\x12%\n\x11senates_signature\x18\x05 \x03(\x0b\x32\n.Signature\x12&\n\x12\x64irector_signature\x18\x06 \x01(\x0b\x32\n.Signature\"P\n\x05\x43hain\x12\x15\n\rsenate_number\x18\x01 \x01(\x05\x12\x18\n\x10\x66\x61ilure_boundary\x18\x02 \x01(\x05\x12\x16\n\x06\x62locks\x18\x03 \x03(\x0b\x32\x06.Block* \n\nScriptType\x12\x12\n\x0eSCRIPT_TYPE_VK\x10\x00\x62\x06proto3')
+  serialized_pb=_b('\n\x0emessages.proto\"$\n\x08\x44iscover\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\"g\n\rDiscoverReply\x12(\n\x05nodes\x18\x01 \x03(\x0b\x32\x19.DiscoverReply.NodesEntry\x1a,\n\nNodesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"@\n\x0bInstruction\x12\x13\n\x0binstruction\x18\x01 \x01(\t\x12\r\n\x05\x64\x65lay\x18\x02 \x01(\x05\x12\r\n\x05param\x18\x03 \x01(\t\" \n\x04Ping\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\" \n\x04Pong\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\".\n\tSignature\x12\x0e\n\x06signer\x18\x01 \x01(\x0c\x12\x11\n\tsignature\x18\x02 \x01(\x0c\"(\n\x06Member\x12\x0e\n\x06vk_str\x18\x01 \x01(\x0c\x12\x0e\n\x06sk_str\x18\x02 \x01(\x0c\"U\n\x07TxInput\x12\x18\n\x10transaction_hash\x18\x01 \x01(\t\x12\x17\n\x0ftransaction_idx\x18\x02 \x01(\x05\x12\x17\n\x06script\x18\x03 \x01(\x0b\x32\x07.Script\"9\n\nScriptUnit\x12\x1d\n\x04type\x18\x01 \x01(\x0e\x32\x0f.ScriptUnitType\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x0c\"#\n\x06Script\x12\x19\n\x04\x62ody\x18\x01 \x03(\x0b\x32\x0b.ScriptUnit\"2\n\x08TxOutput\x12\r\n\x05value\x18\x01 \x01(\x05\x12\x17\n\x06script\x18\x02 \x01(\x0b\x32\x07.Script\"C\n\x0bTransaction\x12\x18\n\x06inputs\x18\x01 \x03(\x0b\x32\x08.TxInput\x12\x1a\n\x07outputs\x18\x02 \x03(\x0b\x32\t.TxOutput\"\xa4\x01\n\x05\x42lock\x12\x11\n\tprev_hash\x18\x01 \x01(\t\x12\t\n\x01q\x18\x02 \x01(\t\x12\x13\n\x0bmerkle_root\x18\x03 \x01(\t\x12\x19\n\x03txs\x18\x04 \x03(\x0b\x32\x0c.Transaction\x12%\n\x11senates_signature\x18\x05 \x03(\x0b\x32\n.Signature\x12&\n\x12\x64irector_signature\x18\x06 \x01(\x0b\x32\n.Signature\"P\n\x05\x43hain\x12\x15\n\rsenate_number\x18\x01 \x01(\x05\x12\x18\n\x10\x66\x61ilure_boundary\x18\x02 \x01(\x05\x12\x16\n\x06\x62locks\x18\x03 \x03(\x0b\x32\x06.Block*7\n\x0eScriptUnitType\x12\x0f\n\x0bSCRIPT_DATA\x10\x00\x12\x14\n\x10SCRIPT_CHECK_SIG\x10\x01\x62\x06proto3')
 )
 
-_SCRIPTTYPE = _descriptor.EnumDescriptor(
-  name='ScriptType',
-  full_name='ScriptType',
+_SCRIPTUNITTYPE = _descriptor.EnumDescriptor(
+  name='ScriptUnitType',
+  full_name='ScriptUnitType',
   filename=None,
   file=DESCRIPTOR,
   values=[
     _descriptor.EnumValueDescriptor(
-      name='SCRIPT_TYPE_VK', index=0, number=0,
+      name='SCRIPT_DATA', index=0, number=0,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='SCRIPT_CHECK_SIG', index=1, number=1,
       options=None,
       type=None),
   ],
   containing_type=None,
   options=None,
-  serialized_start=854,
-  serialized_end=886,
+  serialized_start=938,
+  serialized_end=993,
 )
-_sym_db.RegisterEnumDescriptor(_SCRIPTTYPE)
+_sym_db.RegisterEnumDescriptor(_SCRIPTUNITTYPE)
 
-ScriptType = enum_type_wrapper.EnumTypeWrapper(_SCRIPTTYPE)
-SCRIPT_TYPE_VK = 0
+ScriptUnitType = enum_type_wrapper.EnumTypeWrapper(_SCRIPTUNITTYPE)
+SCRIPT_DATA = 0
+SCRIPT_CHECK_SIG = 1
 
 
 
@@ -372,8 +377,8 @@ _TXINPUT = _descriptor.Descriptor(
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='script', full_name='TxInput.script', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
@@ -390,7 +395,76 @@ _TXINPUT = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=385,
-  serialized_end=461,
+  serialized_end=470,
+)
+
+
+_SCRIPTUNIT = _descriptor.Descriptor(
+  name='ScriptUnit',
+  full_name='ScriptUnit',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='type', full_name='ScriptUnit.type', index=0,
+      number=1, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='data', full_name='ScriptUnit.data', index=1,
+      number=2, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b(""),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=472,
+  serialized_end=529,
+)
+
+
+_SCRIPT = _descriptor.Descriptor(
+  name='Script',
+  full_name='Script',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='body', full_name='Script.body', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=531,
+  serialized_end=566,
 )
 
 
@@ -410,15 +484,8 @@ _TXOUTPUT = _descriptor.Descriptor(
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='script', full_name='TxOutput.script', index=1,
-      number=2, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='address', full_name='TxOutput.address', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
@@ -434,8 +501,8 @@ _TXOUTPUT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=463,
-  serialized_end=534,
+  serialized_start=568,
+  serialized_end=618,
 )
 
 
@@ -472,8 +539,8 @@ _TRANSACTION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=536,
-  serialized_end=603,
+  serialized_start=620,
+  serialized_end=687,
 )
 
 
@@ -538,8 +605,8 @@ _BLOCK = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=606,
-  serialized_end=770,
+  serialized_start=690,
+  serialized_end=854,
 )
 
 
@@ -583,13 +650,16 @@ _CHAIN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=772,
-  serialized_end=852,
+  serialized_start=856,
+  serialized_end=936,
 )
 
 _DISCOVERREPLY_NODESENTRY.containing_type = _DISCOVERREPLY
 _DISCOVERREPLY.fields_by_name['nodes'].message_type = _DISCOVERREPLY_NODESENTRY
-_TXOUTPUT.fields_by_name['script'].enum_type = _SCRIPTTYPE
+_TXINPUT.fields_by_name['script'].message_type = _SCRIPT
+_SCRIPTUNIT.fields_by_name['type'].enum_type = _SCRIPTUNITTYPE
+_SCRIPT.fields_by_name['body'].message_type = _SCRIPTUNIT
+_TXOUTPUT.fields_by_name['script'].message_type = _SCRIPT
 _TRANSACTION.fields_by_name['inputs'].message_type = _TXINPUT
 _TRANSACTION.fields_by_name['outputs'].message_type = _TXOUTPUT
 _BLOCK.fields_by_name['txs'].message_type = _TRANSACTION
@@ -604,11 +674,13 @@ DESCRIPTOR.message_types_by_name['Pong'] = _PONG
 DESCRIPTOR.message_types_by_name['Signature'] = _SIGNATURE
 DESCRIPTOR.message_types_by_name['Member'] = _MEMBER
 DESCRIPTOR.message_types_by_name['TxInput'] = _TXINPUT
+DESCRIPTOR.message_types_by_name['ScriptUnit'] = _SCRIPTUNIT
+DESCRIPTOR.message_types_by_name['Script'] = _SCRIPT
 DESCRIPTOR.message_types_by_name['TxOutput'] = _TXOUTPUT
 DESCRIPTOR.message_types_by_name['Transaction'] = _TRANSACTION
 DESCRIPTOR.message_types_by_name['Block'] = _BLOCK
 DESCRIPTOR.message_types_by_name['Chain'] = _CHAIN
-DESCRIPTOR.enum_types_by_name['ScriptType'] = _SCRIPTTYPE
+DESCRIPTOR.enum_types_by_name['ScriptUnitType'] = _SCRIPTUNITTYPE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 Discover = _reflection.GeneratedProtocolMessageType('Discover', (_message.Message,), dict(
@@ -674,6 +746,20 @@ TxInput = _reflection.GeneratedProtocolMessageType('TxInput', (_message.Message,
   # @@protoc_insertion_point(class_scope:TxInput)
   ))
 _sym_db.RegisterMessage(TxInput)
+
+ScriptUnit = _reflection.GeneratedProtocolMessageType('ScriptUnit', (_message.Message,), dict(
+  DESCRIPTOR = _SCRIPTUNIT,
+  __module__ = 'messages_pb2'
+  # @@protoc_insertion_point(class_scope:ScriptUnit)
+  ))
+_sym_db.RegisterMessage(ScriptUnit)
+
+Script = _reflection.GeneratedProtocolMessageType('Script', (_message.Message,), dict(
+  DESCRIPTOR = _SCRIPT,
+  __module__ = 'messages_pb2'
+  # @@protoc_insertion_point(class_scope:Script)
+  ))
+_sym_db.RegisterMessage(Script)
 
 TxOutput = _reflection.GeneratedProtocolMessageType('TxOutput', (_message.Message,), dict(
   DESCRIPTOR = _TXOUTPUT,

@@ -79,7 +79,7 @@ def gen_some_member(member_dir, number=10, in_a_file=True):
 
 def gen_genic_block(path='genic_block.json', member=chain_config.get_member_by_idx(0)):
     tx = transaction_model.Transaction()
-    op = transaction_model.Transaction.Output.new(1000000, pb.SCRIPT_TYPE_VK, member.verify_key_str)
+    op = transaction_model.Transaction.Output.new(1000000, script_to_member(member))
     tx.add_outputs([op])
     b = block_model.Block.new(prev_hash="genic_block")
     b.add_transactions([tx])
@@ -112,6 +112,11 @@ def rreload(module):
 
 import math
 
+
+def script_to_member(member):
+    return pb.Script(body=[pb.ScriptUnit(type=pb.SCRIPT_DATA, data=member.verify_key_str),
+                           pb.ScriptUnit(type=pb.SCRIPT_CHECK_SIG)])
+
 def collect_transaction(clients, verbose=False):
     collects = []
     for cli in clients:
@@ -125,7 +130,10 @@ def collect_transaction(clients, verbose=False):
                 rand_out_amount = output.value * random_utils.rand_percent()
                 rand_out_amount = int(math.floor(rand_out_amount))
                 rand_remains_amount = output.value-rand_out_amount
-                cli_outputs = cli.create_outputs( [(rand_remains_amount, pb.SCRIPT_TYPE_VK, cli.member.verify_key_str ), (rand_out_amount, pb.SCRIPT_TYPE_VK, dest.verify_key_str )] )
+                script_to_myself = script_to_member(cli.member)
+                script_to_dest = script_to_member(dest)
+                cli_outputs = cli.create_outputs([(rand_remains_amount, script_to_myself ),
+                                                  (rand_out_amount, script_to_dest)])
                 cli_tx = cli.create_transaction(cli_inputs, cli_outputs)
                 collects.append(cli_tx)
      
@@ -148,8 +156,8 @@ def collect_transaction_evenly_distributed(clients, verbose=False):
         dest = members_notebook
         out_amount = int(math.floor(tot / members_notebook.__len__()))
         out_remain = tot - out_amount*members_notebook.__len__()
-        pre_outputs = [ (out_amount, pb.SCRIPT_TYPE_VK, m.verify_key_str) for m in members_notebook if m.mid != cli.member.mid]
-        pre_outputs.append( (out_remain+out_amount, pb.SCRIPT_TYPE_VK, cli.member.verify_key_str ))
+        pre_outputs = [(out_amount, script_to_member(m)) for m in members_notebook if m.mid != cli.member.mid]
+        pre_outputs.append((out_remain+out_amount, script_to_member(cli.member)))
         # for o in pre_outputs:
         #     print cli.member.mid, "to", o[2], ":", o[0]
         # print "total out:", tot

@@ -265,11 +265,11 @@ class Block(ProtobufWrapper):
         # FUTURE: Optimization
         b.add_transactions(json.loads(dic['txs'], object_hook=transaction_model.Transaction.dict2obj))
 
-        b.set_director_signature(signer=b64d(dic['director_signature'][0]),
-                                 signature=b64d(dic['director_signature'][1]))
+        b.set_director_signature(signer=b64d(dic['director_signature'][0].encode('utf-8')),
+                                 signature=b64d(dic['director_signature'][1].encode('utf-8')))
         for signature in dic['senates_signature']:
-            b.add_senate_signature(senate=b64d(signature[0]),
-                                   signature=b64d(signature[1]))
+            b.add_senate_signature(senate=b64d(signature[0].encode('utf-8')),
+                                   senate_signature=b64d(signature[1].encode('utf-8')))
 
         b.pb.merkle_root = dic["merkle_root"]
         b._merkle_root = b.pb.merkle_root

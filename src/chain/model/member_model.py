@@ -98,7 +98,7 @@ class MemberModel(ProtobufWrapper):
         """member id"""
         if not self._mid:
             if self.verify_key_str:
-                self._mid = self.verify_key_str
+                self._mid = b64e(self.verify_key_str)
         return self._mid
 
     @property
