@@ -171,6 +171,7 @@ class Block(ProtobufWrapper):
     def director_sign(self, member, prev_q):
         """add director, signature, q"""
         self.set_q(member.sign(hash_utils.hash_std(prev_q)))
+        self.set_director(member.verify_key_str)
         data = self.get_director_sign_data_source()
         self.set_director_signature(signer=member.verify_key_str, signature=member.sign(data))
 
