@@ -40,7 +40,7 @@ from src.chain.model.member_model import verify
         
 class Client(object):
 
-    STATUS = enum.Enum("client_status",('Sleeping', "Wait4Senates"))
+    STATUS = enum.Enum("client_status" , ('Sleeping', "Wait4Senates"))
     
     @property
     def status(self):
@@ -55,12 +55,12 @@ class Client(object):
         return self._member
 
     @property
-    def ledger(self):
-        return self._ledger
+    def chain(self):
+        return self._chain
 
     @property
     def last_block(self):
-        return self.ledger.last_block
+        return self.chain.last_block
 
     @property
     def pending_transactions(self):
@@ -92,13 +92,13 @@ class Client(object):
 
     @property
     def is_senate(self):
-        ledger = self.ledger
+        ledger = self.chain
         senates = ledger.senates
         return self.member.verify_key_str in senates
 
     @property
     def is_senate_leader(self):
-        senates = self.ledger.senates
+        senates = self.chain.senates
         mvs = self.member.verify_key_str
         if mvs in senates:
             if self._leader_serial_number in senates[mvs]:
@@ -117,7 +117,7 @@ class Client(object):
         self._status = Client.STATUS.Sleeping
         self._cooking_food = {}
 
-        self._ledger = chain_model.Chain.new()
+        self._chain = chain_model.Chain.new()
         
         # the pending transactions 
         self._pending_transactions = {}
@@ -137,8 +137,8 @@ class Client(object):
         self._m_satoshi_total = 0
         if blocks_path:
             bs = block_model.load_blocks(blocks_path)
-            ledger = self._ledger
-            ledger.set_ledger(bs, None)
+            chain = self.chain
+            chain.set_ledger(bs, None)
             self.listen_block_change(None)
 
         # logger
@@ -156,7 +156,7 @@ class Client(object):
 
     def update_my_satoshi(self):
         """check the satoshi client have"""
-        utxos = self.ledger.utxos
+        utxos = self.chain.utxos
         member = self.member
         m_satoshi = {}
         m_satoshi_total = 0
@@ -217,7 +217,6 @@ class Client(object):
         # ----- method 2 ----
         self._pending_transactions = {}
 
-
     def receive_transactions(self, transactions):
         """collect transactions"""
         for transaction in transactions:
@@ -255,7 +254,7 @@ class Client(object):
 
     def senate_sign(self, block):
         if self.is_senate:
-            ledger = self.ledger
+            ledger = self.chain
             if ledger.verify_transactions(block)!=None:
                 data = block.get_senate_sign_data_source()
                 member = self.member
@@ -266,7 +265,7 @@ class Client(object):
 
     def director_sign(self, block):
         if block.director == self.member.verify_key_str:
-            ledger = self.ledger
+            ledger = self.chain
             block.director_sign(self.member, ledger.last_block.q)
             if ledger.verify_block(block) :
                 return block
@@ -295,14 +294,14 @@ class Client(object):
     def add_senate_signature(self, signatory, signature):
         block = self.get_cooking_block()
         sign_source = block.get_senate_sign_data_source()
-        if self.ledger.verify_senate_signature(signatory, sign_source, signature):
+        if self.chain.verify_senate_signature(signatory, sign_source, signature):
             block.add_senate_signature(signatory, signature)
 
     def get_director_competition_signature(self, transaction_hash, transaction_idx):
         """return (signature, txo_idx),  signature = sign_owner( hash(prev_hash+q+merkle_root + transacntion out index ) ) """
         utxo_idx = (transaction_hash, transaction_idx)
         if (transaction_hash, transaction_idx) in self.my_satoshi:
-            ret = self.ledger.get_director_competition_signature_source(transaction_hash, transaction_idx)
+            ret = self.chain.get_director_competition_signature_source(transaction_hash, transaction_idx)
             if ret:
                 source, txo_idx, __output = ret
                 data = self.member.sign(source)
@@ -311,7 +310,7 @@ class Client(object):
 
     def verify_director_competition_signature(self, signature, txo_idx):
         """return the owner member"""
-        ret = self.ledger.get_director_competition_signature_source(txo_idx.transaction_hash, txo_idx.transaction_idx)
+        ret = self.chain.get_director_competition_signature_source(txo_idx.transaction_hash, txo_idx.transaction_idx)
         if ret:
             source, __txo_idx, op = ret
             verify_key_str = op.address
@@ -320,8 +319,8 @@ class Client(object):
         return False
 
     def add_block(self, block):
-        ledger = self._ledger
-        if ledger.add_block(block):
+        chain = self.chain
+        if chain.add_block(block):
             self.listen_block_change(block)
         else:
             logging.warn("Invalid block")

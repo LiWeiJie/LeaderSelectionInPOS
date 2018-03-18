@@ -147,13 +147,13 @@ class TestClient(unittest.TestCase):
         if verbose:
             print "director sign" , director_signed_block
 
-        self.assertTrue(leader_client.ledger.verify_block(b2))
+        self.assertTrue(leader_client.chain.verify_block(b2))
 
         # add block
         for cli in clients:
             cli.add_block(b)
 
-        self.assertFalse(leader_client.ledger.verify_block(b))        
+        self.assertFalse(leader_client.chain.verify_block(b))
 
         for cli in clients:
             self.assertEqual(cli.my_satoshi_total, 100)
@@ -165,11 +165,11 @@ class TestClient(unittest.TestCase):
             i = 0
             for cli in clients:
                 print cli.last_block.q
-                print i, cli.my_satoshi, cli.ledger.senates
+                print i, cli.my_satoshi, cli.chain.senates
                 i += 1
             print("=== test_clients_local ===")
         
-        leader_client.ledger.dump_blocks(os.path.join(unittest_chain_config.tmp_output_dir, "clients_local.json"))
+        leader_client.chain.dump_blocks(os.path.join(unittest_chain_config.tmp_output_dir, "clients_local.json"))
         
 
 
