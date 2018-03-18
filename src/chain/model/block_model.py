@@ -18,9 +18,10 @@ from src.utils import hash_utils
 from src.protobufwrapper import ProtobufWrapper
 import src.messages.messages_pb2 as pb
 from src.chain.model.member_model import verify
+import logging
 
-from base64 import urlsafe_b64decode as b64d
-from base64 import urlsafe_b64encode as b64e
+from src.utils.encode_utils import json_bytes_dumps, json_bytes_loads
+
 
 def load_blocks(path):
     with open(path, 'r') as f:
@@ -39,18 +40,22 @@ def dump_blocks(blocks, path):
 def dumps_blocks(blocks):
     return json.dumps(blocks, default=Block.obj2dict)
 
+
+def encode_in_utf8(code):
+    if isinstance(code, unicode):
+        return code.encode('utf-8')
+    else:
+        return code
+
 class Block(ProtobufWrapper):
 
     def __init__(self, pbo):
         assert(isinstance(pbo, pb.Block)), type(pbo)
         super(Block, self).__init__(pbo)
-        self._prev_hash = pbo.prev_hash
-        self._q = pbo.q
+        # self._prev_hash = pbo.prev_hash
+        # self._q = pbo.q
         self._merkle_root = pbo.merkle_root
         self._txs = [Transaction(tx) for tx in pbo.txs]
-
-        self._senates_signature = pbo.senates_signature
-        self._director_signature = pbo.director_signature
 
         self._merkle_tree = None
 
@@ -81,12 +86,13 @@ class Block(ProtobufWrapper):
 
     @property
     def q(self):
-        return self._q
+        return self.pb.q
     
     @property
     def merkle_root(self):
         if not self._merkle_root:
             self._merkle_root = self.merkle_tree[-1]
+            self.pb.merkle_root = self.merkle_tree[-1]
         return self._merkle_root
 
     @property
@@ -103,7 +109,7 @@ class Block(ProtobufWrapper):
 
     @property
     def prev_hash(self):
-        return self._prev_hash
+        return self.pb.prev_hash
     
     @property
     def transactions(self):
@@ -111,19 +117,20 @@ class Block(ProtobufWrapper):
 
     @property
     def director_signature(self):
-        return self._director_signature
+        return self.pb.director_signature
 
     @property
     def senates(self):
-        return self._senates_signature
+        return self.pb.senates_signature
 
     @property
     def director(self):
         """director's verify_key"""
-        return self._director_signature.signer
+        return self.pb.director_signature.signer
     
     def on_change(self):
         super(Block, self).on_change()
+        self.pb.merkle_root
         self._merkle_root = ""
         self._merkle_tree = None
     
@@ -146,9 +153,13 @@ class Block(ProtobufWrapper):
         self.on_change()
 
     def set_q(self, new_q):
-        self._q = new_q
+        # self._q = new_q
         self.pb.q = new_q
-        # self._q = new_q.encode('utf-8')
+        self.on_change()
+
+    def set_director(self, director):
+        self.pb.director_signature.signer = director
+        self.pb.director_signature.signature = ''
         self.on_change()
 
     def set_director_signature(self, signer, signature):
@@ -177,21 +188,25 @@ class Block(ProtobufWrapper):
 
     def get_senate_sign_data_source(self):
         """including director_verify_key_str, transaction merkle_root"""
-        director = self.director
-        assert isinstance(director, member_model.MemberModel), type(director)
-        director_str = director.verify_key_str
-        return director_str + self.merkle_root
+        # director = self.director
+        # assert isinstance(director, member_model.MemberModel), type(director)
+        # director_str = director.verify_key_str
+        return self.director + self.merkle_root
 
     def get_director_competition_data_source(self):
         """the data of b*, including the prev_block, the q, the transactions merkle root, director"""
-        header = self.prev_hash + self.q + self.merkle_root + self.director
+        header = self.prev_hash
+        header += self.q
+        header += self.merkle_root
+        # logging.info("director {} {}".format(self.director.__len__(), self.director.encode("utf-8")))
+        header += self.director
         hv = hash_utils.hash_std(header)
         return hv
     
     def get_director_sign_data_source(self):
         header = self.prev_hash + self.q + self.merkle_root + self.director + self.merkle_root
         for s in self.senates:
-            header += s.director_signature.signature
+            header += s.signature
         hv = hash_utils.hash_std(header)
         return hv
 
@@ -245,33 +260,32 @@ class Block(ProtobufWrapper):
     @classmethod
     def obj2dict(cls, obj):
         return {
-            "prev_hash": obj.prev_hash,
-            "q":obj.q,
+            "prev_hash": json_bytes_dumps(obj.prev_hash),
+            "q":json_bytes_dumps(obj.q),
             "txs": json.dumps(obj.transactions, default=transaction_model.Transaction.obj2dict),
-            "director_signature": (b64e(obj.director_signature.signer), b64e(obj.director_signature.signature)),
-            "senates_signature": [(b64e(s.signer), b64e(s.signature)) for s in obj.senates],
+            "director_signature": (json_bytes_dumps(obj.director_signature.signer), json_bytes_dumps(obj.director_signature.signature)),
+            "senates_signature": [(json_bytes_dumps(s.signer), json_bytes_dumps(s.signature)) for s in obj.senates],
             # "n_txs":obj.n_txs,
-            "merkle_root": obj.merkle_root
+            "merkle_root": json_bytes_dumps(obj.merkle_root)
         }
 
     @classmethod
     def dict2obj(cls, dic):
-        prev_hash = dic['prev_hash']
-        q = dic['q']
-        # import logging
-        # logging.info("{}".format(type(prev_hash)))
+        prev_hash = json_bytes_loads(dic['prev_hash'])
+        q = json_bytes_loads(dic['q'])
         b = Block.new(prev_hash, q)
 
         # FUTURE: Optimization
         b.add_transactions(json.loads(dic['txs'], object_hook=transaction_model.Transaction.dict2obj))
 
-        b.set_director_signature(signer=b64d(dic['director_signature'][0].encode('utf-8')),
-                                 signature=b64d(dic['director_signature'][1].encode('utf-8')))
+        b.set_director_signature(signer=json_bytes_loads(dic['director_signature'][0].encode('utf-8')),
+                                 signature=json_bytes_loads(dic['director_signature'][1].encode('utf-8')))
         for signature in dic['senates_signature']:
-            b.add_senate_signature(senate=b64d(signature[0].encode('utf-8')),
-                                   senate_signature=b64d(signature[1].encode('utf-8')))
+            b.add_senate_signature(senate=json_bytes_loads(signature[0].encode('utf-8')),
+                                   senate_signature=json_bytes_loads(signature[1].encode('utf-8')))
 
-        b.pb.merkle_root = dic["merkle_root"]
+        merkle_root = json_bytes_loads(dic["merkle_root"])
+        b.pb.merkle_root = merkle_root
         b._merkle_root = b.pb.merkle_root
         return b
         

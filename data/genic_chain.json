@@ -1,13 +1,13 @@
 [
     {
         "senates_signature": [],
-        "merkle_root": "06c5ea0ab716d6d83102d967a029f0b84325a76c76febaee94d06ef35c26a0d7",
-        "q": "Y3XpAf6a980yswRD9QtXZtbbGbS2tiIB4K_1HO3-b2h__CYCjT5Be1n6OkDgSCeR",
-        "prev_hash": "genic_block",
+        "merkle_root": "yFfN5PRK5H98y5dM_3soXmHzD7X9dp__bEaZO39O5rI=",
+        "q": "aE82TU1wUWZtdkZRV05VcDloVXo3YjFUMGhHeTNaU1pXRUpENDEtQjZ4OG9BZ2FzbV9nQ2xTM05rc21OZVFFeA==",
+        "prev_hash": "l_XufzG4V2pOBuFmex_0Geti--RElX9Btw-_NvT1fsw=",
         "txs": "[{\"inputs\": \"[]\", \"outputs\": \"[{\\\"value\\\": 1000000, \\\"script\\\": \\\"CjISMAnjMzKFnPrseg69tUD2cYjAvU9V2hfZv6TrPkvgO3mJ33iYFti7idTTRmlIneh9gwoCCAE=\\\"}]\"}]",
         "director_signature": [
             "CeMzMoWc-ux6Dr21QPZxiMC9T1XaF9m_pOs-S-A7eYnfeJgW2LuJ1NNGaUid6H2D",
-            "OVFOb2VxZUgtNnlkTElZejY4MUVqNkFJZTJ0WENTbmFELUlNdXdVLU5BVlBhcXN4Slh6UzVRQnZLeFAwakVPRg=="
+            "aG4wZGFqWmZkX3MzTUc3bHRVaGdsb0xIUHE4TEJ3Q0pHdVJ3bUxEbGJLWnVYQk01VkFQVzUzVXJDVGVadnFQQw=="
         ]
     }
 ]

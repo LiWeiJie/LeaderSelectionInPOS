@@ -80,8 +80,14 @@ def gen_some_member(member_dir, number=10, in_a_file=True):
 def gen_genic_block(path='genic_block.json', member=chain_config.get_member_by_idx(0)):
     tx = transaction_model.Transaction()
     op = transaction_model.Transaction.Output.new(1000000, script_to_member(member))
+    # print (script_to_member(member))
+    # print (pb.ScriptUnit(data=member.verify_key_str))
+    # c = pb.ScriptUnit(data=member.verify_key_str).data
+    # print c
+    # print (member.verify_key_str)
+    # print (c==member.verify_key_str)
     tx.add_outputs([op])
-    b = block_model.Block.new(prev_hash="genic_block")
+    b = block_model.Block.new(prev_hash=hash_utils.hash_std("genic_block"))
     b.add_transactions([tx])
     b.director_sign(member=member, prev_q="genic_block")
     block_model.dump_blocks([b], path)
@@ -295,6 +301,9 @@ def simulation_one_round(clients, verbose=False, evenly_transaction=False):
     end = time.time()
     print "add_block cost", end-start, "secs"
 
+    print_own_satoshi(clients)
+
+def print_own_satoshi(clients):
     for cli in clients:
         print "satoshi %d:"%cli.my_satoshi_total, cli.my_satoshi, "\n"
     

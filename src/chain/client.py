@@ -35,6 +35,8 @@ from .model import ledger_model
 from src.utils import message
 from src.utils import hash_utils
 import src.messages.messages_pb2 as pb
+
+from src.chain.model.member_model import verify
         
 class Client(object):
 
@@ -158,9 +160,12 @@ class Client(object):
         member = self.member
         m_satoshi = {}
         m_satoshi_total = 0
-        for  (key, transaction_output) in utxos.items():
-            
-            if transaction_output.script.body[0] == member.verify_key_str:
+        for (key, transaction_output) in utxos.items():
+            # print ("trans {}".format(transaction_output.script))
+            # vkd = transaction_output.script.body[0].data
+            # print ("trans vk {}".format(.))
+            # print ("member {}".format(member.verify_key_str))
+            if transaction_output.script.body[0].data == member.verify_key_str:
                 m_satoshi[ key ] = transaction_output
                 m_satoshi_total += transaction_output.value
         self._m_satoshi = m_satoshi
@@ -260,7 +265,7 @@ class Client(object):
         return False
 
     def director_sign(self, block):
-        if block.director.verify_key_str==self.member.verify_key_str:
+        if block.director == self.member.verify_key_str:
             ledger = self.ledger
             block.director_sign(self.member, ledger.last_block.q)
             if ledger.verify_block(block) :
@@ -284,13 +289,12 @@ class Client(object):
                     return None
             else:
                 return None
-        assert isinstance(director, member_model.MemberModel), type(director)
         block.set_director(director)
         return block
 
     def add_senate_signature(self, signatory, signature):
         block = self.get_cooking_block()
-        sign_source = block.get_senate_sign_source()
+        sign_source = block.get_senate_sign_data_source()
         if self.ledger.verify_senate_signature(signatory, sign_source, signature):
             block.add_senate_signature(signatory, signature)
 
@@ -311,9 +315,8 @@ class Client(object):
         if ret:
             source, __txo_idx, op = ret
             verify_key_str = op.address
-            m = member_model.MemberModel.get_verify_member(verify_key_str)
-            if m.verify(source, signature):
-                return m
+            if verify(signer=verify_key_str, signature=signature, data=source):
+                return verify_key_str
         return False
 
     def add_block(self, block):

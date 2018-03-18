@@ -16,6 +16,7 @@ from src.protobufwrapper import ProtobufWrapper
 import logging
 from src.chain.model.member_model import verify
 
+from src.utils.encode_utils import json_bytes_dumps, json_bytes_loads
 
 # TransactionOutputScriptOP = [
 #     "verifyKeyStr",  # 0
@@ -70,8 +71,9 @@ class Transaction(ProtobufWrapper):
     def get_transaction_sign_source(self):
         data_str = ""
         for ip in self.inputs:
-            cp = pb.TxInput.CopyFrom(ip.pb)
-            cp.script.clear()
+            cp = pb.TxInput()
+            cp.CopyFrom(ip.pb)
+            cp.script.Clear()
             data_str += cp.SerializeToString()
 
         for op in self.outputs:
@@ -91,20 +93,23 @@ class Transaction(ProtobufWrapper):
             return False
         sz = prev_outputs.__len__()
         input_satoshi = 0
+        # handle inputs
         for i in range(sz):
             ip = inputs[i]
             op = prev_outputs[i]
 
+            input_satoshi += op.value
             result = True
-            stack = input.script.body
+            stack = [script_unit for script_unit in ip.script.body]
             for item in op.script.body:
                 if item.type == pb.SCRIPT_DATA:
                     stack.append(item)
                 elif item.type == pb.SCRIPT_CHECK_SIG:
-                    verify_key = stack.pop()
-                    signature = stack.pop()
+                    verify_key = stack.pop().data
+                    signature = stack.pop().data
                     if not verify(signer=verify_key,
-                                  signature=signature):
+                                  signature=signature,
+                                  data=data):
                         logging.info("TX: signature invalid")
                         result = False
                 if not result:
@@ -113,6 +118,7 @@ class Transaction(ProtobufWrapper):
                 logging.info("TX: script invalid")
                 return False
 
+        # handle outputs
         for op in self.outputs:
             input_satoshi -= op.value
 
@@ -197,8 +203,8 @@ class Transaction(ProtobufWrapper):
 
     @classmethod
     def obj2dict(cls, obj):
-        logging.info("tx: obj2dict {}".format(obj.inputs))
-        logging.info("tx: obj2dict {}".format(obj.outputs))
+        # logging.info("tx: obj2dict {}".format(obj.inputs))
+        # logging.info("tx: obj2dict {}".format(obj.outputs))
         return {
             "inputs": json.dumps(obj.inputs, default=Transaction.Input.obj2dict),
             "outputs": json.dumps(obj.outputs, default=Transaction.Output.obj2dict),
@@ -243,7 +249,7 @@ class Transaction(ProtobufWrapper):
         def transaction_idx(self):
             """Returns the index of the output inside the transaction that is
             redeemed by this input"""
-            return self.transaction_idx
+            return self.pb.transaction_idx
 
         @property
         def script(self):
@@ -260,14 +266,14 @@ class Transaction(ProtobufWrapper):
         @classmethod
         def obj2dict(cls, obj):
             return {
-                "transaction_hash": obj.transaction_hash,
+                "transaction_hash": json_bytes_dumps(obj.transaction_hash),
                 "transaction_idx": obj.transaction_idx,
                 "script": obj.script.SerializeToString()
             }
 
         @classmethod
         def dict2obj(cls, dic):
-            ip = Transaction.Input.new(transaction_hash=dic['transaction_hash'],
+            ip = Transaction.Input.new(transaction_hash=json_bytes_loads(dic['transaction_hash']),
                                        transaction_idx=dic['transaction_idx'],
                                        script=pb.Script.FromString(dic['script']))
             return ip
@@ -308,6 +314,10 @@ class Transaction(ProtobufWrapper):
         def script(self):
             return self.pb.script
 
+        @property
+        def address(self):
+            return self.script.body[0].data
+
         # @property
         # def hash(self):
         #     if not self._hash:
@@ -322,19 +332,19 @@ class Transaction(ProtobufWrapper):
 
         @classmethod
         def obj2dict(cls, obj):
-            from base64 import urlsafe_b64encode as b64e
+            from base64 import urlsafe_b64encode as json_bytes_dumps
 
             return {
                 "value": obj.value,
-                "script": b64e(obj.script.SerializeToString()),
+                "script": json_bytes_dumps(obj.script.SerializeToString()),
             }
 
         @classmethod
         def dict2obj(cls, dic):
-            from base64 import urlsafe_b64decode as b64d
+            from base64 import urlsafe_b64decode as json_bytes_loads
             op = Transaction.Output.new(
                 value=dic['value'],
-                script=pb.Script.FromString(b64d(dic['script'].encode('utf-8'))))
+                script=pb.Script.FromString(json_bytes_loads(dic['script'].encode('utf-8'))))
             return op
 
 

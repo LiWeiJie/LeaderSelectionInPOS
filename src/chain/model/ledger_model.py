@@ -136,7 +136,9 @@ class Ledger(object):
         senate_sign_source = block.get_senate_sign_data_source()
         senates_signed_data = block.senates
         signed_ct = 0
-        for (verify_key_str, signature) in senates_signed_data:
+        for senate_signature in senates_signed_data:
+            verify_key_str = senate_signature.signer
+            signature = senate_signature.signature
             if not self.verify_senate_signature(verify_key_str, senate_sign_source, signature):
                 print("verify_senate_signature fail")
                 return False
@@ -272,7 +274,9 @@ class Ledger(object):
             @hv hash value by sha256
             @tot_satoshi
             """
-            hi = int(hv, 16) * tot_satoshi
+            import binascii
+            hexhv = binascii.hexlify(hv)
+            hi = int(hexhv, 16) * tot_satoshi
             const_tot_sha256 = 1<<256
             return hi / const_tot_sha256
 

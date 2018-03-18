@@ -39,7 +39,7 @@ message Member {
 }
 
 message TxInput {
-    string transaction_hash = 1;
+    bytes transaction_hash = 1;
     int32 transaction_idx = 2;
     Script script = 3;
 }
@@ -69,9 +69,9 @@ message Transaction {
 }
 
 message Block {
-    string prev_hash = 1;
-    string q = 2;
-    string merkle_root = 3; // optional for the efficient
+    bytes prev_hash = 1;
+    bytes q = 2;
+    bytes merkle_root = 3; // optional for the efficient
     repeated Transaction txs = 4;
 
     // senates  sign from above
