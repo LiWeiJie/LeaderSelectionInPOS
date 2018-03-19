@@ -77,3 +77,33 @@ message Chain {
     int32 failure_boundary = 2;
     repeated Block blocks = 3;
 }
+
+// 1. first broadcast senate existence
+// TODO:
+// message ping pong
+
+// 2. second director competition
+message DirectorCompetition {
+    Signature signature = 1;
+    bytes trransaction_hash = 2;
+    int32 transaction_idx = 3;
+}
+
+// 3. leader create block then send to senates
+// message Block
+
+// 4. consensus the block 
+// TODO:
+// pbft 
+
+// 5. reply signature
+message SenateSignature {
+    bytes signed_block_hash
+    Signature signature
+}
+
+// 6. send to director
+// message Block
+
+// 7. director sent block
+// message Block

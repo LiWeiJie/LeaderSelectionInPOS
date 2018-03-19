@@ -72,8 +72,15 @@ class MyProto(ProtobufReceiver):
         elif isinstance(obj, pb.Pong):
             self.handle_pong(obj)
 
-        elif isinstance(obj, pb.)
+        elif isinstanceo(obj, pb.DirectorCompetition):
+            self.factory.chain_runner.handle_director_competition(obj, self.remote_vk)
 
+        elif isinstance(obj, pb.Block):
+            self.factory.chain_runner.handle_block(obj, self.remote_vk)
+
+        elif isinstance(obj, pb.SenateSignature):
+            self.factory.chain_runner.handle_senate_signature(obj, self.remote_vk)
+            
         # old
 
         # elif isinstance(obj, pb.ACS):
@@ -125,28 +132,28 @@ class MyProto(ProtobufReceiver):
         ProtobufReceiver.send_obj(self, obj)
         self.factory.sent_message_log[obj.__class__.__name__] += obj.ByteSize()
 
-    def process_acs_res(self, o, m):
-        """
-        This function checks whether the result is Replay or Handled.
-        If it's the former, the message is placed into factory.q and then we replay it (factory.process_queue).
-        :param o: the object we're processing
-        :param m: the original message
-        :return:
-        """
-        assert o is not None
+    # def process_acs_res(self, o, m):
+    #     """
+    #     This function checks whether the result is Replay or Handled.
+    #     If it's the former, the message is placed into factory.q and then we replay it (factory.process_queue).
+    #     :param o: the object we're processing
+    #     :param m: the original message
+    #     :return:
+    #     """
+    #     assert o is not None
 
-        if isinstance(o, Replay):
-            logging.debug("NODE: putting {} into msg queue".format(m))
-            self.factory.q.put((self.remote_vk, m))
-        elif isinstance(o, Handled):
-            if self.factory.config.test == 'acs':
-                logging.debug("NODE: testing ACS, not handling the result")
-                return
-            if o.m is not None:
-                logging.debug("NODE: attempting to handle ACS result")
-                self.factory.tc_runner.handle_cons_from_acs(o.m)
-        else:
-            raise AssertionError("instance is not Replay or Handled")
+    #     if isinstance(o, Replay):
+    #         logging.debug("NODE: putting {} into msg queue".format(m))
+    #         self.factory.q.put((self.remote_vk, m))
+    #     elif isinstance(o, Handled):
+    #         if self.factory.config.test == 'acs':
+    #             logging.debug("NODE: testing ACS, not handling the result")
+    #             return
+    #         if o.m is not None:
+    #             logging.debug("NODE: attempting to handle ACS result")
+    #             self.factory.tc_runner.handle_cons_from_acs(o.m)
+    #     else:
+    #         raise AssertionError("instance is not Replay or Handled")
 
     def send_ping(self):
         self.send_obj(pb.Ping(vk=self.vk, port=self.config.port))
