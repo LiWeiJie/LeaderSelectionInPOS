@@ -55,8 +55,25 @@ class Client(object):
         return self._member
 
     @property
+    def leader_serial_number(self):
+        return self._leader_serial_number
+
+    @property
+    def senates_leader(self):
+        if self._senates_leader==None:
+            senates = self.chain.senates
+            for senate in senates:
+                if self.leader_serial_number in senates[senate]:
+                    self._senates_leader = senate
+        return self._senates_leader
+
+    @property
     def chain(self):
         return self._chain
+
+    @property
+    def rounds(self):
+        return self._rounds
 
     @property
     def last_block(self):
@@ -98,23 +115,29 @@ class Client(object):
 
     @property
     def is_senate_leader(self):
-        senates = self.chain.senates
-        mvs = self.member.verify_key_str
-        if mvs in senates:
-            if self._leader_serial_number in senates[mvs]:
-                return True
-        return False
+        # senates = self.chain.senates
+        # mvs = self.member.verify_key_str
+        # if mvs in senates:
+        #     if self._leader_serial_number in senates[mvs]:
+        #         return True
+        # return False
+        return self.senates_leader==self.member.verify_key_str
 
-    def __init__(self, member=None, blocks_path=None):
+    def __init__(self, member=None, blocks_path=None, consensus_timeout=10, director_competition_timeout = 5):
         """
 
         :param member: MemberModel or member_path , if None , will generate a random member
         :param blocks_path:
         """
 
+        self.consensus_timeout = consensus_timeout
+        self.director_competition_timeout = director_competition_timeout
+        self._senates_leader = None
+
         self._timestamp = 0
+        # TODO: decide which senate be the leader
         self._leader_serial_number = 0
-        self._status = self.ClientStatus.Sleeping
+        self.set_client_status(self.ClientStatus.Sleeping)
         self._cooking_food = {}
 
         self._chain = chain_model.Chain.new()
@@ -141,18 +164,21 @@ class Client(object):
             chain.set_ledger(bs, None)
             self.listen_block_change(None)
 
+        self._rounds = self.chain.blocks.__len__()
+
         # logger
         self._logger = create_logger(member.mid[-5:])
         
         # init models
 
-        self.initiate_protocol_handler();
+        self.initiate_protocol_handler()
 
     def listen_block_change(self, block):
         if block:
             self.update_pending_transactions(block)
         self.update_my_satoshi()
         self._cooking_food = {}
+        self._senates_leader = None
 
     def update_my_satoshi(self):
         """check the satoshi client have"""
@@ -170,6 +196,51 @@ class Client(object):
                 m_satoshi_total += transaction_output.value
         self._m_satoshi = m_satoshi
         self._m_satoshi_total = m_satoshi_total
+
+    def add_director(self, block=None, director=None):
+        if not block:
+            block = self.get_cooking_block()
+        if not block:
+            return None
+        if not director:
+            if self.cooking_food.has_key("director_competition"):
+                sorted_list = sorted(self.cooking_food["director_competition"])
+                if sorted_list.__len__():
+                    director = sorted_list[0][1]
+                else:
+                    return None
+            else:
+                return None
+        block.set_director(director)
+        return block
+
+    def add_senate_signature(self, block_hash, signatory, signature):
+        block = self.get_cooking_block()
+        sign_source = block.get_senate_sign_data_source()
+        if block_hash==sign_source and self.chain.verify_senate_signature(signatory, sign_source, signature):
+            block.add_senate_signature(signatory, signature)
+            return True
+        else:
+            return False
+
+    def add_block(self, block):
+        chain = self.chain
+        if chain.add_block(block):
+            self.listen_block_change(block)
+            return True
+        else:
+            logging.warn("Invalid block")
+            return False
+
+    def set_round(self, rounds):
+        self._rounds = rounds
+
+    def set_cooking_block(self, block):
+        self.cooking_food['cooking_block'] = block
+
+    def set_client_status(self, status):
+        assert(status in self.ClientStatus)
+        self._status = status
        
     def create_inputs(self, transaction_info):
         """
@@ -198,6 +269,16 @@ class Client(object):
         for i in range(inputs.__len__()):
             tx.add_input_script(i, pb.Script(body=[pb.ScriptUnit(type=pb.SCRIPT_DATA, data=self.member.sign(source))]))
         return tx
+
+    def create_block(self, transactions=None):
+        """create by accepted transactions"""
+        last_block = self.last_block
+        block = block_model.Block.new(last_block.hash)
+        if not transactions:
+            transactions = self.pending_transactions.values()
+        block.add_transactions(transactions)
+        self.add_director(block)
+        return block
 
     def update_pending_transactions(self, block):
         """
@@ -230,20 +311,6 @@ class Client(object):
             else:
                 self.cooking_food["director_competition"] = [ (signature, ret) ]
         return False
-
-    def create_block(self, transactions=None):
-        """create by accepted transactions"""
-        last_block = self.last_block
-        block = block_model.Block.new(last_block.hash)
-        if not transactions:
-            transactions = self.pending_transactions.values()
-        block.add_transactions(transactions)
-        self.add_director(block)
-        
-        return block
-    
-    def set_cooking_block(self, block):
-        self.cooking_food['cooking_block'] = block
     
     def get_cooking_block(self):
         cooking_food = self.cooking_food
@@ -252,13 +319,25 @@ class Client(object):
         else:
             return None
 
+    def get_director_competition_signature(self, transaction_hash, transaction_idx):
+        """return (signature, txo_idx),  signature = sign_owner( hash(prev_hash+q+merkle_root + transacntion out index ) ) """
+        utxo_idx = (transaction_hash, transaction_idx)
+        if (transaction_hash, transaction_idx) in self.my_satoshi:
+            ret = self.chain.get_director_competition_signature_source(transaction_hash, transaction_idx)
+            if ret:
+                source, txo_idx, __output = ret
+                data = self.member.sign(source)
+                return data, txo_idx
+        return None
+
     def senate_sign(self, block):
+        # todo: (return hash, vk, signature)
         if self.is_senate:
             ledger = self.chain
             if ledger.verify_transactions(block)!=None:
                 data = block.get_senate_sign_data_source()
                 member = self.member
-                return (member.verify_key_str, member.sign(data))
+                return (data, member.verify_key_str, member.sign(data))
             else :
                 logging.info("senate_sign fail")                
         return False
@@ -274,40 +353,6 @@ class Client(object):
                 block._signature = None
         return None
 
-    def add_director(self, block=None, director=None):
-        if not block:
-            block = self.get_cooking_block()
-        if not block:
-            return None
-        if not director:
-            if self.cooking_food.has_key("director_competition"):
-                sorted_list = sorted(self.cooking_food["director_competition"])
-                if sorted_list.__len__():
-                    director = sorted_list[0][1]
-                else:
-                    return None
-            else:
-                return None
-        block.set_director(director)
-        return block
-
-    def add_senate_signature(self, signatory, signature):
-        block = self.get_cooking_block()
-        sign_source = block.get_senate_sign_data_source()
-        if self.chain.verify_senate_signature(signatory, sign_source, signature):
-            block.add_senate_signature(signatory, signature)
-
-    def get_director_competition_signature(self, transaction_hash, transaction_idx):
-        """return (signature, txo_idx),  signature = sign_owner( hash(prev_hash+q+merkle_root + transacntion out index ) ) """
-        utxo_idx = (transaction_hash, transaction_idx)
-        if (transaction_hash, transaction_idx) in self.my_satoshi:
-            ret = self.chain.get_director_competition_signature_source(transaction_hash, transaction_idx)
-            if ret:
-                source, txo_idx, __output = ret
-                data = self.member.sign(source)
-                return data, txo_idx
-        return None
-
     def verify_director_competition_signature(self, signature, txo_idx):
         """return the owner member"""
         ret = self.chain.get_director_competition_signature_source(txo_idx.transaction_hash, txo_idx.transaction_idx)
@@ -318,13 +363,6 @@ class Client(object):
                 return verify_key_str
         return False
 
-    def add_block(self, block):
-        chain = self.chain
-        if chain.add_block(block):
-            self.listen_block_change(block)
-        else:
-            logging.warn("Invalid block")
-
     def initiate_protocol_handler(self):
         messages = {
             "senate_broadcast": message.Message(handler=self.on_senate_broadcast,
@@ -333,36 +371,26 @@ class Client(object):
         }
         self._meta_messages = messages
 
-    def start(self, status=ClientStatus.Wait4Senates, timestamp = 0):
+    def start(self, rounds=0):
         """set the status and timestamp """
-        self._timestamp = timestamp
-        self._status = status
-
-    # def on_blocks_broadcast..
-
-    def on_senate_broadcast(self, payload):
-        logger = self._logger
-        timestamp = self.timestamp
-        status = self.status
-        logger.info("handle senate broadcast")
-
-        # payload = json.loads(data, object_hook=payload_base.PayloadBase.dict2obj)        
-        sender = None
-        
-        if payload.verify():
-            authentication = payload.authentication
-            sender = authentication.sender.verify_key_str
-            if self.is_senate:
-                logger.info("senate broadcast from %s", authentication.sender.mid)
-                if status == Client.ClientStatus.Wait4Senates and payload.timestamp >= timestamp:
-                    return (sender, (None, None, None))
-                else:
-                    logger.warn("status invalid: %s"%status.name)
+        #  TODO: timeout , different role
+        self.set_round(rounds)
+        if self.is_senate:
+            # todo: broadcast existence
+            status = self.ClientStatus.Wait4TxsAndDirector
+            self.set_client_status(status)
+            if self.is_senate_leader:
+                # set timeout for collect and create block
+                def
+                # self.lc = task.LoopingCall(self.send_instruction_when_ready)
+                # self.lc.start(5).addErrback(my_err_back)
+            pass
         else:
-            logger.warn("payload verify fail")
-        # sender, (destination, protoco_name, message)
-        ret = (sender, (None, None, None))
-        return ret
+
+        status = self.ClientStatus.Wait4Senates
+        # self._timestamp = timestamp
+        self.set_client_status(status)
+
 
     def send_senate_broadcast(self):
         logger = self._logger
@@ -381,7 +409,7 @@ class Client(object):
         )
         message.add_signature()
         #  (destination, protoco_name, message)
-        return (json.dumps([dest.mid]), protocol_name, json.dumps(message, default=payload_base.PayloadBase.obj2dict))
+        return json.dumps([dest.mid]), protocol_name, json.dumps(message, default=payload_base.PayloadBase.obj2dict)
 
     def handle_protocols(self, dests, protocol_name, data):
         meta_messages = self._meta_messages
@@ -401,15 +429,68 @@ class Client(object):
         assert(isinstance(obj, pb.DirectorCompetition)), type(obj)
         client_status = self.ClientStatus
         assert(self.status in [client_status.Wait4TxsAndDirector])
-        self.receive_director_competition(signature=obj.signature.signature, txo_idx=(obj.transaction_hash, obj.transaction_idx))
+        self.receive_director_competition(signature=obj.signature.signature,
+                                          txo_idx=transaction_model.TxoIndex(transaction_hash=obj.transaction_hash,
+                                                                             transaction_idx=obj.transaction_idx))
+
+    def handle_transaction_summit(self, obj, remote_vk_str):
+        assert(isinstance(obj, pb.TransactionSummit)), type(obj)
+        client_status = self.ClientStatus
+        assert(self.status in [client_status.Wait4TxsAndDirector])
+        if obj.rounds==self.rounds and self.is_senate:
+            self.receive_transactions(obj.txs)
+
+    def handle_consensus_result(self, obj, remote_vk_str):
+        assert(isinstance(obj, pb.Block)), type(obj)
+        block = block_model.Block(obj)
+        ret = self.senate_sign(block)
+        if ret:
+            # cli.set_cooking_block(copy.copy(block))
+            self.send(self.senates_leader, pb.SenateSignature(signed_block_hash=ret[0], signature=pb.Signature(signer=ret[1],
+                                                                                signature=ret[2]
+                                                                                )))
 
     def handle_block(self, obj, remote_vk_str):
         assert(isinstance(obj, pb.Block)), type(obj)
         client_status = self.ClientStatus
         if self.status == client_status.Wait4Block:
-            self.add_block(obj)
+            if self.add_block(obj):
+                self.start(self.rounds+1)
         elif self.status == client_status.Wait4Consensus:
-            pass
+            # consensus result
+            self.handle_consensus_result(obj, remote_vk_str)
+        else:
+            raise Exception("chain_runner: handle block in invalid status: {}".format(self.status))
+
+    def send(self, remote_vk, obj):
+        pass
+
+
+    # def on_blocks_broadcast..
+
+    def on_senate_broadcast(self, payload):
+        logger = self._logger
+        timestamp = self.timestamp
+        status = self.status
+        logger.info("handle senate broadcast")
+
+        # payload = json.loads(data, object_hook=payload_base.PayloadBase.dict2obj)
+        sender = None
+
+        if payload.verify():
+            authentication = payload.authentication
+            sender = authentication.sender.verify_key_str
+            if self.is_senate:
+                logger.info("senate broadcast from %s", authentication.sender.mid)
+                if status == Client.ClientStatus.Wait4Senates and payload.timestamp >= timestamp:
+                    return (sender, (None, None, None))
+                else:
+                    logger.warn("status invalid: %s" % status.name)
+        else:
+            logger.warn("payload verify fail")
+        # sender, (destination, protoco_name, message)
+        ret = (sender, (None, None, None))
+        return ret
 
     
 if __name__ == "__main__":

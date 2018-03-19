@@ -265,8 +265,8 @@ def simulation_one_round(clients, verbose=False, evenly_transaction=False):
     start = time.time()
     for cli in clients:
         if cli.is_senate_leader:
-            for (signatory, signature) in responses:
-                cli.add_senate_signature(signatory, signature)
+            for (bl_hash, signatory, signature) in responses:
+                cli.add_senate_signature(bl_hash, signatory, signature)
     end = time.time()
     print "add_senate_signature cost", end-start, "secs"
     

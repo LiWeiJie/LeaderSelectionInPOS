@@ -94,11 +94,16 @@ message Chain {
 // TODO:
 // message ping pong
 
-// 2. second director competition
+// 2. second director competition and transaction
 message DirectorCompetition {
     Signature signature = 1;
     bytes trransaction_hash = 2;
     int32 transaction_idx = 3;
+}
+
+message TransactionSummit {
+    int32 rounds = 1;
+    repeated Transaction txs = 2;
 }
 
 // 3. leader create block then send to senates

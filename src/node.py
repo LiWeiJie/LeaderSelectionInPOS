@@ -75,6 +75,9 @@ class MyProto(ProtobufReceiver):
         elif isinstance(obj, pb.DirectorCompetition):
             self.factory.chain_runner.handle_director_competition(obj, self.remote_vk)
 
+        elif isinstance(obj, pb.TransactionSummit):
+            self.factory.chain_runner.handle_transaction_summit(obj, self.remote_vk)
+
         elif isinstance(obj, pb.Block):
             self.factory.chain_runner.handle_block(obj, self.remote_vk)
 

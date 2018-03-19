@@ -130,7 +130,7 @@ class TestClient(unittest.TestCase):
         for cli in clients:
             if cli.is_senate_leader:
                 for am in accepted_message:
-                    cli.add_senate_signature(am[0], am[1])
+                    cli.add_senate_signature(am[0], am[1], am[2])
 
         b = None
         for cli in clients:
