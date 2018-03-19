@@ -12,8 +12,16 @@
 import json
 
 from . import transaction_model
+from src.chain.model.transaction_model import Transaction
 from . import member_model
-from ..utils import hash_utils
+from src.utils import hash_utils
+from src.protobufwrapper import ProtobufWrapper
+import src.messages.messages_pb2 as pb
+from src.chain.model.member_model import verify
+import logging
+
+from src.utils.encode_utils import json_bytes_dumps, json_bytes_loads
+
 
 def load_blocks(path):
     with open(path, 'r') as f:
@@ -31,27 +39,34 @@ def dump_blocks(blocks, path):
 
 def dumps_blocks(blocks):
     return json.dumps(blocks, default=Block.obj2dict)
-class Block(object):
 
-    def __init__(self, prev_hash, q = None):
-        self._prev_hash = None
-        self._q = None
-        self._merkle_root = None
-        self._n_txs = 0
 
-        self._txs = []
-        self._hash = None
+def encode_in_utf8(code):
+    if isinstance(code, unicode):
+        return code.encode('utf-8')
+    else:
+        return code
+
+class Block(ProtobufWrapper):
+
+    def __init__(self, pbo):
+        assert(isinstance(pbo, pb.Block)), type(pbo)
+        super(Block, self).__init__(pbo)
+        # self._prev_hash = pbo.prev_hash
+        # self._q = pbo.q
+        self._merkle_root = pbo.merkle_root
+        self._txs = [Transaction(tx) for tx in pbo.txs]
+
         self._merkle_tree = None
-        self._signature = None
 
-        self._director = None
-        self._senates = []
-        if prev_hash:
-            # print prev_hash, " type ", type(prev_hash)
-            self._prev_hash = prev_hash.encode('utf-8')
+    @classmethod
+    def new(cls, prev_hash, q=""):
+        obj = cls(pb.Block(
+            prev_hash=prev_hash,
+            q=q
+        ))
+        return obj
 
-        if q:
-            self._q = q.encode('utf-8')
 
     # MARK: Not needed: blocks write and load is needed, not block
     # @classmethod
@@ -67,16 +82,17 @@ class Block(object):
 
     @property
     def n_txs(self):
-        return self._n_txs
+        return self._txs.__len__()
 
     @property
     def q(self):
-        return self._q
+        return self.pb.q
     
     @property
     def merkle_root(self):
         if not self._merkle_root:
             self._merkle_root = self.merkle_tree[-1]
+            self.pb.merkle_root = self.merkle_tree[-1]
         return self._merkle_root
 
     @property
@@ -85,84 +101,115 @@ class Block(object):
             self.completion_merkle_tree()
         return self._merkle_tree
 
-    @property
-    def hash(self):
-        if not self._hash:
-            self.cal_hash()
-        return self._hash
+    # @property
+    # def hash(self):
+    #     if not self._hash:
+    #         self.cal_hash()
+    #     return self._hash
 
     @property
     def prev_hash(self):
-        return self._prev_hash
+        return self.pb.prev_hash
     
     @property
     def transactions(self):
         return self._txs
 
     @property
-    def signature(self):
-        return self._signature
+    def director_signature(self):
+        return self.pb.director_signature
 
     @property
     def senates(self):
-        return self._senates
+        return self.pb.senates_signature
 
     @property
     def director(self):
         """director's verify_key"""
-        return self._director
+        return self.pb.director_signature.signer
+    
+    def on_change(self):
+        super(Block, self).on_change()
+        self.pb.merkle_root
+        self._merkle_root = ""
+        self._merkle_tree = None
+    
+    def add_transactions(self, txs):
+        pbs = [t.pb for t in txs]
+        self.pb.txs.extend(pbs)
+        n = pbs.__len__()
+        last_pbs = self.pb.txs[-n:]
+        new_txs = [Transaction(tx) for tx in last_pbs ]
+        self._txs.extend(new_txs)
+        self.on_change()
+
+    def add_senate_signature(self, senate, senate_signature):
+        """
+        must verify the senate's real identity in outside
+        @senate_verify_key_str  pem format
+        """
+        self.pb.senates_signature.add(signer=senate, signature=senate_signature)
+        # self._senates_signature = self.pb.senates_signature
+        self.on_change()
+
+    def set_q(self, new_q):
+        # self._q = new_q
+        self.pb.q = new_q
+        self.on_change()
 
     def set_director(self, director):
-        self._director = director
+        self.pb.director_signature.signer = director
+        self.pb.director_signature.signature = ''
+        self.on_change()
+
+    def set_director_signature(self, signer, signature):
+        self.pb.director_signature.signer = signer
+        self.pb.director_signature.signature = signature
+        # self._director_signature = self.pb.director_signature
+        self.on_change()
 
     def director_sign(self, member, prev_q):
         """add director, signature, q"""
-        self.set_director(member)
-        self._q = member.sign(hash_utils.hash_std(prev_q))
-        self._signature = member.sign(self.hash)
+        self.set_q(member.sign(hash_utils.hash_std(prev_q)))
+        self.set_director(member.verify_key_str)
+        data = self.get_director_sign_data_source()
+        self.set_director_signature(signer=member.verify_key_str, signature=member.sign(data))
 
     def director_verify(self, prev_q):
         """including:
         signature of the block hash value by director
         q
         """
-        if not self.signature or not self.director or not self.q:
+        if not self.director_signature or not self.director or not self.q:
             return False
         director = self.director
         prev_q = hash_utils.hash_std(prev_q)
-        return director.verify(prev_q, self.q) and director.verify(self.hash, self.signature)
+        data = self.get_director_sign_data_source()
+        return verify(signer=director, data=prev_q, signature=self.q) and verify(signer=director, data=data, signature=self.director_signature.signature)
 
-    def add_senate_signature(self, senate_verify_key_str, senate_signature):
-        """
-        must verify the senate's real identity in outside
-        @senate_verify_key_str  pem format
-        """
-        self._senates.append((senate_verify_key_str, senate_signature))
-
-    def get_senate_sign_source(self):
+    def get_senate_sign_data_source(self):
         """including director_verify_key_str, transaction merkle_root"""
-        director = self.director
-        assert isinstance(director, member_model.MemberModel), type(director)
-        director_str = director.verify_key_str
-        return director_str + self.merkle_root
+        # director = self.director
+        # assert isinstance(director, member_model.MemberModel), type(director)
+        # director_str = director.verify_key_str
+        return self.director + self.merkle_root
 
-    def get_block_star_info_source(self):
-        """the data of b*, including the prev_block, the q, the transactions merkle root"""
-        prev_hash = self.prev_hash
-        if not prev_hash:
-            prev_hash = ""
-        data = prev_hash + self.q + self.merkle_root
-        return data
+    def get_director_competition_data_source(self):
+        """the data of b*, including the prev_block, the q, the transactions merkle root, director"""
+        header = self.prev_hash
+        header += self.q
+        header += self.merkle_root
+        # logging.info("director {} {}".format(self.director.__len__(), self.director.encode("utf-8")))
+        header += self.director
+        hv = hash_utils.hash_std(header)
+        return hv
     
-    def set_q(self, new_q):
-        self._q = new_q.encode('utf-8')
-
-    def add_transactions(self, txs):
-        for tx in txs:
-            assert isinstance(tx, transaction_model.Transaction), type(tx)
-            self._txs.append(tx)
-            self._n_txs += 1
-        self.on_change()
+    def get_director_sign_data_source(self):
+        header = self.prev_hash + self.q + self.merkle_root + self.director + self.merkle_root
+        for s in self.senates:
+            header += s.signature
+        hv = hash_utils.hash_std(header)
+        return hv
 
     def get_transaction(self, idx):
         if idx<=self.n_txs:
@@ -171,15 +218,10 @@ class Block(object):
             return None
 
     def clean_transaction(self):
-        self._n_txs = 0
         self._txs = None
         self._merkle_root = None
         self.on_change()
 
-    def on_change(self):
-        self._merkle_root = None
-        self._merkle_tree = None
-        self._hash = None
 
     def completion_merkle_tree(self):
         n = self.n_txs
@@ -206,40 +248,46 @@ class Block(object):
 
         self._merkle_tree = merkle_tree
 
-    def cal_hash(self):
-        verify_key_str = None
-        if self.director:
-            verify_key_str = self.director.verify_key_str
-        header = [self.prev_hash, self.q, self.merkle_root, verify_key_str]
-        header.extend(self.senates)
-        head_data = json.dumps(header, sort_keys=True)
-        hv = hash_utils.hash_std(head_data)
-        self._hash = hv
+    # def cal_hash(self):
+    #     verify_key_str = None
+    #     if self.director:
+    #         verify_key_str = self.director.verify_key_str
+    #     header = [self.prev_hash, self.q, self.merkle_root, verify_key_str]
+    #     header.extend(self.senates)
+    #     head_data = json.dumps(header, sort_keys=True)
+    #     hv = hash_utils.hash_std(head_data)
+    #     self._hash = hv
 
     @classmethod
     def obj2dict(cls, obj):
         return {
-            "prev_hash": obj.prev_hash,
-            "q":obj.q,
-            "n_txs":obj.n_txs,
+            "prev_hash": json_bytes_dumps(obj.prev_hash),
+            "q":json_bytes_dumps(obj.q),
             "txs": json.dumps(obj.transactions, default=transaction_model.Transaction.obj2dict),
-            "signature": obj.signature,
-            "director": json.dumps(obj.director, default=member_model.MemberModel.obj2dict),
-            "senates": obj.senates
+            "director_signature": (json_bytes_dumps(obj.director_signature.signer), json_bytes_dumps(obj.director_signature.signature)),
+            "senates_signature": [(json_bytes_dumps(s.signer), json_bytes_dumps(s.signature)) for s in obj.senates],
+            # "n_txs":obj.n_txs,
+            "merkle_root": json_bytes_dumps(obj.merkle_root)
         }
 
     @classmethod
     def dict2obj(cls, dic):
-        prev_hash = dic['prev_hash']
-        q = dic['q']
-        b = Block(prev_hash, q)
-        b._n_txs = dic['n_txs']
+        prev_hash = json_bytes_loads(dic['prev_hash'])
+        q = json_bytes_loads(dic['q'])
+        b = Block.new(prev_hash, q)
 
-        b._txs = json.loads(dic['txs'], object_hook=transaction_model.Transaction.dict2obj)
-        b._signature = dic['signature']
+        # FUTURE: Optimization
+        b.add_transactions(json.loads(dic['txs'], object_hook=transaction_model.Transaction.dict2obj))
 
-        b._director = json.loads(dic['director'], object_hook=member_model.MemberModel.dict2obj)
-        b._senates = dic['senates']
+        b.set_director_signature(signer=json_bytes_loads(dic['director_signature'][0].encode('utf-8')),
+                                 signature=json_bytes_loads(dic['director_signature'][1].encode('utf-8')))
+        for signature in dic['senates_signature']:
+            b.add_senate_signature(senate=json_bytes_loads(signature[0].encode('utf-8')),
+                                   senate_signature=json_bytes_loads(signature[1].encode('utf-8')))
+
+        merkle_root = json_bytes_loads(dic["merkle_root"])
+        b.pb.merkle_root = merkle_root
+        b._merkle_root = b.pb.merkle_root
         return b
         
 

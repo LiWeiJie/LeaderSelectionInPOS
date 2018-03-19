@@ -19,7 +19,13 @@ from ..model import member_model
 
 from .unittest_config import unittest_chain_config
 
-from ..utils import random_utils
+from src.utils import random_utils
+
+import src.messages.messages_pb2 as pb
+from src.utils.script_utils import script_to_verify_key
+from src.utils.script_utils import script_to_member
+from src.utils.script_utils import script_to_sig
+
 
 class TestClient(unittest.TestCase):
     
@@ -58,10 +64,10 @@ class TestClient(unittest.TestCase):
         spend_token = spend_satoshi[0]
         spend_txo = spend_satoshi[1]
         ips = leader_client.create_inputs( [spend_token])
-        ops = leader_client.create_outputs( [(100, "verifyKeyStr", client.member.verify_key_str ) for client in clients] )
+        ops = leader_client.create_outputs( [(100, script_to_member(client.member) ) for client in clients] )
         c_tx = leader_client.create_transaction(ips, ops)
         sign_source = c_tx.get_transaction_sign_source()
-        c_tx.add_input_script(0 , leader_client.member.sign(sign_source), leader_client.member.verify_key_str)
+        c_tx.add_input_script(0, script_to_sig(leader_client.member, sign_source))
         self.assertTrue(c_tx.verify_sig_in_inputs([spend_txo]))
 
         # two method create block
@@ -69,7 +75,8 @@ class TestClient(unittest.TestCase):
         cli_ret = []
         for cli in clients:
             if cli.is_senate_leader:
-                cli_ret.append(leader_client.create_block([c_tx]) )
+                cli_ret.append(cli.create_block([c_tx]) )
+        # print cli_ret
         self.assertEqual(cli_ret.__len__(), 1)
         b1 = cli_ret[0]
         # method 2
@@ -140,13 +147,13 @@ class TestClient(unittest.TestCase):
         if verbose:
             print "director sign" , director_signed_block
 
-        self.assertTrue(leader_client.ledger.verify_block(b2))
+        self.assertTrue(leader_client.chain.verify_block(b2))
 
         # add block
         for cli in clients:
             cli.add_block(b)
 
-        self.assertFalse(leader_client.ledger.verify_block(b))        
+        self.assertFalse(leader_client.chain.verify_block(b))
 
         for cli in clients:
             self.assertEqual(cli.my_satoshi_total, 100)
@@ -158,11 +165,11 @@ class TestClient(unittest.TestCase):
             i = 0
             for cli in clients:
                 print cli.last_block.q
-                print i, cli.my_satoshi, cli.ledger.senates
+                print i, cli.my_satoshi, cli.chain.senates
                 i += 1
             print("=== test_clients_local ===")
         
-        leader_client.ledger.dump_blocks(os.path.join(unittest_chain_config.tmp_output_dir, "clients_local.json"))
+        leader_client.chain.dump_blocks(os.path.join(unittest_chain_config.tmp_output_dir, "clients_local.json"))
         
 
 
@@ -180,47 +187,47 @@ class TestClient(unittest.TestCase):
             print("=== test_load_client ===")
         
     
-    def test_client_handle_senate(self, verbose=False):
-        if verbose:        
-            print("=== test_client_handle_senate ===")
+    # def test_client_handle_senate(self, verbose=False):
+    #     if verbose:        
+    #         print("=== test_client_handle_senate ===")
 
-        def send_protocols(cli, dests, protocol, data):
-            ret = cli.handle_protocols(dests, protocol, data)
-            return ret
+    #     def send_protocols(cli, dests, protocol, data):
+    #         ret = cli.handle_protocols(dests, protocol, data)
+    #         return ret
 
-        members = unittest_chain_config.get_members(10)
-        blocks_path = unittest_chain_config.genic_chain_path
+    #     members = unittest_chain_config.get_members(10)
+    #     blocks_path = unittest_chain_config.genic_chain_path
 
-        clients = [client.Client(member=member, blocks_path= blocks_path) for member in members ]
+    #     clients = [client.Client(member=member, blocks_path= blocks_path) for member in members ]
 
-        client0 = clients[0]
-        client1 = clients[1]
+    #     client0 = clients[0]
+    #     client1 = clients[1]
         
-        member0 = members[0]
-        member1 = members[1]
+    #     member0 = members[0]
+    #     member1 = members[1]
 
-        a = payload_base.PayloadBase(sender=member0,
-                                                    destination=member_model.BroadcastMember())
-        a.add_signature()
-        a.verify()
-        # print "38 ", a
-        dic_a = json.dumps(a, default=payload_base.PayloadBase.obj2dict)
-        # print "s ", dic_a
-        print dic_a
-        b = json.loads(dic_a, object_hook=payload_base.PayloadBase.dict2obj)
-        # print b
+    #     a = payload_base.PayloadBase(sender=member0,
+    #                                                 destination=member_model.BroadcastMember())
+    #     a.add_signature()
+    #     a.verify()
+    #     # print "38 ", a
+    #     dic_a = json.dumps(a, default=payload_base.PayloadBase.obj2dict)
+    #     # print "s ", dic_a
+    #     print dic_a
+    #     b = json.loads(dic_a, object_hook=payload_base.PayloadBase.dict2obj)
+    #     # print b
 
 
-        dest, protocol, data = client0.send_senate_broadcast()
-        # print "f ", data
-        if dest:
-            sender, (dest, protocol, data) = ret = send_protocols(client0, dest, protocol, data)
-            # all None
-            self.assertEqual(sender, client0.member.verify_key_str)
-            self.assertEqual(dest, protocol)
-            self.assertEqual(dest, data)
-            if verbose:        
-                print ret
-        if verbose:        
-            print("=== test_client_handle_senate ===")
+    #     dest, protocol, data = client0.send_senate_broadcast()
+    #     # print "f ", data
+    #     if dest:
+    #         sender, (dest, protocol, data) = ret = send_protocols(client0, dest, protocol, data)
+    #         # all None
+    #         self.assertEqual(sender, client0.member.verify_key_str)
+    #         self.assertEqual(dest, protocol)
+    #         self.assertEqual(dest, data)
+    #         if verbose:        
+    #             print ret
+    #     if verbose:        
+    #         print("=== test_client_handle_senate ===")
         

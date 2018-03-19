@@ -16,10 +16,11 @@ import os
 from ..model import member_model
 from .unittest_config import unittest_chain_config
 from .. import config
-from ..utils import hash_utils
+from src.utils import hash_utils
+import src.messages.messages_pb2 as pb
 
 def get_member():
-    return member_model.MemberModel(genkey=True)
+    return member_model.MemberModel.new(genkey=True)
 
 def get_random_hash():
     return hash_utils.hash_std("sad")
@@ -59,29 +60,26 @@ class TestMember(unittest.TestCase):
         path = os.path.join(unittest_chain_config.tmp_output_dir, "member_config.txt")
         c.write_to_path(path, except_signing_key=False)
         c = a
-        a.load_key_from_path(path)
+        a = member_model.MemberModel.new(False, path)
         self.assertTrue(c.verify(msg, a.sign(msg)))
-        a = member_model.MemberModel(False, path)
-        self.assertTrue(c.verify(msg, a.sign(msg)))
-        a = member_model.MemberModel(True)
+        a = member_model.MemberModel.new(True)
         self.assertFalse(c.verify(msg, a.sign(msg)))
         os.remove(path)
 
 from ..model import transaction_model
 
 def get_input():
-    ip = transaction_model.Transaction.Input("transaction_hash", 0, "script")
+    ip = transaction_model.Transaction.Input.new(transaction_hash="transaction_hash", transaction_idx=0, script=pb.Script())
     return ip
 
 def get_output():
-    op = transaction_model.Transaction.Output(1, "verifyKeyStr", "address")
+    op = transaction_model.Transaction.Output.new(1, pb.Script())
     return op
 
 def get_tx():
     tx = transaction_model.Transaction()
     tx.add_inputs([get_input()])
     tx.add_outputs([get_output()])
-    tx.cal_hash()
     return tx
     
 class TestTransaction(unittest.TestCase):
@@ -90,7 +88,6 @@ class TestTransaction(unittest.TestCase):
         tx = get_tx()
         tx_str = json.dumps(tx, default=tx.obj2dict)
         t2 = json.loads(tx_str, object_hook=tx.dict2obj)
-        t2.cal_hash()
         tx2_str = json.dumps(t2, default=t2.obj2dict)
         self.assertEqual(tx.hash, t2.hash)
 
@@ -106,7 +103,6 @@ class TestTransaction(unittest.TestCase):
         tx = get_tx()
         tx.add_inputs([ip])
         tx.add_outputs([op])
-        tx.cal_hash()     
 
     def test_output_init(self):
         op = get_output()
@@ -134,9 +130,9 @@ class TestTransaction(unittest.TestCase):
     
         
 def get_block():
-    b = block_model.Block("prev_hash", "q")
+    b = block_model.Block.new("prev_hash", "q")
     b.add_transactions([get_tx(), get_tx()])
-    member = member_model.MemberModel(genkey=True)
+    member = member_model.MemberModel.new(genkey=True)
     b.director_sign(member, "prev_q")
     return b
 
@@ -144,7 +140,7 @@ from ..model import block_model
 class TestBlock(unittest.TestCase):
     
     def test_init(self):
-        b = block_model.Block("prev_hash","q")
+        b = block_model.Block.new("prev_hash","q")
 
     def test_get_merkle_root(self):
         b = get_block()
@@ -162,7 +158,6 @@ class TestBlock(unittest.TestCase):
         b = get_block()
         bjd = json.dumps(b, default=block_model.Block.obj2dict)
         b2 = json.loads(bjd, object_hook=block_model.Block.dict2obj)
-        b2.cal_hash()
         self.assertEqual( b.hash, b2.hash)
 
     def test_block_write_down(self):
@@ -188,11 +183,11 @@ class TestBlock(unittest.TestCase):
         # print dic
         dic_obj = [ls[0].dict2obj(x) for x in dic ]
         for i in range(ls.__len__()):
-            ls[i].cal_hash()
-            dic_obj[i].cal_hash()
-        self.assertEqual(dic_obj[i].hash, ls[i].hash)
+            # ls[i].cal_hash()
+            # dic_obj[i].cal_hash()
+            self.assertEqual(dic_obj[i].hash, ls[i].hash)
 
-from ..model import ledger_model
+from ..model import chain_model
 
 def get_genic_blocks():
     blocks_path = unittest_chain_config.genic_chain_path
@@ -202,7 +197,7 @@ def get_genic_blocks():
     return bs
 
 def get_ledger():
-    ledger = ledger_model.Ledger()
+    ledger = chain_model.Chain.new()
     bs = get_genic_blocks()
     ledger.set_ledger(bs, None)
     return ledger
@@ -211,7 +206,7 @@ class TestLedger(unittest.TestCase):
 
     def test_get_ledger(self):
         l = get_ledger()        
-        self.assertIsInstance(l, ledger_model.Ledger)
+        self.assertIsInstance(l, chain_model.Chain)
         b = l.last_block
         self.assertEquals(b.transactions.__len__(), 1)
         tx = b.transactions[-1]

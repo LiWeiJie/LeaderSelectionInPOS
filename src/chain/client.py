@@ -30,15 +30,17 @@ from payload import payload_base
 from .model import member_model
 from .model import block_model
 from .model import transaction_model
-from .model import ledger_model
-from .model import transaction_output_index
+from .model import chain_model
 
-from .utils import message
-from .utils import hash_utils
+from src.utils import message
+from src.utils import hash_utils
+import src.messages.messages_pb2 as pb
+
+from src.chain.model.member_model import verify
         
 class Client(object):
 
-    STATUS = enum.Enum("client_status",('Sleeping', "Wait4Senates"))
+    STATUS = enum.Enum("client_status" , ('Sleeping', "Wait4Senates"))
     
     @property
     def status(self):
@@ -53,12 +55,12 @@ class Client(object):
         return self._member
 
     @property
-    def ledger(self):
-        return self._ledger
+    def chain(self):
+        return self._chain
 
     @property
     def last_block(self):
-        return self.ledger.last_block
+        return self.chain.last_block
 
     @property
     def pending_transactions(self):
@@ -90,32 +92,32 @@ class Client(object):
 
     @property
     def is_senate(self):
-        ledger = self.ledger
+        ledger = self.chain
         senates = ledger.senates
         return self.member.verify_key_str in senates
 
     @property
     def is_senate_leader(self):
-        senates = self.ledger.senates
+        senates = self.chain.senates
         mvs = self.member.verify_key_str
         if mvs in senates:
             if self._leader_serial_number in senates[mvs]:
                 return True
         return False
 
-    def __init__(self, member=None, blocks_path=None, factory=None):
+    def __init__(self, member=None, blocks_path=None):
         """
 
         :param member: MemberModel or member_path , if None , will generate a random member
         :param blocks_path:
         """
-        self._factory = factory
+
         self._timestamp = 0
         self._leader_serial_number = 0
         self._status = Client.STATUS.Sleeping
         self._cooking_food = {}
 
-        self._ledger = ledger_model.Ledger()
+        self._chain = chain_model.Chain.new()
         
         # the pending transactions 
         self._pending_transactions = {}
@@ -126,7 +128,7 @@ class Client(object):
             if not isinstance(member, member_model.MemberModel):
                 member_path = member
                 member = member_model.MemberModel()
-                member.load_key_from_path(member_path)
+                member.new(key_path=member_path)
         assert isinstance(member, member_model.MemberModel), type(member)
 
         self._member = member
@@ -135,8 +137,8 @@ class Client(object):
         self._m_satoshi_total = 0
         if blocks_path:
             bs = block_model.load_blocks(blocks_path)
-            ledger = self._ledger
-            ledger.set_ledger(bs, None)
+            chain = self.chain
+            chain.set_ledger(bs, None)
             self.listen_block_change(None)
 
         # logger
@@ -154,13 +156,16 @@ class Client(object):
 
     def update_my_satoshi(self):
         """check the satoshi client have"""
-        utxos = self.ledger.utxos
+        utxos = self.chain.utxos
         member = self.member
         m_satoshi = {}
         m_satoshi_total = 0
-        for  (key, transaction_output) in utxos.items():
-            
-            if transaction_output.addresses == member.verify_key_str:
+        for (key, transaction_output) in utxos.items():
+            # print ("trans {}".format(transaction_output.script))
+            # vkd = transaction_output.script.body[0].data
+            # print ("trans vk {}".format(.))
+            # print ("member {}".format(member.verify_key_str))
+            if transaction_output.script.body[0].data == member.verify_key_str:
                 m_satoshi[ key ] = transaction_output
                 m_satoshi_total += transaction_output.value
         self._m_satoshi = m_satoshi
@@ -172,17 +177,16 @@ class Client(object):
         """
         ips = []
         for (transaction_hash, transaction_idx) in transaction_info:
-            ips.append(transaction_model.Transaction.Input(transaction_hash, transaction_idx))
+            ips.append(transaction_model.Transaction.Input.new(transaction_hash, transaction_idx))
         return ips
 
     def create_outputs(self, transaction_info):
         """
-        @transaction_info list of tuples (value, script, addresses)
+        @transaction_info list of tuples (value, script, address)
         """
         ops = []
-        for (value, script, addresses) in transaction_info:
-            assert script in transaction_model.TransactionOutputScriptOP
-            ops.append( transaction_model.Transaction.Output(value, script, addresses))
+        for (value, script) in transaction_info:
+            ops.append(transaction_model.Transaction.Output.new(value=value, script=script))
         return ops
 
     def create_transaction(self, inputs, outputs):
@@ -190,8 +194,9 @@ class Client(object):
         tx.add_inputs(inputs)
         tx.add_outputs(outputs)
         source = tx.get_transaction_sign_source()
+        # MARK: deprecated in future
         for i in range(inputs.__len__()):
-            tx.add_input_script(i, self.member.sign(source), self.member.verify_key_str)
+            tx.add_input_script(i, pb.Script(body=[pb.ScriptUnit(type=pb.SCRIPT_DATA, data=self.member.sign(source))]))
         return tx
 
     def update_pending_transactions(self, block):
@@ -212,7 +217,6 @@ class Client(object):
         # ----- method 2 ----
         self._pending_transactions = {}
 
-
     def receive_transactions(self, transactions):
         """collect transactions"""
         for transaction in transactions:
@@ -230,14 +234,12 @@ class Client(object):
     def create_block(self, transactions=None):
         """create by accepted transactions"""
         last_block = self.last_block
-        block = block_model.Block(last_block.hash)
+        block = block_model.Block.new(last_block.hash)
         if not transactions:
             transactions = self.pending_transactions.values()
         block.add_transactions(transactions)
-        # transaction fee and block reward
-        # FUTURE:
-        # FEATURE:INCENTIVE
         self.add_director(block)
+        
         return block
     
     def set_cooking_block(self, block):
@@ -252,9 +254,9 @@ class Client(object):
 
     def senate_sign(self, block):
         if self.is_senate:
-            ledger = self.ledger
+            ledger = self.chain
             if ledger.verify_transactions(block)!=None:
-                data = block.get_senate_sign_source()
+                data = block.get_senate_sign_data_source()
                 member = self.member
                 return (member.verify_key_str, member.sign(data))
             else :
@@ -262,8 +264,8 @@ class Client(object):
         return False
 
     def director_sign(self, block):
-        if block.director.verify_key_str==self.member.verify_key_str:
-            ledger = self.ledger
+        if block.director == self.member.verify_key_str:
+            ledger = self.chain
             block.director_sign(self.member, ledger.last_block.q)
             if ledger.verify_block(block) :
                 return block
@@ -286,21 +288,20 @@ class Client(object):
                     return None
             else:
                 return None
-        assert isinstance(director, member_model.MemberModel), type(director)
         block.set_director(director)
         return block
 
     def add_senate_signature(self, signatory, signature):
         block = self.get_cooking_block()
-        sign_source = block.get_senate_sign_source()
-        if self.ledger.verify_senate_signature(signatory, sign_source, signature):
+        sign_source = block.get_senate_sign_data_source()
+        if self.chain.verify_senate_signature(signatory, sign_source, signature):
             block.add_senate_signature(signatory, signature)
 
     def get_director_competition_signature(self, transaction_hash, transaction_idx):
         """return (signature, txo_idx),  signature = sign_owner( hash(prev_hash+q+merkle_root + transacntion out index ) ) """
         utxo_idx = (transaction_hash, transaction_idx)
         if (transaction_hash, transaction_idx) in self.my_satoshi:
-            ret = self.ledger.get_director_competition_signature_source(transaction_hash, transaction_idx)
+            ret = self.chain.get_director_competition_signature_source(transaction_hash, transaction_idx)
             if ret:
                 source, txo_idx, __output = ret
                 data = self.member.sign(source)
@@ -309,18 +310,17 @@ class Client(object):
 
     def verify_director_competition_signature(self, signature, txo_idx):
         """return the owner member"""
-        ret = self.ledger.get_director_competition_signature_source(txo_idx.transaction_hash, txo_idx.transaction_idx)
+        ret = self.chain.get_director_competition_signature_source(txo_idx.transaction_hash, txo_idx.transaction_idx)
         if ret:
             source, __txo_idx, op = ret
-            verify_key_str = op.addresses
-            m = member_model.MemberModel.get_verify_member(verify_key_str)
-            if m.verify(source, signature):
-                return m
+            verify_key_str = op.address
+            if verify(signer=verify_key_str, signature=signature, data=source):
+                return verify_key_str
         return False
 
     def add_block(self, block):
-        ledger = self._ledger
-        if ledger.add_block(block):
+        chain = self.chain
+        if chain.add_block(block):
             self.listen_block_change(block)
         else:
             logging.warn("Invalid block")
@@ -415,9 +415,9 @@ def gen_some_member(path, number=10):
 def gen_genic_block(path, owner_path):
     member = member_model.MemberModel(key_path=owner_path)
     tx = transaction_model.Transaction()
-    op = transaction_model.Transaction.Output(1000.0, "verifyKeyStr", member.verify_key_str)
+    op = transaction_model.Transaction.Output.new(1000, pb.SCRIPT_TYPE_VK, member.verify_key_str)
     tx.add_outputs([op])
-    b = block_model.Block(None, hash_utils.hash_std("genic block"))
+    b = block_model.Block.new(None, hash_utils.hash_std("genic block"))
     b.add_transactions([tx])
     b.director_sign(member)
     block_model.dump_blocks([b], path)

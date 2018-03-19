@@ -29,28 +29,38 @@ message Pong {
 
 
 message Signature {
-    bytes vk_str = 1;
+    bytes signer = 1;
     bytes signature = 2;
 }
 
 message Member {
-    string vk_str = 1;
-    string sk_str = 2;
+    bytes vk_str = 1;
+    bytes sk_str = 2;
 }
 
 message TxInput {
-    string tx_hash = 1;
-    int32 tx_idx = 2;
-    string script = 3;
+    bytes transaction_hash = 1;
+    int32 transaction_idx = 2;
+    Script script = 3;
+}
+
+enum ScriptUnitType {
+    SCRIPT_DATA  = 0;
+    SCRIPT_CHECK_SIG  = 1;
+}
+
+message ScriptUnit {
+    ScriptUnitType type = 1;
+    bytes data = 2;
+}
+
+message Script {
+    repeated ScriptUnit body = 1;
 }
 
 message TxOutput {
-    enum ScriptType {
-        VK = 0;
-    }
-    string value = 1;
-    ScriptType script = 2;
-    string address = 3;
+    int32 value = 1;
+    Script script = 2;
 }
 
 message Transaction {
@@ -59,23 +69,25 @@ message Transaction {
 }
 
 message Block {
-    string prev_hash = 1;
-    string q = 2;
-    string merkle_root = 3;
-    string director = 4;
-    repeated Transaction txs = 5;
+    bytes prev_hash = 1;
+    bytes q = 2;
+    bytes merkle_root = 3; // optional for the efficient
+    repeated Transaction txs = 4;
 
     // senates  sign from above
-    repeated Signature senates_signature = 6;
+    repeated Signature senates_signature = 5;
 
     // director sign from above
-    Signature director_signature = 7;
+    Signature director_signature = 6;
 }
 
 message Chain {
-    int32 senate_number = 1;
-    int32 failure_boundary = 2;
-    repeated Block blocks = 3;
+    repeated Block blocks = 1;
+    int32 senates_number = 2;
+    int32 failure_boundary = 3;
+    // maybe in client
+    // int32 director_competition_timeout_in_secs = 4;
+    // int32 senate_communication_timeout_in_secs = 5;
 }
 
 // 1. first broadcast senate existence

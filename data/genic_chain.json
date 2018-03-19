@@ -1,11 +1,13 @@
 [
     {
-        "director": "{\"_verify_key\": \"CeMzMoWc-ux6Dr21QPZxiMC9T1XaF9m_pOs-S-A7eYnfeJgW2LuJ1NNGaUid6H2D\"}",
-        "prev_hash": "genic_block",
-        "q": "31bb0f8b1f81b659cb6a78c58ff699c4fe29a1cf92378e2dd493b5e30be6e9df8f7a16c06a25261637f8b3b8f4ead23c",
-        "signature": "b2b32583fe500102db6daa9b89dbfbd061ab72b4afeb3d821eedc8da39bce2e284554be918f52383d4e776deb6069099",
-        "txs": "[{\"inputs\": \"[]\", \"outputs\": \"[{\\\"addresses\\\": \\\"CeMzMoWc-ux6Dr21QPZxiMC9T1XaF9m_pOs-S-A7eYnfeJgW2LuJ1NNGaUid6H2D\\\", \\\"value\\\": 1000000, \\\"script\\\": \\\"verifyKeyStr\\\"}]\"}]",
-        "n_txs": 1,
-        "senates": []
+        "senates_signature": [],
+        "merkle_root": "yFfN5PRK5H98y5dM_3soXmHzD7X9dp__bEaZO39O5rI=",
+        "q": "3dB95XpDbXGxoCvDP6pkA8rI14FuPBIuukmfLNb748a7LMYwgEuNmLZRTIMc2Pz7",
+        "prev_hash": "l_XufzG4V2pOBuFmex_0Geti--RElX9Btw-_NvT1fsw=",
+        "txs": "[{\"inputs\": \"[]\", \"outputs\": \"[{\\\"value\\\": 1000000, \\\"script\\\": \\\"CjISMAnjMzKFnPrseg69tUD2cYjAvU9V2hfZv6TrPkvgO3mJ33iYFti7idTTRmlIneh9gwoCCAE=\\\"}]\"}]",
+        "director_signature": [
+            "CeMzMoWc-ux6Dr21QPZxiMC9T1XaF9m_pOs-S-A7eYnfeJgW2LuJ1NNGaUid6H2D",
+            "qD251oyC0-1Wl28F_zh3GyLZFJw41_GpHkAwTDDn7LFjwqxciOXSz39NWbQ1Gm2I"
+        ]
     }
 ]
