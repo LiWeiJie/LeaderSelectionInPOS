@@ -112,15 +112,24 @@ message TransactionSummit {
 // 4. consensus the block 
 // TODO:
 // pbft 
+message ConsensusReq {
+    Block block = 1;
+}
+
+message ConsensusResult {
+    Block block = 1;
+}
 
 // 5. reply signature
 message SenateSignature {
     bytes signed_block_hash = 1;
-    Signature signature = 2;
+    Signature senate_signature = 2;
 }
 
 // 6. send to director
-// message Block
+message DirectorShowTime {
+    Block block = 1;
+}
 
 // 7. director sent block
 // message Block

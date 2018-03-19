@@ -37,6 +37,14 @@ from src.utils import hash_utils
 import src.messages.messages_pb2 as pb
 
 from src.chain.model.member_model import verify
+
+from twisted.internet import task
+
+from src.utils.network_utils import my_err_back, call_later
+# from src.utils import set_logging, my_err_back, call_later
+
+
+
         
 class Client(object):
 
@@ -59,8 +67,12 @@ class Client(object):
         return self._leader_serial_number
 
     @property
+    def senates(self):
+        return self.chain.senates
+
+    @property
     def senates_leader(self):
-        if self._senates_leader==None:
+        if self._senates_leader is None:
             senates = self.chain.senates
             for senate in senates:
                 if self.leader_serial_number in senates[senate]:
@@ -123,7 +135,7 @@ class Client(object):
         # return False
         return self.senates_leader==self.member.verify_key_str
 
-    def __init__(self, member=None, blocks_path=None, consensus_timeout=10, director_competition_timeout = 5):
+    def __init__(self, member=None, blocks_path=None, consensus_timeout=10, prepare_timeout = 5, factory=None):
         """
 
         :param member: MemberModel or member_path , if None , will generate a random member
@@ -131,8 +143,11 @@ class Client(object):
         """
 
         self.consensus_timeout = consensus_timeout
-        self.director_competition_timeout = director_competition_timeout
+        self.prepare_timeout = prepare_timeout
         self._senates_leader = None
+
+        self.factory = factory
+        self.consensus_reached = {}
 
         self._timestamp = 0
         # TODO: decide which senate be the leader
@@ -179,6 +194,8 @@ class Client(object):
         self.update_my_satoshi()
         self._cooking_food = {}
         self._senates_leader = None
+        self._leader_serial_number = 0
+
 
     def update_my_satoshi(self):
         """check the satoshi client have"""
@@ -241,6 +258,10 @@ class Client(object):
     def set_client_status(self, status):
         assert(status in self.ClientStatus)
         self._status = status
+
+    def next_senate_leader(self):
+        self._senates_leader = None
+        self._leader_serial_number += 1
        
     def create_inputs(self, transaction_info):
         """
@@ -344,9 +365,9 @@ class Client(object):
 
     def director_sign(self, block):
         if block.director == self.member.verify_key_str:
-            ledger = self.chain
-            block.director_sign(self.member, ledger.last_block.q)
-            if ledger.verify_block(block) :
+            chain = self.chain
+            block.director_sign(self.member, chain.last_block.q)
+            if chain.verify_block(block) :
                 return block
             else:
                 block._q = None
@@ -375,22 +396,84 @@ class Client(object):
         """set the status and timestamp """
         #  TODO: timeout , different role
         self.set_round(rounds)
+        self.consensus_reached[rounds] = False
         if self.is_senate:
             # todo: broadcast existence
             status = self.ClientStatus.Wait4TxsAndDirector
             self.set_client_status(status)
             if self.is_senate_leader:
                 # set timeout for collect and create block
-                def
-                # self.lc = task.LoopingCall(self.send_instruction_when_ready)
-                # self.lc.start(5).addErrback(my_err_back)
-            pass
+
+                # self.factory.lc = task.LoopingCall(self.send_senate_block_when_ready)
+                # self.factory.lc.start(self.prepare_timeout).addErrback(my_err_back)
+                call_later(self.prepare_timeout, self.send_senate_block_when_ready)
+            else:
+                call_later(self.prepare_timeout, self.consensus_phase_when_ready)
         else:
+            status = self.ClientStatus.Wait4Block
+            self.set_client_status(status)
 
-        status = self.ClientStatus.Wait4Senates
-        # self._timestamp = timestamp
-        self.set_client_status(status)
+    def consensus_phase_when_ready(self):
+        logging.info("consensus_phase_when_ready")
+        if self.pending_transactions.__len__()>0:
+            def stop_and_restart(r):
+                if not self.consensus_reached[r]:
+                    self.next_senate_leader()
+                    self.start(self.rounds)
+                else:
+                    del self.consensus_reached[r]
+            call_later(self.consensus_timeout, stop_and_restart, self.rounds)
 
+            self.set_client_status(self.ClientStatus.Wait4Consensus)
+        else:
+            next_call = 2
+            logging.info("senate: no transaction, check {} seconds later".format(next_call))
+            call_later(next_call, self.consensus_phase_when_ready)
+
+
+    def send_senate_block_when_ready(self):
+        logging.info("senate leader time to send block")
+        if self.pending_transactions.__len__()>0:
+            def stop_and_restart(r):
+                if not self.consensus_reached[r]:
+                    self.factory.lc.stop()
+                    self.next_senate_leader()
+                    self.start(self.rounds)
+                else:
+                    del self.consensus_reached[r]
+            call_later(self.consensus_timeout, stop_and_restart, self.rounds)
+
+            block = self.create_block()
+            self.set_client_status(self.ClientStatus.Wait4Consensus)
+            for senate in self.senates:
+                self.send(senate, pb.ConsensusReq(block=block))
+
+            self.factory.lc = task.LoopingCall(self.check_enough_senate_signature)
+            start_repeat_call = 2
+            self.factory.lc.start(start_repeat_call).addErrback(my_err_back)
+            # logging.info("Timeout start")
+            # call_later(self.consensus_timeout, stop_and_restart)
+            # self.timeout_called = True
+        else:
+            next_call = 2
+            logging.info("senate leader: no transaction, check {} seconds later".format(next_call))
+            call_later(next_call, self.send_senate_block_when_ready)
+
+    def check_enough_senate_signature(self):
+        block = self.get_cooking_block()
+        received_signature = block.senates
+        ct = 0
+        for senate_signature in received_signature:
+            ct += self.senates[senate_signature.signer].__len__()
+        failure_boundary = self.chain.failure_boundary
+        logging.info("received {}/{}/{} signature".format(ct, failure_boundary, self.chain.senates_number))
+        if ct>=failure_boundary:
+            block = self.get_cooking_block()
+            self.factory.lc.stop()
+            # self.broadcast(block.pb)
+            self.send(block.director, pb.DirectorShowTime(block=block.pb))
+            self.set_client_status(self.ClientStatus.Wait4Block)
+            logging.info("wait4block")
 
     def send_senate_broadcast(self):
         logger = self._logger
@@ -440,29 +523,50 @@ class Client(object):
         if obj.rounds==self.rounds and self.is_senate:
             self.receive_transactions(obj.txs)
 
+    def handle_senate_signature(self, obj, remote_vk_str):
+        assert(isinstance(obj, pb.SenateSignature)), type(obj)
+        self.add_senate_signature(obj.signed_block_hash, obj.senate_signature.signer, obj.senate_signature.signature)
+
     def handle_consensus_result(self, obj, remote_vk_str):
-        assert(isinstance(obj, pb.Block)), type(obj)
-        block = block_model.Block(obj)
+        assert(isinstance(obj, pb.ConsensusResult)), type(obj)
+        # self.consensus_reached = True
+        assert(self.status==self.ClientStatus.Wait4Consensus)
+        block = block_model.Block(obj.block)
         ret = self.senate_sign(block)
         if ret:
             # cli.set_cooking_block(copy.copy(block))
             self.send(self.senates_leader, pb.SenateSignature(signed_block_hash=ret[0], signature=pb.Signature(signer=ret[1],
                                                                                 signature=ret[2]
                                                                                 )))
+            self.set_client_status(self.ClientStatus.Wait4Block)
 
     def handle_block(self, obj, remote_vk_str):
         assert(isinstance(obj, pb.Block)), type(obj)
         client_status = self.ClientStatus
         if self.status == client_status.Wait4Block:
             if self.add_block(obj):
+                self.consensus_reached[self.rounds] = True
                 self.start(self.rounds+1)
-        elif self.status == client_status.Wait4Consensus:
-            # consensus result
-            self.handle_consensus_result(obj, remote_vk_str)
+        # elif self.status == client_status.Wait4Consensus:
+        #     # consensus result
+        #     self.handle_consensus_result(obj, remote_vk_str)
         else:
             raise Exception("chain_runner: handle block in invalid status: {}".format(self.status))
 
+    def handle_director_show_time(self, obj, remote_vk_str):
+        assert(isinstance(obj, pb.DirectorShowTime)), type(obj)
+        block = block_model.Block(obj.block)
+        signed = self.director_sign(block)
+        logging.info("I am director")
+        if signed:
+            self.broadcast(signed.pb)
+
+
+
     def send(self, remote_vk, obj):
+        pass
+
+    def broadcast(self, obj):
         pass
 
 

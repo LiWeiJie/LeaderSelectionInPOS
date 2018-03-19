@@ -16,7 +16,7 @@ import src.messages.messages_pb2 as pb
 from src.protobufreceiver import ProtobufReceiver
 
 from chain.client import Client as ChainRunner
-from src.utils import Replay, Handled, set_logging, my_err_back, call_later, stop_reactor
+from src.utils.network_utils import Replay, Handled, set_logging, my_err_back, call_later, stop_reactor
 from src.discovery import Discovery, got_discovery
 
 
@@ -78,11 +78,18 @@ class MyProto(ProtobufReceiver):
         elif isinstance(obj, pb.TransactionSummit):
             self.factory.chain_runner.handle_transaction_summit(obj, self.remote_vk)
 
-        elif isinstance(obj, pb.Block):
-            self.factory.chain_runner.handle_block(obj, self.remote_vk)
+        elif isinstance(obj, pb.ConsensusReq):
+            # TODO: should delay to consensus machine
+            self.factory.chain_runner.handle_consensus_result(obj, self.remote_vk)
 
         elif isinstance(obj, pb.SenateSignature):
             self.factory.chain_runner.handle_senate_signature(obj, self.remote_vk)
+
+        elif isinstance(obj, pb.DirectorShowTime):
+            self.factory.chain_runner.handle_director_show_time(obj, self.remote_vk)
+
+        elif isinstance(obj, pb.Block):
+            self.factory.chain_runner.handle_block(obj, self.remote_vk)
             
         # old
 

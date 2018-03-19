@@ -3,7 +3,7 @@ from base64 import b64encode
 
 import logging
 import sys
-from chain.utils.hash_utils import hash_std
+from src.utils.hash_utils import hash_std
 
 def byteify(inp):
     """
