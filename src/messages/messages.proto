@@ -110,8 +110,8 @@ message DirectorCompetition {
 
 // 5. reply signature
 message SenateSignature {
-    bytes signed_block_hash
-    Signature signature
+    bytes signed_block_hash = 1;
+    Signature signature = 2;
 }
 
 // 6. send to director

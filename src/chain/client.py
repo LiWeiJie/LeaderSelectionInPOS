@@ -40,7 +40,7 @@ from src.chain.model.member_model import verify
         
 class Client(object):
 
-    STATUS = enum.Enum("client_status" , ('Sleeping', "Wait4Senates"))
+    ClientStatus = enum.Enum("ClientStatus", ('Sleeping', "Wait4Senates", 'Wait4TxsAndDirector', 'Wait4Consensus', 'Wait4Block'))
     
     @property
     def status(self):
@@ -114,7 +114,7 @@ class Client(object):
 
         self._timestamp = 0
         self._leader_serial_number = 0
-        self._status = Client.STATUS.Sleeping
+        self._status = self.ClientStatus.Sleeping
         self._cooking_food = {}
 
         self._chain = chain_model.Chain.new()
@@ -333,7 +333,7 @@ class Client(object):
         }
         self._meta_messages = messages
 
-    def start(self, status=STATUS.Wait4Senates, timestamp = 0):
+    def start(self, status=ClientStatus.Wait4Senates, timestamp = 0):
         """set the status and timestamp """
         self._timestamp = timestamp
         self._status = status
@@ -354,7 +354,7 @@ class Client(object):
             sender = authentication.sender.verify_key_str
             if self.is_senate:
                 logger.info("senate broadcast from %s", authentication.sender.mid)
-                if (status == Client.STATUS.Wait4Senates and payload.timestamp >= timestamp):
+                if status == Client.ClientStatus.Wait4Senates and payload.timestamp >= timestamp:
                     return (sender, (None, None, None))
                 else:
                     logger.warn("status invalid: %s"%status.name)
@@ -396,6 +396,20 @@ class Client(object):
                 else:
                     logger.warn("unknown protocol: %s", protocol_name)
         return (None, (None, None, None))
+
+    def handle_director_competition(self, obj, remote_vk_str):
+        assert(isinstance(obj, pb.DirectorCompetition)), type(obj)
+        client_status = self.ClientStatus
+        assert(self.status in [client_status.Wait4TxsAndDirector])
+        self.receive_director_competition(signature=obj.signature.signature, txo_idx=(obj.transaction_hash, obj.transaction_idx))
+
+    def handle_block(self, obj, remote_vk_str):
+        assert(isinstance(obj, pb.Block)), type(obj)
+        client_status = self.ClientStatus
+        if self.status == client_status.Wait4Block:
+            self.add_block(obj)
+        elif self.status == client_status.Wait4Consensus:
+            pass
 
     
 if __name__ == "__main__":

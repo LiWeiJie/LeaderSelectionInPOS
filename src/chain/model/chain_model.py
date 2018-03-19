@@ -266,7 +266,9 @@ class Chain(ProtobufWrapper):
 
     def add_block(self, block):
         """add block with verify"""
-        assert isinstance(block, block_model.Block), type(block)
+        assert isinstance(block, (block_model.Block, pb.Block)), type(block)
+        if isinstance(block, pb.Block):
+            block = block_model.Block(block)
         if self.verify_block(block, update=True):
             self._senates = None
             self.pb.blocks.extend([block.pb])

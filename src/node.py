@@ -72,7 +72,7 @@ class MyProto(ProtobufReceiver):
         elif isinstance(obj, pb.Pong):
             self.handle_pong(obj)
 
-        elif isinstanceo(obj, pb.DirectorCompetition):
+        elif isinstance(obj, pb.DirectorCompetition):
             self.factory.chain_runner.handle_director_competition(obj, self.remote_vk)
 
         elif isinstance(obj, pb.Block):

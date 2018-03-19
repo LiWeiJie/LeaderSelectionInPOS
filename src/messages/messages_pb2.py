@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='messages.proto',
   package='',
   syntax='proto3',
-  serialized_pb=_b('\n\x0emessages.proto\"$\n\x08\x44iscover\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\"g\n\rDiscoverReply\x12(\n\x05nodes\x18\x01 \x03(\x0b\x32\x19.DiscoverReply.NodesEntry\x1a,\n\nNodesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"@\n\x0bInstruction\x12\x13\n\x0binstruction\x18\x01 \x01(\t\x12\r\n\x05\x64\x65lay\x18\x02 \x01(\x05\x12\r\n\x05param\x18\x03 \x01(\t\" \n\x04Ping\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\" \n\x04Pong\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\".\n\tSignature\x12\x0e\n\x06signer\x18\x01 \x01(\x0c\x12\x11\n\tsignature\x18\x02 \x01(\x0c\"(\n\x06Member\x12\x0e\n\x06vk_str\x18\x01 \x01(\x0c\x12\x0e\n\x06sk_str\x18\x02 \x01(\x0c\"U\n\x07TxInput\x12\x18\n\x10transaction_hash\x18\x01 \x01(\x0c\x12\x17\n\x0ftransaction_idx\x18\x02 \x01(\x05\x12\x17\n\x06script\x18\x03 \x01(\x0b\x32\x07.Script\"9\n\nScriptUnit\x12\x1d\n\x04type\x18\x01 \x01(\x0e\x32\x0f.ScriptUnitType\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x0c\"#\n\x06Script\x12\x19\n\x04\x62ody\x18\x01 \x03(\x0b\x32\x0b.ScriptUnit\"2\n\x08TxOutput\x12\r\n\x05value\x18\x01 \x01(\x05\x12\x17\n\x06script\x18\x02 \x01(\x0b\x32\x07.Script\"C\n\x0bTransaction\x12\x18\n\x06inputs\x18\x01 \x03(\x0b\x32\x08.TxInput\x12\x1a\n\x07outputs\x18\x02 \x03(\x0b\x32\t.TxOutput\"\xa4\x01\n\x05\x42lock\x12\x11\n\tprev_hash\x18\x01 \x01(\x0c\x12\t\n\x01q\x18\x02 \x01(\x0c\x12\x13\n\x0bmerkle_root\x18\x03 \x01(\x0c\x12\x19\n\x03txs\x18\x04 \x03(\x0b\x32\x0c.Transaction\x12%\n\x11senates_signature\x18\x05 \x03(\x0b\x32\n.Signature\x12&\n\x12\x64irector_signature\x18\x06 \x01(\x0b\x32\n.Signature\"Q\n\x05\x43hain\x12\x16\n\x06\x62locks\x18\x01 \x03(\x0b\x32\x06.Block\x12\x16\n\x0esenates_number\x18\x02 \x01(\x05\x12\x18\n\x10\x66\x61ilure_boundary\x18\x03 \x01(\x05*7\n\x0eScriptUnitType\x12\x0f\n\x0bSCRIPT_DATA\x10\x00\x12\x14\n\x10SCRIPT_CHECK_SIG\x10\x01\x62\x06proto3')
+  serialized_pb=_b('\n\x0emessages.proto\"$\n\x08\x44iscover\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\"g\n\rDiscoverReply\x12(\n\x05nodes\x18\x01 \x03(\x0b\x32\x19.DiscoverReply.NodesEntry\x1a,\n\nNodesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"@\n\x0bInstruction\x12\x13\n\x0binstruction\x18\x01 \x01(\t\x12\r\n\x05\x64\x65lay\x18\x02 \x01(\x05\x12\r\n\x05param\x18\x03 \x01(\t\" \n\x04Ping\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\" \n\x04Pong\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\".\n\tSignature\x12\x0e\n\x06signer\x18\x01 \x01(\x0c\x12\x11\n\tsignature\x18\x02 \x01(\x0c\"(\n\x06Member\x12\x0e\n\x06vk_str\x18\x01 \x01(\x0c\x12\x0e\n\x06sk_str\x18\x02 \x01(\x0c\"U\n\x07TxInput\x12\x18\n\x10transaction_hash\x18\x01 \x01(\x0c\x12\x17\n\x0ftransaction_idx\x18\x02 \x01(\x05\x12\x17\n\x06script\x18\x03 \x01(\x0b\x32\x07.Script\"9\n\nScriptUnit\x12\x1d\n\x04type\x18\x01 \x01(\x0e\x32\x0f.ScriptUnitType\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x0c\"#\n\x06Script\x12\x19\n\x04\x62ody\x18\x01 \x03(\x0b\x32\x0b.ScriptUnit\"2\n\x08TxOutput\x12\r\n\x05value\x18\x01 \x01(\x05\x12\x17\n\x06script\x18\x02 \x01(\x0b\x32\x07.Script\"C\n\x0bTransaction\x12\x18\n\x06inputs\x18\x01 \x03(\x0b\x32\x08.TxInput\x12\x1a\n\x07outputs\x18\x02 \x03(\x0b\x32\t.TxOutput\"\xa4\x01\n\x05\x42lock\x12\x11\n\tprev_hash\x18\x01 \x01(\x0c\x12\t\n\x01q\x18\x02 \x01(\x0c\x12\x13\n\x0bmerkle_root\x18\x03 \x01(\x0c\x12\x19\n\x03txs\x18\x04 \x03(\x0b\x32\x0c.Transaction\x12%\n\x11senates_signature\x18\x05 \x03(\x0b\x32\n.Signature\x12&\n\x12\x64irector_signature\x18\x06 \x01(\x0b\x32\n.Signature\"Q\n\x05\x43hain\x12\x16\n\x06\x62locks\x18\x01 \x03(\x0b\x32\x06.Block\x12\x16\n\x0esenates_number\x18\x02 \x01(\x05\x12\x18\n\x10\x66\x61ilure_boundary\x18\x03 \x01(\x05\"h\n\x13\x44irectorCompetition\x12\x1d\n\tsignature\x18\x01 \x01(\x0b\x32\n.Signature\x12\x19\n\x11trransaction_hash\x18\x02 \x01(\x0c\x12\x17\n\x0ftransaction_idx\x18\x03 \x01(\x05\"K\n\x0fSenateSignature\x12\x19\n\x11signed_block_hash\x18\x01 \x01(\x0c\x12\x1d\n\tsignature\x18\x02 \x01(\x0b\x32\n.Signature*7\n\x0eScriptUnitType\x12\x0f\n\x0bSCRIPT_DATA\x10\x00\x12\x14\n\x10SCRIPT_CHECK_SIG\x10\x01\x62\x06proto3')
 )
 
 _SCRIPTUNITTYPE = _descriptor.EnumDescriptor(
@@ -40,8 +40,8 @@ _SCRIPTUNITTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=939,
-  serialized_end=994,
+  serialized_start=1122,
+  serialized_end=1177,
 )
 _sym_db.RegisterEnumDescriptor(_SCRIPTUNITTYPE)
 
@@ -654,6 +654,89 @@ _CHAIN = _descriptor.Descriptor(
   serialized_end=937,
 )
 
+
+_DIRECTORCOMPETITION = _descriptor.Descriptor(
+  name='DirectorCompetition',
+  full_name='DirectorCompetition',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='signature', full_name='DirectorCompetition.signature', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='trransaction_hash', full_name='DirectorCompetition.trransaction_hash', index=1,
+      number=2, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b(""),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='transaction_idx', full_name='DirectorCompetition.transaction_idx', index=2,
+      number=3, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=939,
+  serialized_end=1043,
+)
+
+
+_SENATESIGNATURE = _descriptor.Descriptor(
+  name='SenateSignature',
+  full_name='SenateSignature',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='signed_block_hash', full_name='SenateSignature.signed_block_hash', index=0,
+      number=1, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b(""),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='signature', full_name='SenateSignature.signature', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1045,
+  serialized_end=1120,
+)
+
 _DISCOVERREPLY_NODESENTRY.containing_type = _DISCOVERREPLY
 _DISCOVERREPLY.fields_by_name['nodes'].message_type = _DISCOVERREPLY_NODESENTRY
 _TXINPUT.fields_by_name['script'].message_type = _SCRIPT
@@ -666,6 +749,8 @@ _BLOCK.fields_by_name['txs'].message_type = _TRANSACTION
 _BLOCK.fields_by_name['senates_signature'].message_type = _SIGNATURE
 _BLOCK.fields_by_name['director_signature'].message_type = _SIGNATURE
 _CHAIN.fields_by_name['blocks'].message_type = _BLOCK
+_DIRECTORCOMPETITION.fields_by_name['signature'].message_type = _SIGNATURE
+_SENATESIGNATURE.fields_by_name['signature'].message_type = _SIGNATURE
 DESCRIPTOR.message_types_by_name['Discover'] = _DISCOVER
 DESCRIPTOR.message_types_by_name['DiscoverReply'] = _DISCOVERREPLY
 DESCRIPTOR.message_types_by_name['Instruction'] = _INSTRUCTION
@@ -680,6 +765,8 @@ DESCRIPTOR.message_types_by_name['TxOutput'] = _TXOUTPUT
 DESCRIPTOR.message_types_by_name['Transaction'] = _TRANSACTION
 DESCRIPTOR.message_types_by_name['Block'] = _BLOCK
 DESCRIPTOR.message_types_by_name['Chain'] = _CHAIN
+DESCRIPTOR.message_types_by_name['DirectorCompetition'] = _DIRECTORCOMPETITION
+DESCRIPTOR.message_types_by_name['SenateSignature'] = _SENATESIGNATURE
 DESCRIPTOR.enum_types_by_name['ScriptUnitType'] = _SCRIPTUNITTYPE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -788,6 +875,20 @@ Chain = _reflection.GeneratedProtocolMessageType('Chain', (_message.Message,), d
   # @@protoc_insertion_point(class_scope:Chain)
   ))
 _sym_db.RegisterMessage(Chain)
+
+DirectorCompetition = _reflection.GeneratedProtocolMessageType('DirectorCompetition', (_message.Message,), dict(
+  DESCRIPTOR = _DIRECTORCOMPETITION,
+  __module__ = 'messages_pb2'
+  # @@protoc_insertion_point(class_scope:DirectorCompetition)
+  ))
+_sym_db.RegisterMessage(DirectorCompetition)
+
+SenateSignature = _reflection.GeneratedProtocolMessageType('SenateSignature', (_message.Message,), dict(
+  DESCRIPTOR = _SENATESIGNATURE,
+  __module__ = 'messages_pb2'
+  # @@protoc_insertion_point(class_scope:SenateSignature)
+  ))
+_sym_db.RegisterMessage(SenateSignature)
 
 
 _DISCOVERREPLY_NODESENTRY.has_options = True
