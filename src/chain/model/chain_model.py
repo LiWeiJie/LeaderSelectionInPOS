@@ -17,6 +17,7 @@ from . import transaction_output_index
 from transaction_model import TxoIndex
 
 from ..config import config_loader
+from src.chain.config import chain_config
 from src.utils import hash_utils
 import src.messages.messages_pb2 as pb
 from src.protobufwrapper import ProtobufWrapper
@@ -46,7 +47,7 @@ class Chain(ProtobufWrapper):
 
     @classmethod
     def new(cls,
-            senates_number=config_loader['senates_number'],
+            senates_number=chain_config.senates_number,
             failure_boundary=0):
         if failure_boundary == 0:
             import math

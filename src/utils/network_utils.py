@@ -70,6 +70,9 @@ def collate_cp_blocks(d):
 
 
 def call_later(delay, f, *args, **kw):
+    # logging.info("======== call {} later: {}".format(delay, f))
+    # import traceback
+    # traceback.print_stack()
     task.deferLater(reactor, delay, f, *args, **kw).addErrback(my_err_back)
 
 

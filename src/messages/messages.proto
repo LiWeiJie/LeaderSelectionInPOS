@@ -1,5 +1,8 @@
 syntax = "proto3";
 
+message Dummy {
+    string m = 1;
+}
 
 message Discover {
     bytes vk = 1;
@@ -97,7 +100,7 @@ message Chain {
 // 2. second director competition and transaction
 message DirectorCompetition {
     Signature signature = 1;
-    bytes trransaction_hash = 2;
+    bytes transaction_hash = 2;
     int32 transaction_idx = 3;
 }
 

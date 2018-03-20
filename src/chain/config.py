@@ -37,18 +37,19 @@ class chain_config(object):
     ten_rich_man_chain_path = config_loader["10_rich_man_chain"]
 
     @classmethod
-    def get_members(cls, len=None):
-        assert(len>0 or len==None)
+    def get_members(cls, number=10):
         pre_members = []
         pre_members_path = cls.pre_members_path
         ct = 1
+        if number == 0:
+            return []
         if pre_members_path and os.path.exists(pre_members_path):
             with open(pre_members_path, 'r') as f:
                 j = json.load(f)
                 for m in j:
                     pre_members.append( member_model.MemberModel.loads(m) )
-                    ct+=1                    
-                    if len and ct > len:
+                    ct += 1
+                    if number and ct > number:
                         return pre_members
                     
         return pre_members

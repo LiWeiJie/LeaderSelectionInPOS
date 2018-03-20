@@ -8,7 +8,13 @@ from typing import Union, Dict
 
 import src.messages.messages_pb2 as pb
 from src.protobufreceiver import ProtobufReceiver
-from src.utils import set_logging, my_err_back, call_later
+from src.utils.network_utils import set_logging, my_err_back, call_later
+
+from collections import defaultdict
+
+from src.chain.config import chain_config
+from base64 import b64encode, b64decode
+
 
 return_code = 0
 
@@ -27,6 +33,8 @@ class Discovery(ProtobufReceiver):
 
     def connection_lost(self, reason):
         if self.vk in self.nodes:
+            if self.vk in self.factory.member_determined:
+                self.factory.member_determined[self.vk] = False
             del self.nodes[self.vk]
             logging.debug("Discovery: deleted {}".format(self.vk))
 
@@ -48,11 +56,24 @@ class Discovery(ProtobufReceiver):
                 self.vk = obj.vk  # NOTE storing base64 form as is
                 self.addr = self.transport.getPeer().host + ":" + str(obj.port)
 
+                if self.nodes.__len__() < self.factory.load_member:
+                    idx = self.nodes.__len__()
+                    member = self.factory.pre_members[idx]
+                    vk = b64encode(member.verify_key_str)
+                    if self.factory.member_determined[vk] is False:
+                        logging.info("Discovery: set a member {}".format(idx))
+                        self.factory.member_determined[vk] = True
+                        self.vk = vk
+                        self.send_obj(member.pb)
+
                 # TODO check addr to be in the form host:port
                 if self.vk not in self.nodes:
                     logging.debug("Discovery: added node {} {}".format(self.vk, self.addr))
                     self.nodes[self.vk] = (self.addr, self)
                     logging.debug("Discovery: connected nodes {}".format(self.nodes.__len__()))
+
+                    # self.factory.lc = task.LoopingCall(self.factory.send_instruction_when_ready)
+                    # self.factory.lc.start(5).addErrback(my_err_back)
 
                 assert isinstance(self.factory, DiscoveryFactory)
                 self.send_obj(pb.DiscoverReply(nodes=self.factory.make_nodes_dict()))
@@ -68,6 +89,9 @@ class Discovery(ProtobufReceiver):
             elif isinstance(obj, pb.Instruction):
                 self.factory.handle_instruction(obj)
 
+            elif isinstance(obj, pb.Member):
+                self.factory.change_member(obj)
+
             else:
                 raise AssertionError("Discovery: invalid payload type on CLIENT")
 
@@ -78,9 +102,12 @@ class Discovery(ProtobufReceiver):
 
 
 class DiscoveryFactory(Factory):
-    def __init__(self, n, t, m, inst):
+    def __init__(self, n, t, m, inst, load_member):
         self.nodes = {}  # key = vk, val = addr
         self.timeout_called = False
+        self.load_member = load_member
+        self.member_determined = defaultdict(bool)
+        self.pre_members = chain_config.get_members(load_member)
 
         import time
         logging.debug("Create a discoveryFactory at {}".format(time.time()))
@@ -151,10 +178,16 @@ def got_discovery(p, id, port):
     p.say_hello(id, port)
 
 
-def run(port, n, t, m, inst):
-    reactor.listenTCP(port, DiscoveryFactory(n, t, m, inst))
+def run(port, n, t, m, inst, load_member):
+    f = DiscoveryFactory(n, t, m, inst, load_member)
+    reactor.listenTCP(port, f)
     logging.info("Discovery server running on {}".format(port))
     reactor.run()
+    return f
+
+
+# def run_in_terminal(port=8123, n=10, t=2, m=10, inst=[2, 'boostrap-only', 2], load_member=10):
+#     return run(port, n, t, m, inst, load_member)
 
 # python -m src.discovery -n $n -t $t -m $GUMBY_das4_instances_to_run --inst $delay $experiment $param"
 if __name__ == '__main__':
@@ -187,8 +220,16 @@ if __name__ == '__main__':
         help='the instruction to send after all nodes are connected',
         nargs='*'
     )
+    parser.add_argument(
+        '-l', '--load_member',
+        type=int,
+        help="the first n node will load the member file",
+        default=0,
+    )
     args = parser.parse_args()
 
+    print sys.argv
+
     # NOTE: n, t, m and inst must be all or nothing
-    run(args.port, args.n, args.t, args.m, args.inst)
+    run(args.port, args.n, args.t, args.m, args.inst, args.load_member)
     sys.exit(return_code)

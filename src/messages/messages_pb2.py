@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='messages.proto',
   package='',
   syntax='proto3',
-  serialized_pb=_b('\n\x0emessages.proto\"$\n\x08\x44iscover\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\"g\n\rDiscoverReply\x12(\n\x05nodes\x18\x01 \x03(\x0b\x32\x19.DiscoverReply.NodesEntry\x1a,\n\nNodesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"@\n\x0bInstruction\x12\x13\n\x0binstruction\x18\x01 \x01(\t\x12\r\n\x05\x64\x65lay\x18\x02 \x01(\x05\x12\r\n\x05param\x18\x03 \x01(\t\" \n\x04Ping\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\" \n\x04Pong\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\".\n\tSignature\x12\x0e\n\x06signer\x18\x01 \x01(\x0c\x12\x11\n\tsignature\x18\x02 \x01(\x0c\"(\n\x06Member\x12\x0e\n\x06vk_str\x18\x01 \x01(\x0c\x12\x0e\n\x06sk_str\x18\x02 \x01(\x0c\"U\n\x07TxInput\x12\x18\n\x10transaction_hash\x18\x01 \x01(\x0c\x12\x17\n\x0ftransaction_idx\x18\x02 \x01(\x05\x12\x17\n\x06script\x18\x03 \x01(\x0b\x32\x07.Script\"9\n\nScriptUnit\x12\x1d\n\x04type\x18\x01 \x01(\x0e\x32\x0f.ScriptUnitType\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x0c\"#\n\x06Script\x12\x19\n\x04\x62ody\x18\x01 \x03(\x0b\x32\x0b.ScriptUnit\"2\n\x08TxOutput\x12\r\n\x05value\x18\x01 \x01(\x05\x12\x17\n\x06script\x18\x02 \x01(\x0b\x32\x07.Script\"C\n\x0bTransaction\x12\x18\n\x06inputs\x18\x01 \x03(\x0b\x32\x08.TxInput\x12\x1a\n\x07outputs\x18\x02 \x03(\x0b\x32\t.TxOutput\"\xa4\x01\n\x05\x42lock\x12\x11\n\tprev_hash\x18\x01 \x01(\x0c\x12\t\n\x01q\x18\x02 \x01(\x0c\x12\x13\n\x0bmerkle_root\x18\x03 \x01(\x0c\x12\x19\n\x03txs\x18\x04 \x03(\x0b\x32\x0c.Transaction\x12%\n\x11senates_signature\x18\x05 \x03(\x0b\x32\n.Signature\x12&\n\x12\x64irector_signature\x18\x06 \x01(\x0b\x32\n.Signature\"Q\n\x05\x43hain\x12\x16\n\x06\x62locks\x18\x01 \x03(\x0b\x32\x06.Block\x12\x16\n\x0esenates_number\x18\x02 \x01(\x05\x12\x18\n\x10\x66\x61ilure_boundary\x18\x03 \x01(\x05\"h\n\x13\x44irectorCompetition\x12\x1d\n\tsignature\x18\x01 \x01(\x0b\x32\n.Signature\x12\x19\n\x11trransaction_hash\x18\x02 \x01(\x0c\x12\x17\n\x0ftransaction_idx\x18\x03 \x01(\x05\">\n\x11TransactionSummit\x12\x0e\n\x06rounds\x18\x01 \x01(\x05\x12\x19\n\x03txs\x18\x02 \x03(\x0b\x32\x0c.Transaction\"%\n\x0c\x43onsensusReq\x12\x15\n\x05\x62lock\x18\x01 \x01(\x0b\x32\x06.Block\"(\n\x0f\x43onsensusResult\x12\x15\n\x05\x62lock\x18\x01 \x01(\x0b\x32\x06.Block\"R\n\x0fSenateSignature\x12\x19\n\x11signed_block_hash\x18\x01 \x01(\x0c\x12$\n\x10senate_signature\x18\x02 \x01(\x0b\x32\n.Signature\")\n\x10\x44irectorShowTime\x12\x15\n\x05\x62lock\x18\x01 \x01(\x0b\x32\x06.Block*7\n\x0eScriptUnitType\x12\x0f\n\x0bSCRIPT_DATA\x10\x00\x12\x14\n\x10SCRIPT_CHECK_SIG\x10\x01\x62\x06proto3')
+  serialized_pb=_b('\n\x0emessages.proto\"\x12\n\x05\x44ummy\x12\t\n\x01m\x18\x01 \x01(\t\"$\n\x08\x44iscover\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\"g\n\rDiscoverReply\x12(\n\x05nodes\x18\x01 \x03(\x0b\x32\x19.DiscoverReply.NodesEntry\x1a,\n\nNodesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"@\n\x0bInstruction\x12\x13\n\x0binstruction\x18\x01 \x01(\t\x12\r\n\x05\x64\x65lay\x18\x02 \x01(\x05\x12\r\n\x05param\x18\x03 \x01(\t\" \n\x04Ping\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\" \n\x04Pong\x12\n\n\x02vk\x18\x01 \x01(\x0c\x12\x0c\n\x04port\x18\x02 \x01(\x05\".\n\tSignature\x12\x0e\n\x06signer\x18\x01 \x01(\x0c\x12\x11\n\tsignature\x18\x02 \x01(\x0c\"(\n\x06Member\x12\x0e\n\x06vk_str\x18\x01 \x01(\x0c\x12\x0e\n\x06sk_str\x18\x02 \x01(\x0c\"U\n\x07TxInput\x12\x18\n\x10transaction_hash\x18\x01 \x01(\x0c\x12\x17\n\x0ftransaction_idx\x18\x02 \x01(\x05\x12\x17\n\x06script\x18\x03 \x01(\x0b\x32\x07.Script\"9\n\nScriptUnit\x12\x1d\n\x04type\x18\x01 \x01(\x0e\x32\x0f.ScriptUnitType\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x0c\"#\n\x06Script\x12\x19\n\x04\x62ody\x18\x01 \x03(\x0b\x32\x0b.ScriptUnit\"2\n\x08TxOutput\x12\r\n\x05value\x18\x01 \x01(\x05\x12\x17\n\x06script\x18\x02 \x01(\x0b\x32\x07.Script\"C\n\x0bTransaction\x12\x18\n\x06inputs\x18\x01 \x03(\x0b\x32\x08.TxInput\x12\x1a\n\x07outputs\x18\x02 \x03(\x0b\x32\t.TxOutput\"\xa4\x01\n\x05\x42lock\x12\x11\n\tprev_hash\x18\x01 \x01(\x0c\x12\t\n\x01q\x18\x02 \x01(\x0c\x12\x13\n\x0bmerkle_root\x18\x03 \x01(\x0c\x12\x19\n\x03txs\x18\x04 \x03(\x0b\x32\x0c.Transaction\x12%\n\x11senates_signature\x18\x05 \x03(\x0b\x32\n.Signature\x12&\n\x12\x64irector_signature\x18\x06 \x01(\x0b\x32\n.Signature\"Q\n\x05\x43hain\x12\x16\n\x06\x62locks\x18\x01 \x03(\x0b\x32\x06.Block\x12\x16\n\x0esenates_number\x18\x02 \x01(\x05\x12\x18\n\x10\x66\x61ilure_boundary\x18\x03 \x01(\x05\"g\n\x13\x44irectorCompetition\x12\x1d\n\tsignature\x18\x01 \x01(\x0b\x32\n.Signature\x12\x18\n\x10transaction_hash\x18\x02 \x01(\x0c\x12\x17\n\x0ftransaction_idx\x18\x03 \x01(\x05\">\n\x11TransactionSummit\x12\x0e\n\x06rounds\x18\x01 \x01(\x05\x12\x19\n\x03txs\x18\x02 \x03(\x0b\x32\x0c.Transaction\"%\n\x0c\x43onsensusReq\x12\x15\n\x05\x62lock\x18\x01 \x01(\x0b\x32\x06.Block\"(\n\x0f\x43onsensusResult\x12\x15\n\x05\x62lock\x18\x01 \x01(\x0b\x32\x06.Block\"R\n\x0fSenateSignature\x12\x19\n\x11signed_block_hash\x18\x01 \x01(\x0c\x12$\n\x10senate_signature\x18\x02 \x01(\x0b\x32\n.Signature\")\n\x10\x44irectorShowTime\x12\x15\n\x05\x62lock\x18\x01 \x01(\x0b\x32\x06.Block*7\n\x0eScriptUnitType\x12\x0f\n\x0bSCRIPT_DATA\x10\x00\x12\x14\n\x10SCRIPT_CHECK_SIG\x10\x01\x62\x06proto3')
 )
 
 _SCRIPTUNITTYPE = _descriptor.EnumDescriptor(
@@ -40,8 +40,8 @@ _SCRIPTUNITTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1317,
-  serialized_end=1372,
+  serialized_start=1336,
+  serialized_end=1391,
 )
 _sym_db.RegisterEnumDescriptor(_SCRIPTUNITTYPE)
 
@@ -49,6 +49,37 @@ ScriptUnitType = enum_type_wrapper.EnumTypeWrapper(_SCRIPTUNITTYPE)
 SCRIPT_DATA = 0
 SCRIPT_CHECK_SIG = 1
 
+
+
+_DUMMY = _descriptor.Descriptor(
+  name='Dummy',
+  full_name='Dummy',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='m', full_name='Dummy.m', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=18,
+  serialized_end=36,
+)
 
 
 _DISCOVER = _descriptor.Descriptor(
@@ -84,8 +115,8 @@ _DISCOVER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=18,
-  serialized_end=54,
+  serialized_start=38,
+  serialized_end=74,
 )
 
 
@@ -122,8 +153,8 @@ _DISCOVERREPLY_NODESENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=115,
-  serialized_end=159,
+  serialized_start=135,
+  serialized_end=179,
 )
 
 _DISCOVERREPLY = _descriptor.Descriptor(
@@ -152,8 +183,8 @@ _DISCOVERREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=56,
-  serialized_end=159,
+  serialized_start=76,
+  serialized_end=179,
 )
 
 
@@ -197,8 +228,8 @@ _INSTRUCTION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=161,
-  serialized_end=225,
+  serialized_start=181,
+  serialized_end=245,
 )
 
 
@@ -235,8 +266,8 @@ _PING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=227,
-  serialized_end=259,
+  serialized_start=247,
+  serialized_end=279,
 )
 
 
@@ -273,8 +304,8 @@ _PONG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=261,
-  serialized_end=293,
+  serialized_start=281,
+  serialized_end=313,
 )
 
 
@@ -311,8 +342,8 @@ _SIGNATURE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=295,
-  serialized_end=341,
+  serialized_start=315,
+  serialized_end=361,
 )
 
 
@@ -349,8 +380,8 @@ _MEMBER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=343,
-  serialized_end=383,
+  serialized_start=363,
+  serialized_end=403,
 )
 
 
@@ -394,8 +425,8 @@ _TXINPUT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=385,
-  serialized_end=470,
+  serialized_start=405,
+  serialized_end=490,
 )
 
 
@@ -432,8 +463,8 @@ _SCRIPTUNIT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=472,
-  serialized_end=529,
+  serialized_start=492,
+  serialized_end=549,
 )
 
 
@@ -463,8 +494,8 @@ _SCRIPT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=531,
-  serialized_end=566,
+  serialized_start=551,
+  serialized_end=586,
 )
 
 
@@ -501,8 +532,8 @@ _TXOUTPUT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=568,
-  serialized_end=618,
+  serialized_start=588,
+  serialized_end=638,
 )
 
 
@@ -539,8 +570,8 @@ _TRANSACTION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=620,
-  serialized_end=687,
+  serialized_start=640,
+  serialized_end=707,
 )
 
 
@@ -605,8 +636,8 @@ _BLOCK = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=690,
-  serialized_end=854,
+  serialized_start=710,
+  serialized_end=874,
 )
 
 
@@ -650,8 +681,8 @@ _CHAIN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=856,
-  serialized_end=937,
+  serialized_start=876,
+  serialized_end=957,
 )
 
 
@@ -670,7 +701,7 @@ _DIRECTORCOMPETITION = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='trransaction_hash', full_name='DirectorCompetition.trransaction_hash', index=1,
+      name='transaction_hash', full_name='DirectorCompetition.transaction_hash', index=1,
       number=2, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
@@ -695,8 +726,8 @@ _DIRECTORCOMPETITION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=939,
-  serialized_end=1043,
+  serialized_start=959,
+  serialized_end=1062,
 )
 
 
@@ -733,8 +764,8 @@ _TRANSACTIONSUMMIT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1045,
-  serialized_end=1107,
+  serialized_start=1064,
+  serialized_end=1126,
 )
 
 
@@ -764,8 +795,8 @@ _CONSENSUSREQ = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1109,
-  serialized_end=1146,
+  serialized_start=1128,
+  serialized_end=1165,
 )
 
 
@@ -795,8 +826,8 @@ _CONSENSUSRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1148,
-  serialized_end=1188,
+  serialized_start=1167,
+  serialized_end=1207,
 )
 
 
@@ -833,8 +864,8 @@ _SENATESIGNATURE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1190,
-  serialized_end=1272,
+  serialized_start=1209,
+  serialized_end=1291,
 )
 
 
@@ -864,8 +895,8 @@ _DIRECTORSHOWTIME = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1274,
-  serialized_end=1315,
+  serialized_start=1293,
+  serialized_end=1334,
 )
 
 _DISCOVERREPLY_NODESENTRY.containing_type = _DISCOVERREPLY
@@ -886,6 +917,7 @@ _CONSENSUSREQ.fields_by_name['block'].message_type = _BLOCK
 _CONSENSUSRESULT.fields_by_name['block'].message_type = _BLOCK
 _SENATESIGNATURE.fields_by_name['senate_signature'].message_type = _SIGNATURE
 _DIRECTORSHOWTIME.fields_by_name['block'].message_type = _BLOCK
+DESCRIPTOR.message_types_by_name['Dummy'] = _DUMMY
 DESCRIPTOR.message_types_by_name['Discover'] = _DISCOVER
 DESCRIPTOR.message_types_by_name['DiscoverReply'] = _DISCOVERREPLY
 DESCRIPTOR.message_types_by_name['Instruction'] = _INSTRUCTION
@@ -908,6 +940,13 @@ DESCRIPTOR.message_types_by_name['SenateSignature'] = _SENATESIGNATURE
 DESCRIPTOR.message_types_by_name['DirectorShowTime'] = _DIRECTORSHOWTIME
 DESCRIPTOR.enum_types_by_name['ScriptUnitType'] = _SCRIPTUNITTYPE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
+
+Dummy = _reflection.GeneratedProtocolMessageType('Dummy', (_message.Message,), dict(
+  DESCRIPTOR = _DUMMY,
+  __module__ = 'messages_pb2'
+  # @@protoc_insertion_point(class_scope:Dummy)
+  ))
+_sym_db.RegisterMessage(Dummy)
 
 Discover = _reflection.GeneratedProtocolMessageType('Discover', (_message.Message,), dict(
   DESCRIPTOR = _DISCOVER,
