@@ -348,6 +348,8 @@ class Transaction(ProtobufWrapper):
             return op
 
 
+from base64 import  b64encode
+
 class TxoIndex(object):
 
     def __init__(self, transaction_hash, transaction_idx):

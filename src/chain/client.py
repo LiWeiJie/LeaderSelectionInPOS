@@ -169,6 +169,8 @@ class Client(object):
 
         self.consensus_timeout = consensus_timeout
         self.prepare_timeout = prepare_timeout
+        logging.info("prepare time for txs and director in a round: {} secs".format(prepare_timeout))
+        logging.info("consensus_timeout for a round: {} secs".format(consensus_timeout))
         self._senates_leader = None
 
         self.factory = factory
@@ -210,7 +212,7 @@ class Client(object):
         self._rounds = self.chain.blocks.__len__()
 
         # logger
-        self._logger = create_logger(member.mid[-5:])
+        # self._logger = create_logger(member.mid[-5:])
         
         # init models
 
@@ -227,17 +229,22 @@ class Client(object):
         self.reset_lock_list()
 
     def reset_lock_list(self):
+        print "reset lock list"
         self.locking_txo.clear()
 
-    def lock_txo(self, txo):
-        self.locking_txo[txo] = True
+    def lock_txo(self, tx_hash, tx_idx):
+        # logging.info("chain_runner: lock transaction output {}:{}".format(b64encode(txo.transaction_hash), txo.transaction_idx))
+        self.locking_txo[(tx_hash, tx_idx)] = True
 
     def lock_txos(self, txos):
         for txo in txos:
-            self.locking_txo[txo] = True
+            self.lock_txo(txo.transaction_hash, txo.transaction_idx)
 
-    def is_lock(self, txo):
-        return self.locking_txo[txo]
+    def is_lock(self, tx_hash, tx_idx):
+        # print txo
+        locking_txo = self.locking_txo
+        # print locking_txo
+        return locking_txo[(tx_hash,tx_idx)]
 
     def update_my_satoshi(self):
         """check the satoshi client have"""
@@ -379,13 +386,19 @@ class Client(object):
                 txo = TxoIndex(transaction_hash=ip.transaction_hash,
                                transaction_idx=ip.transaction_idx)
                 pend_to_lock.append(txo)
+            sam = pend_to_lock[0]
+            # print "lock or not ", self.is_lock(sam), " {}:{}".format(b64encode(sam.transaction_hash), sam.transaction_idx)
+            # print self.locking_txo
             for txo in pend_to_lock:
-                if self.is_lock(txo):
+                if self.is_lock(txo.transaction_hash, txo.transaction_idx):
                     check = False
+                    logging.warn("txo {}:{} already locked".format(b64encode(txo.transaction_hash), txo.transaction_idx))
                     break
             if check:
+                # print "lock or not ", self.is_lock(sam), " {}:{}".format(b64encode(sam.transaction_hash), sam.transaction_idx)
                 self.lock_txos(pend_to_lock)
-            self.pending_transactions[transaction.hash] = transaction       
+                # print "lock or not ", self.is_lock(sam), " {}:{}".format(b64encode(sam.transaction_hash), sam.transaction_idx)
+                self.pending_transactions[transaction.hash] = transaction       
 
     def receive_director_competition(self, signature, txo_idx):
         ret = self.verify_director_competition_signature(signature, txo_idx)
@@ -461,6 +474,12 @@ class Client(object):
         """set the status and timestamp """
         #  TODO: timeout , different role
         logging.critical("Start Round: {}".format(rounds))
+        role = "nothing!"
+        if self.is_senate_leader:
+            role = "senate leader!!!"
+        elif self.is_senate:
+            role = "senate!!"
+        logging.critical("I am : {}".format(role))
         logging.critical("senates: {}".format(self.senates))
         logging.critical("satoshi {}: {}".format(self.my_satoshi_total, self.my_satoshi))
 
@@ -481,7 +500,6 @@ class Client(object):
                 # self.factory.lc = task.LoopingCall(self.send_senate_block_when_ready)
                 # self.factory.lc.start(self.prepare_timeout).addErrback(my_err_back)
                 call_later(self.prepare_timeout, self.send_senate_block_when_ready)
-                # logging.info("leaddddddddd {}".format(self.send_senate_block_when_ready))
             else:
                 call_later(self.prepare_timeout, self.consensus_phase_when_ready)
         else:
@@ -502,6 +520,7 @@ class Client(object):
     def send_pend_to_summit_txs(self):
         if self.status is self.ClientStatus.Wait4TxsAndDirector:
             if self.pend_to_summit_transactions.__len__() >0:
+                logging.info("chain runner: send {} txs".format(self.pend_to_summit_transactions.__len__()))
                 pb_txs = [tx.pb for tx in self.pend_to_summit_transactions.values()]
                 tran_summit = pb.TransactionSummit(rounds=self.rounds,
                                                    txs=pb_txs)
@@ -517,15 +536,15 @@ class Client(object):
                     self.start(self.rounds)
                 else:
                     del self.consensus_reached[r]
-            call_later(self.consensus_timeout, stop_and_restart, self.rounds)
 
-            self.set_client_status(self.ClientStatus.Wait4Consensus)
+            call_later(self.consensus_timeout, stop_and_restart, self.rounds)
+            if self.status==self.ClientStatus.Wait4TxsAndDirector:
+                self.set_client_status(self.ClientStatus.Wait4Consensus)
         else:
             next_call = 2
             logging.info("senate: no transaction, check {} seconds later".format(next_call))
             self.send_pend_to_summit_txs()
             call_later(next_call, self.consensus_phase_when_ready)
-
 
     def send_senate_block_when_ready(self):
         logging.info("senate leader time to send block")
@@ -573,7 +592,7 @@ class Client(object):
             logging.info("wait4block")
 
     def send_senate_broadcast(self):
-        logger = self._logger
+        logger = logging
         meta_messages = self._meta_messages
         protocol_name = "senate_broadcast"
 
@@ -593,7 +612,7 @@ class Client(object):
 
     def handle_protocols(self, dests, protocol_name, data):
         meta_messages = self._meta_messages
-        logger = self._logger
+        logger = logging
         dest_mids = json.loads(dests)
         if dest_mids:
             if dest_mids[0]==None or self.member.mid in dest_mids:
@@ -627,7 +646,7 @@ class Client(object):
     def handle_consensus_result(self, obj, remote_vk_str):
         assert(isinstance(obj, pb.ConsensusResult)), type(obj)
         # self.consensus_reached = True
-        assert(self.status==self.ClientStatus.Wait4Consensus)
+        assert(self.status in [self.ClientStatus.Wait4Consensus, self.ClientStatus.Wait4TxsAndDirector ]), self.status
         block = block_model.Block(obj.block)
         ret = self.senate_sign(block)
         if ret:
@@ -639,6 +658,9 @@ class Client(object):
 
     def handle_block(self, obj, remote_vk_str):
         assert(isinstance(obj, pb.Block)), type(obj)
+        if obj.prev_hash != self.last_block.hash:
+            logging.warn("client: prev hash inequal")
+            return
         client_status = self.ClientStatus
         if self.status == client_status.Wait4Block:
             if self.add_block(obj):
@@ -709,24 +731,32 @@ class Client(object):
         lc.start(interval).addErrback(my_err_back)
 
     def _make_tx(self, dest):
-        m_satoshi = self.my_satoshi
-        rand_one = random_utils.rand_one(m_satoshi)
-        # if rand_one:
-        utx_header, output = rand_one
-        if dest is None:
-            dest = self.member.verify_key_str
-        cli_inputs = self.create_inputs([utx_header])
-        rand_out_amount = output.value * random_utils.rand_percent()
-        import math
-        rand_out_amount = int(math.floor(rand_out_amount))
-        logging.info("send {} to dest: {}".format(rand_out_amount, b64encode(dest)))
-        rand_remains_amount = output.value - rand_out_amount
-        script_to_myself = script_to_verify_key(self.member.verify_key_str)
-        script_to_dest = script_to_verify_key(dest)
-        cli_outputs = self.create_outputs([(rand_remains_amount, script_to_myself),
-                                            (rand_out_amount, script_to_dest)])
-        self.create_transaction(cli_inputs, cli_outputs, True)
-    
+        if self.status == self.ClientStatus.Wait4TxsAndDirector:
+            m_satoshi = self.my_satoshi
+            rand_one = random_utils.rand_one(m_satoshi)
+            if rand_one:
+                utx_header, output = rand_one
+                if dest is not None and not self.is_lock(utx_header[0], utx_header[1]):
+                    if not self.is_senate:
+                        self.lock_txo(utx_header[0], utx_header[1])
+                    cli_inputs = self.create_inputs([utx_header])
+                    rand_out_amount = output.value * random_utils.rand_percent()
+                    import math
+                    rand_out_amount = int(math.floor(rand_out_amount))
+                    rand_remains_amount = output.value - rand_out_amount
+                    collector = []
+                    if rand_out_amount>0:
+                        logging.info("send {} to dest: {}".format(rand_out_amount, b64encode(dest)))
+                        script_to_dest = script_to_verify_key(dest)
+                        collector.append((rand_out_amount, script_to_dest))
+                    if rand_remains_amount:
+                        logging.info("send {} to myself: {}".format(rand_out_amount, b64encode(self.member.verify_key_str)))
+                        script_to_myself = script_to_verify_key(self.member.verify_key_str)
+                        collector.append((rand_remains_amount, script_to_myself))
+                    if collector.__len__() > 0 :
+                        cli_outputs = self.create_outputs(collector)
+                        self.create_transaction(cli_inputs, cli_outputs, True)
+
 if __name__ == "__main__":
     c = Client()
     addr = c.get_first_peer_address()

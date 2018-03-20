@@ -37,6 +37,10 @@ class Discovery(ProtobufReceiver):
                 self.factory.member_determined[self.vk] = False
             del self.nodes[self.vk]
             logging.debug("Discovery: deleted {}".format(self.vk))
+        
+        if self.state == 'CLIENT':
+            logging.debug("stop reactor")
+            reactor.stop()
 
     def obj_received(self, obj):
         # type: (Union[pb.Discover, pb.DiscoverReply]) -> None
@@ -83,6 +87,18 @@ class Discovery(ProtobufReceiver):
 
         elif self.state == 'CLIENT':
             if isinstance(obj, pb.DiscoverReply):
+                idx = obj.nodes.__len__()
+                # logging.basicConfig(level=logging.DEBUG,
+                #     format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+                #     datefmt='%a, %d %b %Y %H:%M:%S',
+                #     filename='log/'+str(idx)+'.log',
+                #     filemode='w')
+                logger = logging.getLogger()
+                fh = logging.FileHandler('log/'+str(idx)+'.log', "w")
+                formatter = logging.Formatter('%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s')  
+                fh.setFormatter(formatter)  
+                logger.addHandler(fh)  
+
                 logging.debug("Discovery: making new clients...")
                 self.factory.new_connection_if_not_exist(obj.nodes)
 

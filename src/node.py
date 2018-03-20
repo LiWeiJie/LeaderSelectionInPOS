@@ -319,14 +319,6 @@ class MyFactory(Factory):
         proto = self.peers[node][2]
         proto.send_obj(msg)
 
-    def overwrite_promoters(self):
-        """
-        sets all peers to promoters, only use this method for testing
-        :return:
-        """
-        logging.debug("NODE: overwriting promoters {}".format(len(self.peers)))
-        self.promoters = self.peers.keys()
-
     @property
     def random_node(self):
         node = random.choice(self.peers.keys())
@@ -370,23 +362,10 @@ class MyFactory(Factory):
             interval = 1.0 / rate
             call_later(msg.delay, self.chain_runner.make_tx, interval, False)
 
-        elif msg.instruction == 'tx-validate':
-            rate = float(msg.param)
-            interval = 1.0 / rate
-            call_later(msg.delay, self.tc_runner.make_tx, interval, False)
-            call_later(msg.delay + 10, self.tc_runner.make_validation, interval)
-
         elif msg.instruction == 'tx-random':
             rate = float(msg.param)
             interval = 1.0 / rate
             call_later(msg.delay, self.chain_runner.make_tx, interval, True)
-
-        elif msg.instruction == 'tx-random-validate':
-            rate = float(msg.param)
-            interval = 1.0 / rate
-            call_later(msg.delay, self.tc_runner.make_tx, interval, True)
-            call_later(msg.delay + 10, self.tc_runner.make_validation, interval)
-
 
         else:
             raise AssertionError("Invalid instruction msg {}".format(msg))
@@ -402,38 +381,20 @@ class Config(object):
     All the static settings, used in Factory
     Should be singleton
     """
-    def __init__(self, port, n, t, population, test, value, failure, tx_rate, fan_out, validate,
-                 ignore_promoter, auto_byzantine):
+    def __init__(self, port, n, t, population, fan_out,
+                 ignore_promoter):
         """
         This only stores the config necessary at runtime, so not necessarily all the information from argparse
         :param port:
         :param n:
         :param t:
         :param population:
-        :param test:
-        :param value:
-        :param failure:
-        :param tx_rate:
-        :param auto_byzantine:
         """
         self.port = port
         self.n = n
         self.t = t
-        self.test = test
-        # self.preload_member = preload_member
-
-        assert value in (0, 1)
-        self.value = value
-
-        assert failure in ['byzantine', 'omission'] or failure is None
-        self.failure = failure
-
-        assert isinstance(tx_rate, float)
-        self.tx_rate = tx_rate
 
         self.fan_out = fan_out
-
-        self.validate = validate
 
         self.ignore_promoter = ignore_promoter
 
@@ -441,25 +402,24 @@ class Config(object):
 
         self.population = population
 
-        self.auto_byzantine = auto_byzantine
 
-def simple_run(member = None, n=10, t=0, population=0, port = 0):
+def simple_run(member = None, n=4, t=0, population=0, port = 0):
     set_logging(logging.DEBUG)
-    discovery = 'localhost'
-    fan_out=10
-    ignore_promoter = False
-    test = None
-    value = 0
-    failure=None
-    tx_rate = 0.0
-    broadcast = False
-    validate = False
-    auto_byzantine = False
-    return run(Config(port, n, t, population, test, value, failure, tx_rate,
-                fan_out, validate, ignore_promoter, auto_byzantine),
-        broadcast, discovery)
 
-def run(config, bcast, discovery_addr):
+    # logging.basicConfig(level=logging.DEBUG,
+    #                 format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+    #                 datefmt='%a, %d %b %Y %H:%M:%S',
+    #                 filename='log/default.log',
+    #                 filemode='w')
+    
+    discovery = 'localhost'
+    fan_out = 10
+    ignore_promoter = False
+    return run(Config(port, n, t, population,
+                fan_out, ignore_promoter),
+           discovery)
+
+def run(config, discovery_addr):
     f = MyFactory(config)
 
     try:
@@ -486,157 +446,95 @@ def run(config, bcast, discovery_addr):
         d.addCallback(got_protocol).addErrback(my_err_back)
     call_later(1, connect_to_myself)
 
-
-    if bcast:
-        call_later(5, f.overwrite_promoters)
-
-    # optionally run tests, args.test == None implies reactive node
-    # we use call later to wait until the nodes are registered
-    if config.test == 'dummy':
-        call_later(5, f.bcast, pb.Dummy(m='z'))
-    # elif config.test == 'bracha':
-    #     call_later(6, f.bracha.bcast_init)
-    # elif config.test == 'mo14':
-    #     call_later(6, f.mo14.start, config.value)
-    # elif config.test == 'acs':
-    #     # use port number (unique on local network) as test message
-    #     call_later(6, f.acs.start, str(config.port), 1)
-    # elif config.test == 'tc':
-    #     call_later(5, f.tc_runner.make_tx, 1.0 / config.tx_rate, True)
-    #     # optionally use validate
-    #     if config.validate:
-    #         call_later(10, f.tc_runner.make_validation)
-    # elif config.test == 'bootstrap':
-    #     call_later(5, f.tc_runner.bootstrap_promoters)
-
     logging.info("NODE: reactor starting on port {}".format(config.port))
     reactor.run()
     return f
 
-# python -m src.node 0 10 3 10 -d
+# python -m src.node 0 10 3 10 -d --fan-out 10 --ignore-promoter
 # python -m src.node 0 $n $t $GUMBY_das4_instances_to_run -d --discovery $(hostname) --fan-out 10 --ignore-promoter $profile"
 if __name__ == '__main__':
-    simple_run()
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument(
-    #     'port',
-    #     type=int,
-    #     help='the listener port'
-    # )
-    # parser.add_argument(
-    #     'n',
-    #     type=int,
-    #     help='the total number of promoters'
-    # )
-    # parser.add_argument(
-    #     't',
-    #     type=int,
-    #     help='the total number of malicious nodes'
-    # )
-    # parser.add_argument(
-    #     'population',
-    #     type=int,
-    #     help='the population size',
-    # )
-    # parser.add_argument(
-    #     '-d', '--debug',
-    #     help="log at debug level",
-    #     action="store_const", dest="loglevel", const=logging.DEBUG,
-    #     default=logging.WARNING
-    # )
-    # parser.add_argument(
-    #     '-v', '--verbose',
-    #     help="log at info level",
-    #     action="store_const", dest="loglevel", const=logging.INFO
-    # )
-    # parser.add_argument(
-    #     "-o", "--output",
-    #     type=argparse.FileType('w'),
-    #     metavar='NAME',
-    #     help="location for the output file"
-    # )
-    # parser.add_argument(
-    #     '--discovery',
-    #     metavar='ADDR',
-    #     default='localhost',
-    #     help='address of the discovery server on port 8123'
-    # )
-    # parser.add_argument(
-    #     '--fan-out',
-    #     type=int,
-    #     default=10,
-    #     help='fan-out parameter for gossiping'
-    # )
-    # parser.add_argument(
-    #     '--ignore-promoter',
-    #     action='store_true',
-    #     help='do not transact with promoters'
-    # )
-    # parser.add_argument(
-    #     '--profile',
-    #     metavar='NAME',
-    #     help='run the node with cProfile'
-    # )
-    # parser.add_argument(
-    #     '--timeout',
-    #     help='force exit after timeout, 0 means continue forever',
-    #     default=0,
-    #     type=int
-    # )
-    # parser.add_argument(
-    #     '--auto-byzantine',
-    #     help='automatically become Byzantine during experiment',
-    #     action='store_true'
-    # )
-    # parser.add_argument(
-    #     '--test',
-    #     choices=['dummy', 'bracha', 'mo14', 'acs', 'tc', 'bootstrap'],
-    #     help='[testing] choose an algorithm to initialise'
-    # )
-    # parser.add_argument(
-    #     '--value',
-    #     choices=[0, 1],
-    #     default=0,
-    #     type=int,
-    #     help='[testing] the initial input for BA'
-    # )
-    # parser.add_argument(
-    #     '--failure',
-    #     choices=['byzantine', 'omission'],
-    #     help='[testing] the mode of failure'
-    # )
-    # parser.add_argument(
-    #     '--tx-rate',
-    #     type=float,
-    #     metavar='RATE',
-    #     default=0.0,
-    #     help='[testing] initiate transaction at RATE/sec'
-    # )
-    # parser.add_argument(
-    #     '--broadcast',
-    #     help='[testing] overwrite promoters to be all peers',
-    #     action='store_true'
-    # )
-    # parser.add_argument(
-    #     '--validate',
-    #     help="[testing] if test=='tc', perform validation",
-    #     action='store_true'
-    # )
-    # args = parser.parse_args()
-    #
-    # set_logging(args.loglevel, args.output)
-    #
-    # def _run():
-    #     run(Config(args.port, args.n, args.t, args.population, args.test, args.value, args.failure, args.tx_rate,
-    #                args.fan_out, args.validate, args.ignore_promoter, args.auto_byzantine),
-    #         args.broadcast, args.discovery)
-    #
-    # if args.timeout != 0:
-    #     call_later(args.timeout, stop_reactor)
-    #
-    # if args.profile:
-    #     import cProfile
-    #     cProfile.run('_run()', args.profile)
-    # else:
-    #     _run()
+    # simple_run()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'port',
+        type=int,
+        help='the listener port'
+    )
+    parser.add_argument(
+        'n',
+        type=int,
+        help='the total number of promoters'
+    )
+    parser.add_argument(
+        't',
+        type=int,
+        help='the total number of malicious nodes'
+    )
+    parser.add_argument(
+        'population',
+        type=int,
+        help='the population size',
+    )
+    parser.add_argument(
+        '-d', '--debug',
+        help="log at debug level",
+        action="store_const", dest="loglevel", const=logging.DEBUG,
+        default=logging.WARNING
+    )
+    parser.add_argument(
+        '-v', '--verbose',
+        help="log at info level",
+        action="store_const", dest="loglevel", const=logging.INFO
+    )
+    parser.add_argument(
+        "-o", "--output",
+        type=argparse.FileType('w'),
+        metavar='NAME',
+        help="location for the output file"
+    )
+    parser.add_argument(
+        '--discovery',
+        metavar='ADDR',
+        default='localhost',
+        help='address of the discovery server on port 8123'
+    )
+    parser.add_argument(
+        '--fan-out',
+        type=int,
+        default=10,
+        help='fan-out parameter for gossiping'
+    )
+    parser.add_argument(
+        '--ignore-promoter',
+        action='store_true',
+        help='do not transact with promoters'
+    )
+    parser.add_argument(
+        '--profile',
+        metavar='NAME',
+        help='run the node with cProfile'
+    )
+    parser.add_argument(
+        '--timeout',
+        help='force exit after timeout, 0 means continue forever',
+        default=0,
+        type=int
+    )
+    args = parser.parse_args()
+
+    set_logging(args.loglevel, args.output)
+
+    def _run():
+        run(Config(args.port, args.n, args.t, args.population,
+                   args.fan_out,  args.ignore_promoter),
+            args.discovery)
+
+    if args.timeout != 0:
+        call_later(args.timeout, stop_reactor)
+
+    if args.profile:
+        import cProfile
+        cProfile.run('_run()', args.profile)
+    else:
+        _run()
 
