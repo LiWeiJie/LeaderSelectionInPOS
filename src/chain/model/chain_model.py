@@ -13,7 +13,6 @@ import logging
 
 from . import block_model
 from . import member_model
-from . import transaction_output_index
 from transaction_model import TxoIndex
 
 from ..config import config_loader
