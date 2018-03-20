@@ -484,8 +484,8 @@ class Client(object):
         elif self.is_senate:
             role = "senate!!"
         logging.critical("I am : {}".format(role))
-        logging.critical("senates: {}".format(self.senates))
-        logging.critical("satoshi {}: {}".format(self.my_satoshi_total, self.my_satoshi))
+        # logging.critical("senates: {}".format(self.senates))
+        logging.critical("satoshi {}".format(self.my_satoshi_total))
 
         self.set_round(rounds)
         self.consensus_reached[rounds] = False
@@ -683,14 +683,13 @@ class Client(object):
     def handle_block(self, obj, remote_vk_str):
         assert (isinstance(obj, pb.Block)), type(obj)
         if obj.prev_hash != self.last_block.hash:
-            logging.critical("client: prev hash inequal")
+            logging.critical("client: prev hash in equal")
             return
-
         client_status = self.ClientStatus
         if self.status == client_status.Wait4Block:
             if self.add_block(obj):
                 self.consensus_reached[self.rounds] = True
-                logging.info("add block: {}".format(obj))
+                logging.info("add block: {} Bytes".format(obj.ByteSize()))
                 self.start(self.rounds + 1)
         else:
             # raise Exception("chain_runner: handle block in invalid status: {}".format(self.status))
