@@ -205,7 +205,7 @@ class MyFactory(Factory):
         self.config = config
 
         # self.tc_runner = TrustChainRunner(self)
-        self.chain_runner = ChainRunner(factory=self, senates_number=config.n, blocks_path=chain_config.genic_chain_path)
+        self.chain_runner = ChainRunner(factory=self, senates_number=config.n, blocks_path=chain_config.ten_rich_man_chain_path)
         self.vk = self.chain_runner.member.verify_key_str
         self.q = Queue.Queue()  # (str, msg)
         self.first_disconnect_logged = False
