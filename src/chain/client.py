@@ -20,6 +20,7 @@ import logging
 import logging.handlers
 
 # public crypto Library
+from collections import defaultdict
 from ecdsa import SigningKey
 from ecdsa import VerifyingKey
 
@@ -31,13 +32,15 @@ from .model import member_model
 from .model import block_model
 from .model import transaction_model
 from .model import chain_model
+from src.chain.model.transaction_model import TxoIndex
 
 from src.utils import message
 from src.utils import hash_utils
 import src.messages.messages_pb2 as pb
 
 from src.chain.model.member_model import verify
-        
+
+
 class Client(object):
 
     STATUS = enum.Enum("client_status" , ('Sleeping', "Wait4Senates"))
@@ -71,6 +74,10 @@ class Client(object):
         }
         """
         return self._pending_transactions
+
+    @property
+    def locking_txo(self):
+        return self._locking_txo
 
     @property
     def my_satoshi(self):
@@ -116,6 +123,7 @@ class Client(object):
         self._leader_serial_number = 0
         self._status = Client.STATUS.Sleeping
         self._cooking_food = {}
+        self._locking_txo = defaultdict(bool)
 
         self._chain = chain_model.Chain.new()
         
@@ -153,6 +161,20 @@ class Client(object):
             self.update_pending_transactions(block)
         self.update_my_satoshi()
         self._cooking_food = {}
+        self.reset_lock_list()
+
+    def reset_lock_list(self):
+        self.locking_txo.clear()
+
+    def lock_txo(self, txo):
+        self.locking_txo[txo] = True
+
+    def lock_txos(self, txos):
+        for txo in txos:
+            self.locking_txo[txo] = True
+
+    def is_lock(self, txo):
+        return self.locking_txo[txo]
 
     def update_my_satoshi(self):
         """check the satoshi client have"""
@@ -220,6 +242,18 @@ class Client(object):
     def receive_transactions(self, transactions):
         """collect transactions"""
         for transaction in transactions:
+            check = True
+            pend_to_lock = []
+            for ip in transaction.inputs:
+                txo = TxoIndex(transaction_hash=ip.transaction_hash,
+                               transaction_idx=ip.transaction_idx)
+                pend_to_lock.append(txo)
+            for txo in pend_to_lock:
+                if self.is_lock(txo):
+                    check = False
+                    break
+            if check:
+                self.lock_txos(pend_to_lock)
             self.pending_transactions[transaction.hash] = transaction       
 
     def receive_director_competition(self, signature, txo_idx):
