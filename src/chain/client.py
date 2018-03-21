@@ -791,7 +791,7 @@ class Client(object):
                             break
                     if rand_remains_amount:
                         logging.info(
-                            "send {} to myself: {}".format(rand_out_amount, b64encode(self.member.verify_key_str)))
+                            "send {} to myself: {}".format(rand_remains_amount, b64encode(self.member.verify_key_str)))
                         script_to_myself = script_to_verify_key(self.member.verify_key_str)
                         collector.append((rand_remains_amount, script_to_myself))
                     if collector.__len__() > 0:
