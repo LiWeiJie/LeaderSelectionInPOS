@@ -62,7 +62,8 @@ class Discovery(ProtobufReceiver):
 
                 if self.nodes.__len__() < self.factory.load_member:
                     idx = self.nodes.__len__()
-                    member = self.factory.pre_members[idx]
+                    # member = self.factory.pre_members[idx]
+                    member = chain_config.get_member_by_idx(idx)
                     vk = b64encode(member.verify_key_str)
                     if self.factory.member_determined[vk] is False:
                         logging.info("Discovery: set a member {}".format(idx))
@@ -123,7 +124,7 @@ class DiscoveryFactory(Factory):
         self.timeout_called = False
         self.load_member = load_member
         self.member_determined = defaultdict(bool)
-        self.pre_members = chain_config.get_members(load_member)
+        # self.pre_members = chain_config.get_members(load_member)
 
         import time
         logging.debug("Create a discoveryFactory at {}".format(time.time()))
