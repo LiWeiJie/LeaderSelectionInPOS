@@ -779,7 +779,7 @@ class Client(object):
                     rand_remains_amount = output.value
                     collector = []
                     for dest in dests:
-                        rand_out_amount = output.value * random_utils.rand_percent()
+                        rand_out_amount = rand_remains_amount * random_utils.rand_percent()
                         import math
                         rand_out_amount = int(math.floor(rand_out_amount))
                         if rand_out_amount > 0:
