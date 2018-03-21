@@ -95,7 +95,8 @@ class Discovery(ProtobufReceiver):
                 #     filename='log/'+str(idx)+'.log',
                 #     filemode='w')
                 logger = logging.getLogger()
-                fh = logging.FileHandler('log/'+str(idx)+'.log', "w")
+                log_path = self.factory.config.output_dir + '/' +str(idx)+'.log'
+                fh = logging.FileHandler(log_path, "w")
                 formatter = logging.Formatter('%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s')  
                 fh.setFormatter(formatter)  
                 logger.addHandler(fh)  

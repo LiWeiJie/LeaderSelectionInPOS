@@ -407,7 +407,7 @@ class Config(object):
     Should be singleton
     """
     def __init__(self, port, n, t, population, fan_out, 
-                 ignore_promoter, chain):
+                 ignore_promoter, chain, output_dir):
         """
         This only stores the config necessary at runtime, so not necessarily all the information from argparse
         :param port:
@@ -429,6 +429,8 @@ class Config(object):
 
         self.population = population
 
+        self.output_dir = output_dir
+
 
 def simple_run(member = None, n=4, t=0, population=0, port = 0):
     set_logging(logging.DEBUG)
@@ -443,7 +445,7 @@ def simple_run(member = None, n=4, t=0, population=0, port = 0):
     fan_out = 10
     ignore_promoter = False
     return run(Config(port, n, t, population,
-                fan_out, ignore_promoter, chain_config.chain_genic_path),
+                fan_out, ignore_promoter, chain_config.chain_genic_path, 'log'),
            discovery)
 
 def run(config, discovery_addr):
@@ -517,6 +519,7 @@ if __name__ == '__main__':
         "-o", "--output",
         type=argparse.FileType('w'),
         metavar='NAME',
+
         help="location for the output file"
     )
     parser.add_argument(
@@ -553,6 +556,12 @@ if __name__ == '__main__':
         default='genic',
         dest='chain'
     )
+    parser.add_argument(
+        '--output_dir',
+        help='output dir',
+        default='log',
+        dest='output_dir',
+    )
     args = parser.parse_args()
 
     if args.chain == 'genic':
@@ -566,7 +575,7 @@ if __name__ == '__main__':
 
     def _run():
         run(Config(args.port, args.n, args.t, args.population,
-                   args.fan_out,  args.ignore_promoter, args.chain),
+                   args.fan_out,  args.ignore_promoter, args.chain, args.output_dir),
             args.discovery)
 
     if args.timeout != 0:
