@@ -11,7 +11,6 @@
 
 from src.chain  import client
 
-from src.chain.config import config_loader
 from src.chain.config import chain_config
 
 from src.chain.model import member_model
@@ -102,7 +101,7 @@ members_notebook = []
 def load_predine_members(number=10):
     return chain_config.get_members(number)
 
-def load_predine_chains(members, chain_path=chain_config.genic_chain_path):
+def load_predine_chains(members, chain_path=chain_config.chain_genic_path):
     # blocks_path = "config/long_blocks.json"
     clients = [client.Client(member=member, blocks_path=chain_path) for member in members ]
     return clients
@@ -312,7 +311,7 @@ if __name__=="__main__":
     # prof.enable()  # 开始性能分析
 
     members = load_predine_members()
-    clients = load_predine_chains(members, chain_path=chain_config.ten_rich_man_chain_path)
+    clients = load_predine_chains(members, chain_path=chain_config.chain_10_rich_man_path)
     simulation_one_round(clients, verbose=False)
     # prof.disable()  # 停止性能分析
     # prof.print_stats(sys.stdout)

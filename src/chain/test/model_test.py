@@ -177,7 +177,7 @@ class TestBlock(unittest.TestCase):
 
     def test_get_genic_blocks(self):
         ls = get_genic_blocks()        
-        blocks_path = unittest_chain_config.genic_chain_path
+        blocks_path = unittest_chain_config.chain_genic_path
         with open(blocks_path, 'r') as f:
             dic = json.load(f)
         # print dic
@@ -190,7 +190,7 @@ class TestBlock(unittest.TestCase):
 from ..model import chain_model
 
 def get_genic_blocks():
-    blocks_path = unittest_chain_config.genic_chain_path
+    blocks_path = unittest_chain_config.chain_genic_path
     bs = block_model.load_blocks(blocks_path)
     for b in bs:
         assert isinstance(b, block_model.Block)

@@ -31,11 +31,11 @@ class TestClient(unittest.TestCase):
     
     def setUp(self):
         members = unittest_chain_config.get_members(10)
-        clients = [client.Client(member=member, blocks_path=unittest_chain_config.genic_chain_path) for member in members ]
+        clients = [client.Client(member=member, blocks_path=unittest_chain_config.chain_genic_path) for member in members ]
         self._genic_clients = clients
         self._members = members
 
-        clients = [client.Client(member=member, blocks_path=unittest_chain_config.ten_rich_man_chain_path) for member in members ]
+        clients = [client.Client(member=member, blocks_path=unittest_chain_config.chain_10_rich_man_path) for member in members]
         self._clients = clients
 
     def tearDown(self):
@@ -196,7 +196,7 @@ class TestClient(unittest.TestCase):
     #         return ret
 
     #     members = unittest_chain_config.get_members(10)
-    #     blocks_path = unittest_chain_config.genic_chain_path
+    #     blocks_path = unittest_chain_config.chain_genic_path
 
     #     clients = [client.Client(member=member, blocks_path= blocks_path) for member in members ]
 

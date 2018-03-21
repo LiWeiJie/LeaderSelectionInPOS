@@ -716,13 +716,13 @@ class Client(object):
             self.factory.send(remote_vk, obj)
         else:
             logging.error("chain runner: remote_vk not exist {}".format(b64encode(remote_vk)))
-            raise Exception()
+            # raise Exception()
 
     def send_to_senates(self, obj):
         senates = self.senates
         for senate in senates:
             # print(senate)
-            self.factory.send(senate, obj)
+            self.send(senate, obj)
 
     def broadcast(self, obj):
         self.factory.bcast(obj)

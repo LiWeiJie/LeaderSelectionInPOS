@@ -205,7 +205,7 @@ class MyFactory(Factory):
         self.config = config
 
         # self.tc_runner = TrustChainRunner(self)
-        self.chain_runner = ChainRunner(factory=self, senates_number=config.n, blocks_path=chain_config.ten_rich_man_chain_path)
+        self.chain_runner = ChainRunner(factory=self, senates_number=config.n, blocks_path=config.chain)
         self.vk = self.chain_runner.member.verify_key_str
         self.q = Queue.Queue()  # (str, msg)
         self.first_disconnect_logged = False
@@ -381,8 +381,8 @@ class Config(object):
     All the static settings, used in Factory
     Should be singleton
     """
-    def __init__(self, port, n, t, population, fan_out,
-                 ignore_promoter):
+    def __init__(self, port, n, t, population, fan_out, 
+                 ignore_promoter, chain):
         """
         This only stores the config necessary at runtime, so not necessarily all the information from argparse
         :param port:
@@ -393,6 +393,8 @@ class Config(object):
         self.port = port
         self.n = n
         self.t = t
+
+        self.chain = chain
 
         self.fan_out = fan_out
 
@@ -416,7 +418,7 @@ def simple_run(member = None, n=4, t=0, population=0, port = 0):
     fan_out = 10
     ignore_promoter = False
     return run(Config(port, n, t, population,
-                fan_out, ignore_promoter),
+                fan_out, ignore_promoter, chain_config.chain_genic_path),
            discovery)
 
 def run(config, discovery_addr):
@@ -520,13 +522,26 @@ if __name__ == '__main__':
         default=0,
         type=int
     )
+    parser.add_argument(
+        '--chain',
+        help='the initial chain path',
+        default='genic',
+        dest='chain'
+    )
     args = parser.parse_args()
+
+    if args.chain == 'genic':
+        args.chain = chain_config.chain_genic_path
+    elif args.chain=='10_rich_man':
+        args.chain = chain_config.chain_10_rich_man_path
+    elif args.chain == '100_rich_man':
+        args.chain = chain_config.chain_100_rich_man_path
 
     set_logging(args.loglevel, args.output)
 
     def _run():
         run(Config(args.port, args.n, args.t, args.population,
-                   args.fan_out,  args.ignore_promoter),
+                   args.fan_out,  args.ignore_promoter, args.chain),
             args.discovery)
 
     if args.timeout != 0:

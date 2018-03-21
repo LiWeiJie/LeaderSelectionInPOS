@@ -15,7 +15,6 @@ from . import block_model
 from . import member_model
 from transaction_model import TxoIndex
 
-from ..config import config_loader
 from src.chain.config import chain_config
 from src.utils import hash_utils
 import src.messages.messages_pb2 as pb
