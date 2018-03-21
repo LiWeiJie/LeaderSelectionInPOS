@@ -337,6 +337,20 @@ class MyFactory(Factory):
             self._neighbour = self.sorted_peer_keys[(my_idx + 1) % len(self.sorted_peer_keys)]
         return self._neighbour
 
+    def get_n_neighbour(self, n):
+        my_idx = self.sorted_peer_keys.index(self.vk)
+        double_sorted_peer_keys = None
+        if hasattr(self, '_double_sorted_peer_keys'):
+            double_sorted_peer_keys = self._double_sorted_peer_keys
+        if double_sorted_peer_keys is None:
+            double_sorted_peer_keys = []
+            double_sorted_peer_keys.extend(self.sorted_peer_keys)
+            double_sorted_peer_keys.extend(self.sorted_peer_keys)
+            self._double_sorted_peer_keys = double_sorted_peer_keys
+        my_idx += 1
+        return double_sorted_peer_keys[my_idx:my_idx+n]
+
+
     @property
     def sorted_peer_keys(self):
         if self._sorted_peer_keys is None:
@@ -357,15 +371,26 @@ class MyFactory(Factory):
 
         if msg.instruction == 'bootstrap-only':
             self.chain_runner.make_tx(True)
-        elif msg.instruction == 'tx':
-            rate = float(msg.param)
-            interval = 1.0 / rate
-            call_later(msg.delay, self.chain_runner.make_tx, interval, False)
 
-        elif msg.instruction == 'tx-random':
+        elif msg.instruction == 'tx-rate':
             rate = float(msg.param)
             interval = 1.0 / rate
-            call_later(msg.delay, self.chain_runner.make_tx, interval, True)
+            call_later(msg.delay, self.chain_runner.make_tx, interval, 1, False)
+
+        elif msg.instruction == 'tx-rate-random':
+            rate = float(msg.param)
+            interval = 1.0 / rate
+            call_later(msg.delay, self.chain_runner.make_tx, interval, 1, True)
+
+        elif msg.instruction == 'tx-n-outputs':
+            outputs = int(msg.param)
+            interval = self.chain_runner.prepare_timeout-0.5
+            call_later(msg.delay, self.chain_runner.make_tx, interval, outputs, False)
+
+        # elif msg.instruction == 'tx-n-outputs-random':
+        #     outputs = int(msg.param)
+        #     interval = self.chain_runner.prepare_timeout-0.5
+        #     call_later(msg.delay, self.chain_runner.make_tx, interval, outputs, True)
 
         else:
             raise AssertionError("Invalid instruction msg {}".format(msg))

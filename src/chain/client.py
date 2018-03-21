@@ -754,33 +754,41 @@ class Client(object):
         return ret
 
     ######## FOR SIMULATOR #############
-    def make_tx(self, interval=0, random_node=False):
+    def make_tx(self, interval=0, output_number=1, random_node=False):
         if random_node:
-            lc = task.LoopingCall(lambda: self._make_tx(self.factory.random_node))
+            dests = []
+            for _i in range(output_number):
+                dests.append(self.factory.random_node)
+            lc = task.LoopingCall(lambda: self._make_tx(dests))
         else:
-            node = self.factory.neighbour
-            lc = task.LoopingCall(self._make_tx, node)
+            # node = self.factory.neighbour
+            dests = self.factory.get_n_neighbour(output_number)
+            lc = task.LoopingCall(self._make_tx, dests)
         lc.start(interval).addErrback(my_err_back)
 
-    def _make_tx(self, dest):
+    def _make_tx(self, dests):
         if self.status == self.ClientStatus.Wait4TxsAndDirector:
             m_satoshi = self.my_satoshi
             rand_one = random_utils.rand_one(m_satoshi)
             if rand_one:
                 utx_header, output = rand_one
-                if dest is not None and not self.is_lock(utx_header[0], utx_header[1]):
+                if dests is not None and not self.is_lock(utx_header[0], utx_header[1]):
                     if not self.is_senate:
                         self.lock_txo(utx_header[0], utx_header[1])
                     cli_inputs = self.create_inputs([utx_header])
-                    rand_out_amount = output.value * random_utils.rand_percent()
-                    import math
-                    rand_out_amount = int(math.floor(rand_out_amount))
-                    rand_remains_amount = output.value - rand_out_amount
+                    rand_remains_amount = output.value
                     collector = []
-                    if rand_out_amount > 0:
-                        logging.info("send {} to dest: {}".format(rand_out_amount, b64encode(dest)))
-                        script_to_dest = script_to_verify_key(dest)
-                        collector.append((rand_out_amount, script_to_dest))
+                    for dest in dests:
+                        rand_out_amount = output.value * random_utils.rand_percent()
+                        import math
+                        rand_out_amount = int(math.floor(rand_out_amount))
+                        if rand_out_amount > 0:
+                            logging.info("send {} to dest: {}".format(rand_out_amount, b64encode(dest)))
+                            script_to_dest = script_to_verify_key(dest)
+                            collector.append((rand_out_amount, script_to_dest))
+                        rand_remains_amount = rand_remains_amount - rand_out_amount
+                        if rand_remains_amount <= 0:
+                            break
                     if rand_remains_amount:
                         logging.info(
                             "send {} to myself: {}".format(rand_out_amount, b64encode(self.member.verify_key_str)))
