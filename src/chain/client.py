@@ -491,8 +491,10 @@ class Client(object):
         self.consensus_reached[rounds] = False
         status = self.ClientStatus.Wait4TxsAndDirector
         self.set_client_status(status)
-        self.send_director_competition()
-        self.send_pend_to_summit_txs()
+
+        delay = self.prepare_timeout/2
+        call_later(delay, self.send_director_competition)
+        call_later(delay, self.send_pend_to_summit_txs)
 
         if self.is_senate:
             # todo: broadcast existence
@@ -509,6 +511,7 @@ class Client(object):
             self.set_client_status(status)
 
     def send_director_competition(self):
+        logging.info("chain runner: send_director_competition")
         my_satoshi = self.my_satoshi
         one = random_utils.rand_one(my_satoshi)
         if one:
@@ -521,6 +524,7 @@ class Client(object):
 
     def send_pend_to_summit_txs(self):
         if self.status is self.ClientStatus.Wait4TxsAndDirector:
+            logging.info("chain runner: send_pend_to_summit_txs")
             if self.pend_to_summit_transactions.__len__() > 0:
                 logging.info("chain runner: send {} txs".format(self.pend_to_summit_transactions.__len__()))
                 pb_txs = [tx.pb for tx in self.pend_to_summit_transactions.values()]
@@ -539,6 +543,7 @@ class Client(object):
                 else:
                     del self.consensus_reached[r]
 
+            logging.info
             call_later(self.consensus_timeout, stop_and_restart, self.rounds)
             if self.status == self.ClientStatus.Wait4TxsAndDirector:
                 self.set_client_status(self.ClientStatus.Wait4Consensus)
