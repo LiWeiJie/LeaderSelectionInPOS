@@ -266,10 +266,10 @@ class MyFactory(Factory):
         self.chain_runner.change_member(member)
         self.vk = self.chain_runner.member.verify_key_str
 
-        # # connect to myself
-        # point = TCP4ClientEndpoint(reactor, "localhost", port, timeout=90)
-        # d = connectProtocol(point, MyProto(self))
-        # d.addCallback(got_protocol).addErrback(my_err_back)
+        # connect to myself
+        point = TCP4ClientEndpoint(reactor, "localhost", self.config.port, timeout=90)
+        d = connectProtocol(point, MyProto(self))
+        d.addCallback(got_protocol).addErrback(my_err_back)
 
     def bcast(self, msg):
         """
@@ -473,7 +473,8 @@ def run(config, discovery_addr):
         point = TCP4ClientEndpoint(reactor, "localhost", config.port, timeout=90)
         d = connectProtocol(point, MyProto(f))
         d.addCallback(got_protocol).addErrback(my_err_back)
-    call_later(1, connect_to_myself)
+    connect_to_myself()
+    # call_later(1, connect_to_myself)
 
     logging.info("NODE: reactor starting on port {}".format(config.port))
     reactor.run()
