@@ -271,15 +271,16 @@ class Client(object):
         if not block:
             return None
         if not director:
-            if self.cooking_food.has_key("director_competition"):
-                sorted_list = sorted(self.cooking_food["director_competition"])
+            director_list = self.get_director_competition_food()
+            if director_list is not None:
+                sorted_list = sorted(director_list)
                 if sorted_list.__len__():
-                    director = sorted_list[0][1]
+                    director_competition = sorted_list[0][1]
                 else:
                     return None
             else:
                 return None
-        block.set_director(director)
+        block.set_director_competition(director_competition)
         return block
 
     def add_senate_signature(self, block_hash, signatory, signature):
@@ -320,6 +321,29 @@ class Client(object):
         self._senates_leader = None
         self._leader_serial_number += 1
 
+    #================== utils method====================
+
+    def create_director_competition_signature(self, transaction_hash, transaction_idx):
+        """return (signature, txo),
+        signature = sign_owner( hash(prev_hash+q+merkle_root + transacntion out index ) )
+        """
+        if (transaction_hash, transaction_idx) in self.my_satoshi:
+            ret = self.chain.get_director_competition_signature_source(transaction_hash, transaction_idx)
+            if ret:
+                sign_source, tx_hash, tx_idx, __output = ret
+                data = self.member.sign(sign_source)
+                hpq = hash_utils.hash_std(self.last_block.q)
+                q = self.member.sign(hpq)
+                pbo = pb.DirectorCompetition(signature=pb.Signature(signer=self.member.verify_key_str,
+                                                                    signature=data),
+                                             q=q,
+                                             txo_idx=pb.TransactionOutputIndex(
+                                                transaction_hash=tx_hash,
+                                                transaction_idx=tx_idx)
+                                             )
+                return pbo
+        return None
+
     def create_inputs(self, transaction_info):
         """
         @transaction_info list of tuples (transaction_hash, transaction_idx)
@@ -359,6 +383,8 @@ class Client(object):
         block.add_transactions(transactions)
         self.add_director(block)
         return block
+
+    # ================== end utils methods====================
 
     def update_pending_transactions(self, block):
         """
@@ -404,34 +430,41 @@ class Client(object):
                 # print "lock or not ", self.is_lock(sam), " {}:{}".format(b64encode(sam.transaction_hash), sam.transaction_idx)
                 self.pending_transactions[transaction.hash] = transaction
 
-    def receive_director_competition(self, signature, txo_idx):
-        ret = self.verify_director_competition_signature(signature, txo_idx)
-        if ret:
-            if self.cooking_food.has_key("director_competition"):
-                self.cooking_food["director_competition"].append((signature, ret))
-            else:
-                self.cooking_food["director_competition"] = [(signature, ret)]
-        return False
+    def receive_director_competition(self, director_message):
+        if isinstance(director_message, pb.DirectorCompetition):
+            signature = director_message.signature
+            txo_idx = director_message.txo_idx
+            ret = self.verify_director_competition_signature(signature, txo_idx.transaction_hash, txo_idx.transaction_idx)
+            if ret:
+                self.store_director_competition(director_message=director_message)
+        else:
+            logging.warn("Error type in receive_director_competition: {}".format(type(director_message)))
+            return False
 
-    def get_cooking_block(self):
-        cooking_food = self.cooking_food
-        if cooking_food.has_key('cooking_block'):
-            return cooking_food['cooking_block']
+    def store_food(self, key, value):
+        if self.cooking_food.has_key(key):
+            self.cooking_food[key].append(value)
+        else:
+            self.cooking_food[key] = [value]
+
+    def store_director_competition(self, director_message):
+        key = "director_competition"
+        self.store_food(key, (director_message.signature.signature, director_message))
+
+    def get_food(self, key):
+        if key in self.cooking_food:
+            return self.cooking_food[key]
         else:
             return None
 
-    def get_director_competition_signature(self, transaction_hash, transaction_idx):
-        """return (signature, txo_idx),
-        signature = sign_owner( hash(prev_hash+q+merkle_root + transacntion out index ) )
-        """
-        utxo_idx = (transaction_hash, transaction_idx)
-        if (transaction_hash, transaction_idx) in self.my_satoshi:
-            ret = self.chain.get_director_competition_signature_source(transaction_hash, transaction_idx)
-            if ret:
-                source, txo_idx, __output = ret
-                data = self.member.sign(source)
-                return data, txo_idx
-        return None
+    def get_cooking_block(self):
+        key = 'cooking_block'
+        return self.get_food(key)
+
+
+    def get_director_competition_food(self):
+        key = 'director_competition'
+        return self.get_food(key)
 
     def senate_sign(self, block):
         # todo: (return hash, vk, signature)
@@ -456,14 +489,17 @@ class Client(object):
                 block._signature = None
         return None
 
-    def verify_director_competition_signature(self, signature, txo_idx):
+    def verify_director_competition_signature(self, signature, tx_hash, tx_idx):
         """return the owner member"""
-        ret = self.chain.get_director_competition_signature_source(txo_idx.transaction_hash, txo_idx.transaction_idx)
+        ret = self.chain.get_director_competition_signature_source(tx_hash, tx_idx)
         if ret:
-            source, __txo_idx, op = ret
+            source, tx_hash, tx_idx, op = ret
             verify_key_str = op.address
-            if verify(signer=verify_key_str, signature=signature, data=source):
-                return verify_key_str
+            if verify_key_str != signature.signer:
+                logging.warn("invalid director_competition_signature: op.address != signature.signer, {}".format(signature))
+                return False
+            if verify(signer=verify_key_str, signature=signature.signature, data=source):
+                return True
         return False
 
     def initiate_protocol_handler(self):
@@ -515,12 +551,9 @@ class Client(object):
         my_satoshi = self.my_satoshi
         one = random_utils.rand_one(my_satoshi)
         if one:
-            ret = self.get_director_competition_signature(one[0][0], one[0][1])
+            ret = self.create_director_competition_signature(one[0][0], one[0][1])
             if ret:
-                self.send_to_senates(pb.DirectorCompetition(signature=pb.Signature(signer=self.member.verify_key_str,
-                                                                                   signature=ret[0]),
-                                                            transaction_hash=ret[1].transaction_hash,
-                                                            transaction_idx=ret[1].transaction_idx))
+                self.send_to_senates(ret)
 
     def send_pend_to_summit_txs(self):
         if self.status is self.ClientStatus.Wait4TxsAndDirector:
@@ -637,9 +670,7 @@ class Client(object):
         assert (isinstance(obj, pb.DirectorCompetition)), type(obj)
         client_status = self.ClientStatus
         if self.status in [client_status.Wait4TxsAndDirector]:
-            self.receive_director_competition(signature=obj.signature.signature,
-                                              txo_idx=transaction_model.TxoIndex(transaction_hash=obj.transaction_hash,
-                                                                                 transaction_idx=obj.transaction_idx))
+            self.receive_director_competition(director_message=obj)
         else:
             logging.critical("chain_runner: "
                              "handle_director_competition in error statue {} from".format(self.status,
@@ -810,25 +841,6 @@ class Client(object):
 #     c.gossip_existence(addr)
 #     c.request_peers(addr)
 #     c.run()
-
-
-def gen_some_member(path, number=10):
-    import os
-    for no in range(number):
-        detail_path = os.path.join(path, no.__str__())
-        member = member_model.MemberModel(True)
-        member.write_to_path(detail_path)
-
-
-def gen_genic_block(path, owner_path):
-    member = member_model.MemberModel(key_path=owner_path)
-    tx = transaction_model.Transaction()
-    op = transaction_model.Transaction.Output.new(1000, pb.SCRIPT_TYPE_VK, member.verify_key_str)
-    tx.add_outputs([op])
-    b = block_model.Block.new(None, hash_utils.hash_std("genic block"))
-    b.add_transactions([tx])
-    b.director_sign(member)
-    block_model.dump_blocks([b], path)
 
 
 def create_logger(log_name='batch'):

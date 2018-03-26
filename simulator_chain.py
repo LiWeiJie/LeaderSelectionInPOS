@@ -87,9 +87,10 @@ def gen_genic_block(path='genic_block.json', member=chain_config.get_member_by_i
     # print (member.verify_key_str)
     # print (c==member.verify_key_str)
     tx.add_outputs([op])
-    b = block_model.Block.new(prev_hash=hash_utils.hash_std("genic_block"))
+    b = block_model.Block.new(prev_hash="genic_block")
     b.add_transactions([tx])
-    b.director_sign(member=member, prev_q="genic_block")
+    b.set_director_competition(pb.DirectorCompetition(q='genic_q'))
+    # b.director_sign(member=member, prev_q="genic_block")
     block_model.dump_blocks([b], path)
 
 # import simulator
@@ -177,7 +178,7 @@ def collect_director_competition(clients, verbose=False):
             my_satoshi = cli.my_satoshi
             one = random_utils.rand_one(my_satoshi)
             if one:
-                ret = cli.get_director_competition_signature(one[0][0], one[0][1])
+                ret = cli.create_director_competition_signature(one[0][0], one[0][1])
                 if ret:
                     collects.append(ret)
     return collects
@@ -235,8 +236,8 @@ def simulation_one_round(clients, verbose=False, evenly_transaction=False):
     # send to clients
     start = time.time()
     for cli in clients:
-        for (signature, txo_idx) in message:
-            cli.receive_director_competition(signature, txo_idx)
+        for director_message in message:
+            cli.receive_director_competition(director_message)
     end = time.time()
     print "receive_director_competition cost", end-start, "secs"
     
@@ -278,19 +279,19 @@ def simulation_one_round(clients, verbose=False, evenly_transaction=False):
     end = time.time()
     print "get_cooking_block cost", end-start, "secs"
 
-    # sent to director
-    start = time.time()
-    message = []
-    for cli in clients:
-            signed = cli.director_sign(block)
-            if signed:
-                message.append(signed)
-    end = time.time()
-    print "director_sign cost", end-start, "secs"
-    print "director sign %d:"%message.__len__(), message
+    # # sent to director
+    # start = time.time()
+    # message = []
+    # for cli in clients:
+    #         signed = cli.director_sign(block)
+    #         if signed:
+    #             message.append(signed)
+    # end = time.time()
+    # print "director_sign cost", end-start, "secs"
+    # print "director sign %d:"%message.__len__(), message
 
     start = time.time()
-    block = message[0]
+    # block = message[0]
     for cli in clients:
         cli.add_block(block)
     end = time.time()

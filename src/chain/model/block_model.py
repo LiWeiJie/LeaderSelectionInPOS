@@ -29,13 +29,16 @@ def load_blocks(path):
         b = json.load(f, object_hook=Block.dict2obj)
         return b
 
+
 def loads_blocks(bls):
     b = json.load(bls, object_hook=Block.dict2obj)
     return b
 
+
 def dump_blocks(blocks, path):
     with open(path, 'w') as f:
         json.dump(blocks, f, default=Block.obj2dict)
+
 
 def dumps_blocks(blocks):
     return json.dumps(blocks, default=Block.obj2dict)
@@ -47,10 +50,11 @@ def encode_in_utf8(code):
     else:
         return code
 
+
 class Block(ProtobufWrapper):
 
     def __init__(self, pbo):
-        assert(isinstance(pbo, pb.Block)), type(pbo)
+        assert (isinstance(pbo, pb.Block)), type(pbo)
         super(Block, self).__init__(pbo)
         # self._prev_hash = pbo.prev_hash
         # self._q = pbo.q
@@ -60,13 +64,11 @@ class Block(ProtobufWrapper):
         self._merkle_tree = None
 
     @classmethod
-    def new(cls, prev_hash, q=""):
+    def new(cls, prev_hash):
         obj = cls(pb.Block(
-            prev_hash=prev_hash,
-            q=q
+            prev_hash=prev_hash
         ))
         return obj
-
 
     # MARK: Not needed: blocks write and load is needed, not block
     # @classmethod
@@ -86,8 +88,8 @@ class Block(ProtobufWrapper):
 
     @property
     def q(self):
-        return self.pb.q
-    
+        return self.pb.director_competition.q
+
     @property
     def merkle_root(self):
         if not self._merkle_root:
@@ -110,14 +112,18 @@ class Block(ProtobufWrapper):
     @property
     def prev_hash(self):
         return self.pb.prev_hash
-    
+
     @property
     def transactions(self):
         return self._txs
 
     @property
     def director_signature(self):
-        return self.pb.director_signature
+        return self.director_competition.signature
+
+    @property
+    def director_competition(self):
+        return self.pb.director_competition
 
     @property
     def senates(self):
@@ -126,20 +132,20 @@ class Block(ProtobufWrapper):
     @property
     def director(self):
         """director's verify_key"""
-        return self.pb.director_signature.signer
-    
+        return self.director_signature.signer
+
     def on_change(self):
         super(Block, self).on_change()
         self.pb.merkle_root
         self._merkle_root = ""
         self._merkle_tree = None
-    
+
     def add_transactions(self, txs):
         pbs = [t.pb for t in txs]
         self.pb.txs.extend(pbs)
         n = pbs.__len__()
         last_pbs = self.pb.txs[-n:]
-        new_txs = [Transaction(tx) for tx in last_pbs ]
+        new_txs = [Transaction(tx) for tx in last_pbs]
         self._txs.extend(new_txs)
         self.on_change()
 
@@ -152,30 +158,29 @@ class Block(ProtobufWrapper):
         # self._senates_signature = self.pb.senates_signature
         self.on_change()
 
-    def set_q(self, new_q):
-        # self._q = new_q
-        self.pb.q = new_q
+    # def set_q(self, new_q):
+    #     # self._q = new_q
+    #     self.pb.q = new_q
+    #     self.on_change()
+
+    def set_director_competition(self, director):
+        self.pb.director_competition.CopyFrom(director)
         self.on_change()
 
-    def set_director(self, director):
-        self.pb.director_signature.signer = director
-        self.pb.director_signature.signature = ''
-        self.on_change()
+    # def set_director_signature(self, signer, signature):
+    #     self.pb.director_signature.signer = signer
+    #     self.pb.director_signature.signature = signature
+    #     # self._director_signature = self.pb.director_signature
+    #     self.on_change()
 
-    def set_director_signature(self, signer, signature):
-        self.pb.director_signature.signer = signer
-        self.pb.director_signature.signature = signature
-        # self._director_signature = self.pb.director_signature
-        self.on_change()
+    # def director_sign(self, member, prev_q):
+    #     """add director, signature, q"""
+    #     self.set_q(member.sign(hash_utils.hash_std(prev_q)))
+    #     self.set_director(member.verify_key_str)
+    #     data = self.get_director_sign_data_source()
+    #     self.set_director_signature(signer=member.verify_key_str, signature=member.sign(data))
 
-    def director_sign(self, member, prev_q):
-        """add director, signature, q"""
-        self.set_q(member.sign(hash_utils.hash_std(prev_q)))
-        self.set_director(member.verify_key_str)
-        data = self.get_director_sign_data_source()
-        self.set_director_signature(signer=member.verify_key_str, signature=member.sign(data))
-
-    def director_verify(self, prev_q):
+    def director_verify(self, prev_block, sign_source):
         """including:
         signature of the block hash value by director
         q
@@ -183,8 +188,9 @@ class Block(ProtobufWrapper):
         if not self.director_signature or not self.director or not self.q:
             return False
         director = self.director
+        prev_q = prev_block.q
         prev_q = hash_utils.hash_std(prev_q)
-        data = self.get_director_sign_data_source()
+        data = sign_source
         return verify(signer=director, data=prev_q, signature=self.q) and verify(signer=director, data=data, signature=self.director_signature.signature)
 
     def get_senate_sign_data_source(self):
@@ -192,27 +198,27 @@ class Block(ProtobufWrapper):
         # director = self.director
         # assert isinstance(director, member_model.MemberModel), type(director)
         # director_str = director.verify_key_str
-        return self.director + self.merkle_root
+        return self.director_competition.SerializeToString() + self.merkle_root
 
-    def get_director_competition_data_source(self):
-        """the data of b*, including the prev_block, the q, the transactions merkle root, director"""
-        header = self.prev_hash
-        header += self.q
-        header += self.merkle_root
-        # logging.info("director {} {}".format(self.director.__len__(), self.director.encode("utf-8")))
-        header += self.director
-        hv = hash_utils.hash_std(header)
-        return hv
-    
-    def get_director_sign_data_source(self):
-        header = self.prev_hash + self.q + self.merkle_root + self.director + self.merkle_root
-        for s in self.senates:
-            header += s.signature
-        hv = hash_utils.hash_std(header)
-        return hv
+    # def get_director_competition_data_source(self):
+    #     """the data of b*, including the prev_block, the q, the transactions merkle root, director"""
+    #     header = self.prev_hash
+    #     header += self.q
+    #     header += self.merkle_root
+    #     # logging.info("director {} {}".format(self.director.__len__(), self.director.encode("utf-8")))
+    #     header += self.director
+    #     hv = hash_utils.hash_std(header)
+    #     return hv
+
+    # def get_director_sign_data_source(self):
+    #     header = self.prev_hash + self.q + self.merkle_root + self.director + self.merkle_root
+    #     for s in self.senates:
+    #         header += s.signature
+    #     hv = hash_utils.hash_std(header)
+    #     return hv
 
     def get_transaction(self, idx):
-        if idx<=self.n_txs:
+        if idx <= self.n_txs:
             return self.transactions[idx]
         else:
             return None
@@ -222,7 +228,6 @@ class Block(ProtobufWrapper):
         self._merkle_root = None
         self.on_change()
 
-
     def completion_merkle_tree(self):
         n = self.n_txs
         merkle_tree = []
@@ -230,10 +235,10 @@ class Block(ProtobufWrapper):
             merkle_tree.append(tx.hash)
         pos = 0
         last = n
-        while n>1:
+        while n > 1:
             second_pos = pos + 1
             a = merkle_tree[pos]
-            if second_pos<last:
+            if second_pos < last:
                 a += merkle_tree[second_pos]
                 pos += 2
             else:
@@ -262,40 +267,53 @@ class Block(ProtobufWrapper):
     def obj2dict(cls, obj):
         return {
             "prev_hash": json_bytes_dumps(obj.prev_hash),
-            "q":json_bytes_dumps(obj.q),
             "txs": json.dumps(obj.transactions, default=transaction_model.Transaction.obj2dict),
-            "director_signature": (json_bytes_dumps(obj.director_signature.signer), json_bytes_dumps(obj.director_signature.signature)),
             "senates_signature": [(json_bytes_dumps(s.signer), json_bytes_dumps(s.signature)) for s in obj.senates],
             # "n_txs":obj.n_txs,
+            "director_competition": json.dumps({
+                "director_signature": (
+                    json_bytes_dumps(obj.director_signature.signer),
+                    json_bytes_dumps(obj.director_signature.signature)),
+                "txo_idx": (json_bytes_dumps(obj.director_competition.txo_idx.transaction_hash),
+                             obj.director_competition.txo_idx.transaction_idx),
+                "q": json_bytes_dumps(obj.q)
+            }),
             "merkle_root": json_bytes_dumps(obj.merkle_root)
         }
 
     @classmethod
     def dict2obj(cls, dic):
         prev_hash = json_bytes_loads(dic['prev_hash'])
-        q = json_bytes_loads(dic['q'])
-        b = Block.new(prev_hash, q)
+        b = Block.new(prev_hash)
 
         # FUTURE: Optimization
         b.add_transactions(json.loads(dic['txs'], object_hook=transaction_model.Transaction.dict2obj))
 
-        b.set_director_signature(signer=json_bytes_loads(dic['director_signature'][0].encode('utf-8')),
-                                 signature=json_bytes_loads(dic['director_signature'][1].encode('utf-8')))
+        director_competition_dic = json.loads(dic['director_competition'])
+        director_competition = pb.DirectorCompetition()
+        if director_competition_dic['director_signature'][0]:
+            director_competition.signature.signer = json_bytes_loads(director_competition_dic['director_signature'][0])
+            director_competition.signature.signature = json_bytes_loads(director_competition_dic['director_signature'][1])
+        if director_competition_dic['txo_idx'][0]:
+            director_competition.txo_idx.transaction_hash = json_bytes_loads(director_competition_dic['txo_idx'][0])
+            director_competition.txo_idx.transaction_idx = director_competition_dic['txo_idx'][1]
+        if director_competition_dic['q']:
+            director_competition.q = json_bytes_loads(director_competition_dic['q'])
+
+
+        # director_competition = pb.DirectorCompetition(signature=pb.Signature(signer=json_bytes_loads(director_competition_dic['director_signature'][0].encode('utf-8')),
+        #                                                                      signature=json_bytes_loads(director_competition_dic['director_signature'][1].encode('utf-8'))),
+        #                                               txo_idx=pb.TransactionOutputIndex(transaction_hash=json_bytes_loads(director_competition_dic['txo_idx'][0].encode('utf-8')),
+        #                                                                                 transaction_idx=director_competition_dic['txo_idx'][1]),
+        #                                               q=json_bytes_loads(director_competition_dic['q']))
+        b.set_director_competition(director_competition)
+        # b.set_director_signature(signer=json_bytes_loads(dic['director_signature'][0].encode('utf-8')),
+        #                          signature=json_bytes_loads(dic['director_signature'][1].encode('utf-8')))
         for signature in dic['senates_signature']:
-            b.add_senate_signature(senate=json_bytes_loads(signature[0].encode('utf-8')),
-                                   senate_signature=json_bytes_loads(signature[1].encode('utf-8')))
+            b.add_senate_signature(senate=json_bytes_loads(signature[0]),
+                                   senate_signature=json_bytes_loads(signature[1]))
 
         merkle_root = json_bytes_loads(dic["merkle_root"])
         b.pb.merkle_root = merkle_root
         b._merkle_root = b.pb.merkle_root
         return b
-        
-
-
-
-
-
-
-        
-
-    

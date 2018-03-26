@@ -130,17 +130,17 @@ class TestTransaction(unittest.TestCase):
     
         
 def get_block():
-    b = block_model.Block.new("prev_hash", "q")
+    b = block_model.Block.new("prev_hash")
     b.add_transactions([get_tx(), get_tx()])
-    member = member_model.MemberModel.new(genkey=True)
-    b.director_sign(member, "prev_q")
+    # member = member_model.MemberModel.new(genkey=True)
+    b.set_director_competition(pb.DirectorCompetition(q='prev_q'))
     return b
 
 from ..model import block_model
 class TestBlock(unittest.TestCase):
     
     def test_init(self):
-        b = block_model.Block.new("prev_hash","q")
+        b = block_model.Block.new("prev_hash")
 
     def test_get_merkle_root(self):
         b = get_block()
@@ -158,7 +158,8 @@ class TestBlock(unittest.TestCase):
         b = get_block()
         bjd = json.dumps(b, default=block_model.Block.obj2dict)
         b2 = json.loads(bjd, object_hook=block_model.Block.dict2obj)
-        self.assertEqual( b.hash, b2.hash)
+        # print b, b2
+        self.assertEqual(b.hash, b2.hash),
 
     def test_block_write_down(self):
         path = os.path.join(unittest_chain_config.tmp_output_dir, "0")
@@ -169,11 +170,11 @@ class TestBlock(unittest.TestCase):
         self.assertEqual(b2[0].hash, b.hash)
         os.remove(path)
 
-    def test_director_sign_verify(self):
-        b = get_block()
-        m = get_member()
-        b.director_sign(m, "prev_q")
-        self.assertTrue(b.director_verify("prev_q"))
+    # def test_director_sign_verify(self):
+    #     b = get_block()
+    #     m = get_member()
+    #     b.director_sign(m, "prev_q")
+    #     self.assertTrue(b.director_verify("prev_q"))
 
     def test_get_genic_blocks(self):
         ls = get_genic_blocks()        

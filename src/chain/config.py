@@ -15,8 +15,6 @@ import os
 from .model import member_model
 
 
-
-
 class ChainConfig(object):
 
     # senates_number = int(config_loader["senates_number"])

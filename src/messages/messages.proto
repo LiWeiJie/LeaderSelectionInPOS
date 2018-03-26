@@ -73,7 +73,6 @@ message Transaction {
 
 message Block {
     bytes prev_hash = 1;
-    bytes q = 2;
     bytes merkle_root = 3; // optional for the efficient
     repeated Transaction txs = 4;
 
@@ -81,7 +80,7 @@ message Block {
     repeated Signature senates_signature = 5;
 
     // director sign from above
-    Signature director_signature = 6;
+    DirectorCompetition director_competition = 6;
 }
 
 message Chain {
@@ -97,11 +96,16 @@ message Chain {
 // TODO:
 // message ping pong
 
+message TransactionOutputIndex {
+    bytes transaction_hash = 1;
+    int32 transaction_idx = 2;
+}
+
 // 2. second director competition and transaction
 message DirectorCompetition {
     Signature signature = 1;
-    bytes transaction_hash = 2;
-    int32 transaction_idx = 3;
+    TransactionOutputIndex txo_idx = 2;
+    bytes q = 3;
 }
 
 message TransactionSummit {
@@ -136,3 +140,13 @@ message DirectorShowTime {
 
 // 7. director sent block
 // message Block
+
+message Paths {
+    repeated bytes node = 1;
+}
+
+message SenateAnnounce {
+    bytes vk = 1;
+    int32 rounds = 2;
+    Paths paths = 3;
+}

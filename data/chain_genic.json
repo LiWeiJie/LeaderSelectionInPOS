@@ -1,13 +1,9 @@
 [
     {
-        "senates_signature": [],
+        "director_competition": "{\"txo_idx\": [\"\", 0], \"q\": \"Z2VuaWNfcQ==\", \"director_signature\": [\"\", \"\"]}",
         "merkle_root": "yFfN5PRK5H98y5dM_3soXmHzD7X9dp__bEaZO39O5rI=",
-        "q": "3dB95XpDbXGxoCvDP6pkA8rI14FuPBIuukmfLNb748a7LMYwgEuNmLZRTIMc2Pz7",
-        "prev_hash": "l_XufzG4V2pOBuFmex_0Geti--RElX9Btw-_NvT1fsw=",
+        "senates_signature": [],
         "txs": "[{\"inputs\": \"[]\", \"outputs\": \"[{\\\"value\\\": 1000000, \\\"script\\\": \\\"CjISMAnjMzKFnPrseg69tUD2cYjAvU9V2hfZv6TrPkvgO3mJ33iYFti7idTTRmlIneh9gwoCCAE=\\\"}]\"}]",
-        "director_signature": [
-            "CeMzMoWc-ux6Dr21QPZxiMC9T1XaF9m_pOs-S-A7eYnfeJgW2LuJ1NNGaUid6H2D",
-            "qD251oyC0-1Wl28F_zh3GyLZFJw41_GpHkAwTDDn7LFjwqxciOXSz39NWbQ1Gm2I"
-        ]
+        "prev_hash": "Z2VuaWNfYmxvY2s="
     }
 ]

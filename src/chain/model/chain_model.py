@@ -21,6 +21,8 @@ import src.messages.messages_pb2 as pb
 from src.protobufwrapper import ProtobufWrapper
 from src.chain.model.member_model import verify
 
+from base64 import b64encode
+
 class Chain(ProtobufWrapper):
 
     def __init__(self, pbo):
@@ -119,6 +121,10 @@ class Chain(ProtobufWrapper):
             self.cal_senates()
         return self._senates
 
+    def whether_in_utxo(self, tx_hash, tx_idx):
+        utxos = self.utxos
+        return (tx_hash, tx_idx) in utxos
+
     def verify_transactions(self, block):
         """verify_transactions, and return a new utxo pool if success, otherwise return None
         checklist:
@@ -180,11 +186,24 @@ class Chain(ProtobufWrapper):
         """
         last_block = self.last_block
         if last_block.hash != block.prev_hash:
-            print("last_block.hash != block.prev_hash")
+            logging.warn("last_block.hash != block.prev_hash")
             return False
 
         # director signature
-        if not block.director_verify(last_block.q):
+        director_competition = block.director_competition
+        vr = False
+        ret = self.get_director_competition_signature_source(director_competition.txo_idx.transaction_hash,
+                                                             director_competition.txo_idx.transaction_idx)
+        if ret is None:
+            logging.warn("director satoshi is not in utxos")
+            return False
+        else:
+            data, _, _ , op = ret
+            if op.address==director_competition.signature.signer:
+                if block.director_verify(last_block, data):
+                    vr = True
+
+        if not vr:
             print("director_verify fail")
             return False
         # senate signature
@@ -289,16 +308,17 @@ class Chain(ProtobufWrapper):
             tot += op.value
         self._utxos_tot = tot
 
+    #================== utils method====================
+
     def get_director_competition_signature_source(self, transaction_hash, transaction_idx):
-        """return source, txo_idx, Transaction.Output"""
-        prev_block_star = self.last_block.get_director_competition_data_source()
-        utxo_header = (transaction_hash, transaction_idx)
-        if utxo_header in self.utxos:
-            txo_idx = TxoIndex(transaction_hash, transaction_idx)
-            data = prev_block_star + txo_idx.to_str()
-            data = hash_utils.hash_std(data)
-            return data, txo_idx, self.utxos[utxo_header]
+        """return prev_block_hash, transaction_hash, transaction_idx, Transaction.Output"""
+        prev_block_hash = self.last_block.hash
+        if self.whether_in_utxo(transaction_hash, transaction_idx):
+            data = self.gen_the_director_sign_source(prev_block_hash=prev_block_hash, tx_hash=transaction_hash, tx_idx=transaction_idx)
+            return data, transaction_hash, transaction_idx, self.utxos[(transaction_hash, transaction_idx)]
         else:
+            logging.warn("Chain: fail in get_director_competition_signature_source(): "
+                         "transaction not in UTXO, {}:{}".format(b64encode(transaction_hash), transaction_idx))
             return None
 
     def dump_blocks(self, path):
@@ -308,6 +328,12 @@ class Chain(ProtobufWrapper):
     def dumps_blocks(self):
         """to str"""
         return block_model.dumps_blocks(self.blocks)
+
+    def gen_the_director_sign_source(self, prev_block_hash, tx_hash, tx_idx):
+        return prev_block_hash + tx_hash + str(tx_idx)
+
+    #================== end utils method====================
+
 
     def cal_senates(self, verbose=False):
         # sort by hash of transaction, then chose the satoshi owner by  prev_transaction.q
