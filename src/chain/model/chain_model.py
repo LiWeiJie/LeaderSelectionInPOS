@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-# ledger_model.py ---
+# chain_model.py ---
 #
-# @Filename: ledger_model.py
+# @Filename: chain_model.py
 # @Description: 
 # @Author: Weijie Li
 # @Created time: 2018-02-27 14:42:00
@@ -13,24 +13,85 @@ import logging
 
 from . import block_model
 from . import member_model
-from . import transaction_output_index
+from transaction_model import TxoIndex
 
-from ..config import config_loader
-from ..utils import hash_utils
+from src.chain.config import chain_config
+from src.utils import hash_utils
+import src.messages.messages_pb2 as pb
+from src.protobufwrapper import ProtobufWrapper
+from src.chain.model.member_model import verify
 
-class Ledger(object):
+from base64 import b64encode
 
-    def __init__(self, 
-                    senates_number=config_loader['senates_number'],  
-                    director_competition_boundary=1.0 ):
-        self._blocks = []
+class Chain(ProtobufWrapper):
+
+    def __init__(self, pbo):
+        assert(isinstance(pbo, pb.Chain)), type(pbo)
+        super(Chain, self).__init__(pbo)
+        self._blocks = [ block_model.Block(bl) for bl in self.pb.blocks ]
+        # self._blocks = []
         self._utxos = {}
         self._utxos_tot = 0
         self._senates = None
-        self._senates_number = senates_number
-        self._senates_boundary = senates_number*3/4
 
-        self._director_competition_boundary = director_competition_boundary
+        if self._blocks.__len__() > 0:
+            genic_block = self._blocks[0]
+            self.update_utxo(block=genic_block, verify_prev_block=False)
+            rest_blocks = self._blocks[1:]
+            # be careful
+            self.update_utxo(block=rest_blocks, verify_prev_block=True)
+        # self._senates_number = senates_number
+        # self._senates_boundary = senates_number*3/4
+
+        # self._director_competition_boundary = director_competition_boundary
+
+    @classmethod
+    def new(cls,
+            senates_number=chain_config.senates_number,
+            failure_boundary=0):
+        if failure_boundary == 0:
+            import math
+            max_fail_node = int(math.floor(senates_number-1)/3)
+            failure_boundary = senates_number-max_fail_node
+
+        chain = cls(pb.Chain(
+            senates_number=senates_number,
+            failure_boundary=failure_boundary
+        ))
+        # self._blocks = []
+        # self._utxos = {}
+        # self._utxos_tot = 0
+        # self._senates = None
+        # self._senates_number = senates_number
+        # self._failure_boundary = failure_boundary
+        # self._director_competition_boundary = director_competition_timeout_in_secs
+        return chain
+
+    def set_ledger(self, blocks, utxos):
+        """set the blocks and utxos without check"""
+        # self.pb = pb.Chain()
+        del self.pb.blocks[:]
+        self._blocks = []
+        for bl in blocks:
+            self.pb.blocks.add()
+            self.pb.blocks[-1].CopyFrom(bl.pb)
+            self._blocks.append(block_model.Block(self.pb.blocks[-1]))
+        if utxos and isinstance(utxos, dict) and utxos.__len__() != 0:
+            self._utxos = utxos
+            self.recount_utxos_tot()
+        else:
+            self._utxos = {}
+            self._utxos_tot = 0
+            self._senates = None
+            self.update_utxos(blocks, verify_prev_block=False)
+
+    @property
+    def senates_number(self):
+        return self.pb.senates_number
+
+    @property
+    def failure_boundary(self):
+        return self.pb.failure_boundary
 
     @property
     def blocks(self):
@@ -52,13 +113,17 @@ class Ledger(object):
     @property
     def senates(self):
         """ senates = {}
-            utxo.addresses: [0, 1, 2],   #(senate serial number, for example)
+            utxo.address: [0, 1, 2],   #(senate serial number, for example)
             ...
         }
         """
         if not self._senates:
             self.cal_senates()
         return self._senates
+
+    def whether_in_utxo(self, tx_hash, tx_idx):
+        utxos = self.utxos
+        return (tx_hash, tx_idx) in utxos
 
     def verify_transactions(self, block):
         """verify_transactions, and return a new utxo pool if success, otherwise return None
@@ -121,27 +186,41 @@ class Ledger(object):
         """
         last_block = self.last_block
         if last_block.hash != block.prev_hash:
-            print("last_block.hash != block.prev_hash")
+            logging.warn("last_block.hash != block.prev_hash")
             return False
 
         # director signature
-        if not block.director_verify(last_block.q):
+        director_competition = block.director_competition
+        vr = False
+        ret = self.get_director_competition_signature_source(director_competition.txo_idx.transaction_hash,
+                                                             director_competition.txo_idx.transaction_idx)
+        if ret is None:
+            logging.warn("director satoshi is not in utxos")
+            return False
+        else:
+            data, _, _ , op = ret
+            if op.address==director_competition.signature.signer:
+                if block.director_verify(last_block, data):
+                    vr = True
+
+        if not vr:
             print("director_verify fail")
             return False
         # senate signature
-        senates = self.senates
-        senates_boundary = self._senates_boundary
+        failure_boundary = self.failure_boundary
     
-        senate_sign_source = block.get_senate_sign_source()
+        senate_sign_source = block.get_senate_sign_data_source()
         senates_signed_data = block.senates
         signed_ct = 0
-        for (verify_key_str, signature) in senates_signed_data:
+        for senate_signature in senates_signed_data:
+            verify_key_str = senate_signature.signer
+            signature = senate_signature.signature
             if not self.verify_senate_signature(verify_key_str, senate_sign_source, signature):
                 print("verify_senate_signature fail")
                 return False
             signed_ct += self.senates[verify_key_str].__len__()
-        if signed_ct < senates_boundary:
-            print("signed_ct not enough %d/%d/%d"%(signed_ct, senates_boundary, self._senates_number))
+        if signed_ct < failure_boundary:
+            print("signed_ct not enough %d/%d/%d"%(signed_ct, failure_boundary, self.senates_number))
             return False
 
         utxos_copy = self.verify_transactions(block)
@@ -160,8 +239,7 @@ class Ledger(object):
         senates = self.senates
         if senate_verify_key_str not in senates:
                 return False
-        m = member_model.MemberModel(key_pair=(senate_verify_key_str, None))
-        return m.verify(data, senate_signature)
+        return verify(signer=senate_verify_key_str, signature=senate_signature, data=data)
 
     def update_utxo(self, block, update_satoshi_tot=True, verify_prev_block=True):
         """
@@ -206,10 +284,13 @@ class Ledger(object):
 
     def add_block(self, block):
         """add block with verify"""
-        assert isinstance(block, block_model.Block), type(block)
+        assert isinstance(block, (block_model.Block, pb.Block)), type(block)
+        if isinstance(block, pb.Block):
+            block = block_model.Block(block)
         if self.verify_block(block, update=True):
             self._senates = None
-            self.blocks.append(block)
+            self.pb.blocks.extend([block.pb])
+            self.blocks.append(block_model.Block(self.pb.blocks[-1]))
             return True
         else:
             logging.warn("block verify fail")
@@ -227,25 +308,17 @@ class Ledger(object):
             tot += op.value
         self._utxos_tot = tot
 
-    def set_ledger(self, blocks, utxos):
-        """set the blocks and utxos without check"""
-        if utxos and isinstance(uxtos, dict) and utxos.__len__()!=0:
-            self._utxos = utxos
-            self.recount_utxos_tot()
-        else:
-            self.update_utxos(blocks, verify_prev_block=False)
-        self._blocks = blocks
+    #================== utils method====================
 
     def get_director_competition_signature_source(self, transaction_hash, transaction_idx):
-        """return source, txo_idx, Transaction.Output"""
-        prev_block_star = self.last_block.get_block_star_info_source()
-        utxo_header = (transaction_hash, transaction_idx)
-        if utxo_header in self.utxos:
-            txo_idx = transaction_output_index.TxoIndex(transaction_hash, transaction_idx)
-            data = prev_block_star + txo_idx.to_str()
-            data = hash_utils.hash_std(data)
-            return data, txo_idx, self.utxos[utxo_header]
+        """return prev_block_hash, transaction_hash, transaction_idx, Transaction.Output"""
+        prev_block_hash = self.last_block.hash
+        if self.whether_in_utxo(transaction_hash, transaction_idx):
+            data = self.gen_the_director_sign_source(prev_block_hash=prev_block_hash, tx_hash=transaction_hash, tx_idx=transaction_idx)
+            return data, transaction_hash, transaction_idx, self.utxos[(transaction_hash, transaction_idx)]
         else:
+            logging.warn("Chain: fail in get_director_competition_signature_source(): "
+                         "transaction not in UTXO, {}:{}".format(b64encode(transaction_hash), transaction_idx))
             return None
 
     def dump_blocks(self, path):
@@ -256,13 +329,19 @@ class Ledger(object):
         """to str"""
         return block_model.dumps_blocks(self.blocks)
 
+    def gen_the_director_sign_source(self, prev_block_hash, tx_hash, tx_idx):
+        return prev_block_hash + tx_hash + str(tx_idx)
+
+    #================== end utils method====================
+
+
     def cal_senates(self, verbose=False):
         # sort by hash of transaction, then chose the satoshi owner by  prev_transaction.q
-        # transaction equal and 
+        # transaction equal and
         sorted_utxos = sorted(self._utxos.items(), key=lambda x:x[0])
 
         q = self.last_block.q
-        senates_number = self._senates_number
+        senates_number = self.senates_number
         senates_owner_satoshi = []
         utxos_tot = self._utxos_tot
 
@@ -271,7 +350,9 @@ class Ledger(object):
             @hv hash value by sha256
             @tot_satoshi
             """
-            hi = int(hv, 16) * tot_satoshi
+            import binascii
+            hexhv = binascii.hexlify(hv)
+            hi = int(hexhv, 16) * tot_satoshi
             const_tot_sha256 = 1<<256
             return hi / const_tot_sha256
 
@@ -298,11 +379,11 @@ class Ledger(object):
                 current_op = current_utxo[1]
                 satoshi_ct += current_op.value
             
-            if result.has_key(current_op.addresses):
+            if result.has_key(current_op.address):
                 # record the No. of senate
-                result[current_op.addresses].append(senate[0])
+                result[current_op.address].append(senate[0])
             else:
-                result[current_op.addresses] = [senate[0]]
+                result[current_op.address] = [senate[0]]
         if verbose:            
             print "cal_senates():  ", result
             print "cal_senates():  sorted_utxo", sorted_utxos

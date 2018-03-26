@@ -1,0 +1,21 @@
+[
+    {
+        "director_competition": "{\"txo_idx\": [\"\", 0], \"q\": \"Z2VuaWNfcQ==\", \"director_signature\": [\"\", \"\"]}",
+        "merkle_root": "yFfN5PRK5H98y5dM_3soXmHzD7X9dp__bEaZO39O5rI=",
+        "senates_signature": [],
+        "txs": "[{\"inputs\": \"[]\", \"outputs\": \"[{\\\"value\\\": 1000000, \\\"script\\\": \\\"CjISMAnjMzKFnPrseg69tUD2cYjAvU9V2hfZv6TrPkvgO3mJ33iYFti7idTTRmlIneh9gwoCCAE=\\\"}]\"}]",
+        "prev_hash": "Z2VuaWNfYmxvY2s="
+    },
+    {
+        "director_competition": "{\"txo_idx\": [\"yFfN5PRK5H98y5dM_3soXmHzD7X9dp__bEaZO39O5rI=\", 0], \"q\": \"PTdXpl-3dFdj9SU2ZRjW54otpC5Z4KP-JeKACUWUSQV0cOOzSAUftP0wPlCzV8bT\", \"director_signature\": [\"CeMzMoWc-ux6Dr21QPZxiMC9T1XaF9m_pOs-S-A7eYnfeJgW2LuJ1NNGaUid6H2D\", \"EqLdxL5PMT9ne-wT1fp3LQSNAIVQ5RL6dL6Ck41XCNxoeUtMi2KMCBkZENuPQCnt\"]}",
+        "merkle_root": "cO4ce4bB700nJgHLzZRVPts6qSaVnvIUnD935jZXaFs=",
+        "senates_signature": [
+            [
+                "CeMzMoWc-ux6Dr21QPZxiMC9T1XaF9m_pOs-S-A7eYnfeJgW2LuJ1NNGaUid6H2D",
+                "VcELgyfroHue2O9RNI0SDVfqH5qV2G8utT1Z-8Oh2uNK8euIOuGftrIeL3aaN_SA"
+            ]
+        ],
+        "txs": "[{\"inputs\": \"[{\\\"script\\\": \\\"CjISMO36RfvmBOa1HStUtx5KvEXOYLKv10dOvlOBVML_alF3U4--Ws0VHAQRatx0_FNP2g==\\\", \\\"transaction_hash\\\": \\\"yFfN5PRK5H98y5dM_3soXmHzD7X9dp__bEaZO39O5rI=\\\", \\\"transaction_idx\\\": 0}]\", \"outputs\": \"[{\\\"value\\\": 100000, \\\"script\\\": \\\"CjISMG69JhLyH-ETdHuxVv-CvmGiuggx-n8QZH1BBjyWLMJtJqNqQBuZfa3_jlJ219OqFQoCCAE=\\\"}, {\\\"value\\\": 100000, \\\"script\\\": \\\"CjISMMEfiZcndLZ_zuk6IYwbe7Zx2bxH-ogLZ7847_38IWNKjpK3fsPZS6khOmOqDJHtIAoCCAE=\\\"}, {\\\"value\\\": 100000, \\\"script\\\": \\\"CjISMOpZuzOye7ZJvdMpd_SkJScapOUXcfemXli7GxW1mV1FZnpOBlJ7sZBAvv3Y_L5WNwoCCAE=\\\"}, {\\\"value\\\": 100000, \\\"script\\\": \\\"CjISMEpTCh3XqG5LW6lw4IDhBXQ2dPI3HsBH0oW3S6B4YfmKR86EkzSEc9x6WmJaNBNEawoCCAE=\\\"}, {\\\"value\\\": 100000, \\\"script\\\": \\\"CjISMH-wfMDL0uU-cqEYOTAvjHEnyeccy5Q-56P1i9dEuwEIOyKDsUPvLqAnM7t4tt5Z7QoCCAE=\\\"}, {\\\"value\\\": 100000, \\\"script\\\": \\\"CjISMGFLUyaTbd1WC9tNKT6odK0RdF8HogY7ZZenR0ZSj0K1p9j47e59zLa7zKLblxwx1AoCCAE=\\\"}, {\\\"value\\\": 100000, \\\"script\\\": \\\"CjISMJ1BWoBE0BGh9AcyYTfsnqzInWVaUP5GwT3Quz0SlUKxtPw8v7NTaf4v2Suw1pswsQoCCAE=\\\"}, {\\\"value\\\": 100000, \\\"script\\\": \\\"CjISMMX5_xOr_ks8bLMfRucoIUjCEFqeqNW2bsDPwC7fXtHvzi77P94tUG8ff1c0I4AxGgoCCAE=\\\"}, {\\\"value\\\": 100000, \\\"script\\\": \\\"CjISMID9AwlfP9Ys9h_FZxJAjuRG7oXnWXuZqznhLeqd8F38EehbV_0aWGXqLi7sIQxwhwoCCAE=\\\"}, {\\\"value\\\": 100000, \\\"script\\\": \\\"CjISMAnjMzKFnPrseg69tUD2cYjAvU9V2hfZv6TrPkvgO3mJ33iYFti7idTTRmlIneh9gwoCCAE=\\\"}]\"}]",
+        "prev_hash": "GDffi0eqcmD0ZykMZ9TNG6fDwQTw949fa_wHwm8e1m0="
+    }
+]

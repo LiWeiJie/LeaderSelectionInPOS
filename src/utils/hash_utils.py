@@ -13,7 +13,7 @@ import hashlib
 
 def hash_once(data):
     """hash once by sha256"""
-    return hashlib.sha256(data).hexdigest()
+    return hashlib.sha256(data).digest()
 
 def hash_twice(data):
     """hash twice by sha256"""

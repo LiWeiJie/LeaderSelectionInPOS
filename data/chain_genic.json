@@ -1,0 +1,9 @@
+[
+    {
+        "director_competition": "{\"txo_idx\": [\"\", 0], \"q\": \"Z2VuaWNfcQ==\", \"director_signature\": [\"\", \"\"]}",
+        "merkle_root": "yFfN5PRK5H98y5dM_3soXmHzD7X9dp__bEaZO39O5rI=",
+        "senates_signature": [],
+        "txs": "[{\"inputs\": \"[]\", \"outputs\": \"[{\\\"value\\\": 1000000, \\\"script\\\": \\\"CjISMAnjMzKFnPrseg69tUD2cYjAvU9V2hfZv6TrPkvgO3mJ33iYFti7idTTRmlIneh9gwoCCAE=\\\"}]\"}]",
+        "prev_hash": "Z2VuaWNfYmxvY2s="
+    }
+]

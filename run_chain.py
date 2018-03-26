@@ -19,4 +19,4 @@ if __name__=="__main__":
     member_path = os.path.join(pre_members_dir, "0.json")
     blocks_path = config_loader["blocks_path"]
     client = client.Client(member=member_path, blocks_path=blocks_path)
-    print client.ledger.dumps_blocks()
+    print client.chain.dumps_blocks()

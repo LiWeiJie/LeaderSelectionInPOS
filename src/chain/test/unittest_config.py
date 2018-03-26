@@ -11,12 +11,15 @@
 
 import os
 
-from ..config import chain_config
+from ..config import ChainConfig
 
-class unittest_chain_config(chain_config):
-    test_data_dir = "src/chain/test/data"
-    # members_dir = os.path.join(test_data_dir,  'members')
-    # blocks_path = os.path.join(test_data_dir,  'blocks.json')
-    # genic_block_path = os.path.join(test_data_dir, "genic_blocks.json")
-    tmp_output_dir = "tmp"
-    # test_block_path = os.path.join(test_data_dir, "test_blocks.json")
+unittest_chain_config = ChainConfig()
+unittest_chain_config.test_data_dir = "src/chain/test/data"
+unittest_chain_config.tmp_output_dir = "tmp"
+# class unittest_chain_config(chain_config):
+#     test_data_dir = "src/chain/test/data"
+#     # members_dir = os.path.join(test_data_dir,  'members')
+#     # blocks_path = os.path.join(test_data_dir,  'blocks.json')
+#     # genic_block_path = os.path.join(test_data_dir, "genic_blocks.json")
+#     tmp_output_dir = "tmp"
+#     # test_block_path = os.path.join(test_data_dir, "test_blocks.json")

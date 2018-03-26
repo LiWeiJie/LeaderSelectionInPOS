@@ -1,0 +1,152 @@
+syntax = "proto3";
+
+message Dummy {
+    string m = 1;
+}
+
+message Discover {
+    bytes vk = 1;
+    int32 port = 2;
+}
+
+message DiscoverReply {
+    // they key should be base64 encoded node vk
+    map<string, string> nodes = 1;
+}
+
+message Instruction {
+    string instruction = 1;
+    int32 delay = 2;
+    string param = 3;
+}
+
+message Ping {
+    bytes vk = 1;
+    int32 port = 2;
+}
+
+message Pong {
+    bytes vk = 1;
+    int32 port = 2;
+}
+
+
+message Signature {
+    bytes signer = 1;
+    bytes signature = 2;
+}
+
+message Member {
+    bytes vk_str = 1;
+    bytes sk_str = 2;
+}
+
+message TxInput {
+    bytes transaction_hash = 1;
+    int32 transaction_idx = 2;
+    Script script = 3;
+}
+
+enum ScriptUnitType {
+    SCRIPT_DATA  = 0;
+    SCRIPT_CHECK_SIG  = 1;
+}
+
+message ScriptUnit {
+    ScriptUnitType type = 1;
+    bytes data = 2;
+}
+
+message Script {
+    repeated ScriptUnit body = 1;
+}
+
+message TxOutput {
+    int32 value = 1;
+    Script script = 2;
+}
+
+message Transaction {
+    repeated TxInput inputs = 1;
+    repeated TxOutput outputs = 2;
+}
+
+message Block {
+    bytes prev_hash = 1;
+    bytes merkle_root = 3; // optional for the efficient
+    repeated Transaction txs = 4;
+
+    // senates  sign from above
+    repeated Signature senates_signature = 5;
+
+    // director sign from above
+    DirectorCompetition director_competition = 6;
+}
+
+message Chain {
+    repeated Block blocks = 1;
+    int32 senates_number = 2;
+    int32 failure_boundary = 3;
+    // maybe in client
+    // int32 director_competition_timeout_in_secs = 4;
+    // int32 senate_communication_timeout_in_secs = 5;
+}
+
+// 1. first broadcast senate existence
+// TODO:
+// message ping pong
+
+message TransactionOutputIndex {
+    bytes transaction_hash = 1;
+    int32 transaction_idx = 2;
+}
+
+// 2. second director competition and transaction
+message DirectorCompetition {
+    Signature signature = 1;
+    TransactionOutputIndex txo_idx = 2;
+    bytes q = 3;
+}
+
+message TransactionSummit {
+    int32 rounds = 1;
+    repeated Transaction txs = 2;
+}
+
+// 3. leader create block then send to senates
+// message Block
+
+// 4. consensus the block 
+// TODO:
+// pbft 
+message ConsensusReq {
+    Block block = 1;
+}
+
+message ConsensusResult {
+    Block block = 1;
+}
+
+// 5. reply signature
+message SenateSignature {
+    bytes signed_block_hash = 1;
+    Signature senate_signature = 2;
+}
+
+// 6. send to director
+message DirectorShowTime {
+    Block block = 1;
+}
+
+// 7. director sent block
+// message Block
+
+message Paths {
+    repeated bytes node = 1;
+}
+
+message SenateAnnounce {
+    bytes vk = 1;
+    int32 rounds = 2;
+    Paths paths = 3;
+}
