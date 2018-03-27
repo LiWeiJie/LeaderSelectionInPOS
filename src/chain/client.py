@@ -520,7 +520,7 @@ class Client(object):
         elif self.is_senate:
             role = "senate!!"
         logging.critical("I am : {}".format(role))
-        # logging.critical("senates: {}".format(self.senates))
+        logging.critical("senates: {}".format([(b64encode(se[0]), se[1]) for se in self.senates.items()]))
         logging.critical("satoshi {}".format(self.my_satoshi_total))
 
         self.set_round(rounds)
@@ -571,12 +571,13 @@ class Client(object):
         if self.pending_transactions.__len__() > 0 and self.cooking_food.has_key("director_competition"):
             def stop_and_restart(r):
                 if not self.consensus_reached[r]:
+                    logging.critical("senate: view change")
                     self.next_senate_leader()
                     self.start(self.rounds)
                 else:
                     del self.consensus_reached[r]
 
-            logging.info
+            logging.info("start consensus phase")
             call_later(self.consensus_timeout, stop_and_restart, self.rounds)
             if self.status == self.ClientStatus.Wait4TxsAndDirector:
                 self.set_client_status(self.ClientStatus.Wait4Consensus)
@@ -591,6 +592,7 @@ class Client(object):
         if self.pending_transactions.__len__() > 0 and self.cooking_food.has_key("director_competition"):
             def stop_and_restart(r):
                 if not self.consensus_reached[r]:
+                    logging.critical("senate leader: view change")
                     self.factory.lc.stop()
                     self.next_senate_leader()
                     self.start(self.rounds)
@@ -601,8 +603,7 @@ class Client(object):
 
             block = self.create_block()
             self.set_client_status(self.ClientStatus.Wait4Consensus)
-            for senate in self.senates:
-                self.send(senate, pb.ConsensusReq(block=block.pb))
+            self.send_to_senates(pb.ConsensusReq(block=block.pb))
             self.set_cooking_block(block)
             self.factory.lc = task.LoopingCall(self.check_enough_senate_signature)
             start_repeat_call = 2
@@ -627,10 +628,10 @@ class Client(object):
         if ct >= failure_boundary:
             block = self.get_cooking_block()
             self.factory.lc.stop()
-            # self.broadcast(block.pb)
-            self.send(block.director, pb.DirectorShowTime(block=block.pb))
+            self.broadcast(block.pb)
+            # self.send(block.director, pb.DirectorShowTime(block=block.pb))
             self.set_client_status(self.ClientStatus.Wait4Block)
-            logging.info("wait4block")
+            logging.info("send block and wait4block")
 
     def send_senate_broadcast(self):
         logger = logging
@@ -686,7 +687,6 @@ class Client(object):
             logging.critical("chain_runner: "
                              "handle_transaction_summit in error statue {} from {}".format(self.status,
                                                                                            b64encode(remote_vk_str)))
-
 
     def handle_senate_signature(self, obj, remote_vk_str):
         assert (isinstance(obj, pb.SenateSignature)), type(obj)
@@ -762,6 +762,8 @@ class Client(object):
 
     def broadcast(self, obj):
         self.factory.bcast(obj)
+
+    # def send_to_discovery(self,):
 
     # def on_blocks_broadcast..
 

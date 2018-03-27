@@ -173,7 +173,7 @@ class MyProto(ProtobufReceiver):
 
     def handle_ping(self, msg):
         # type: (pb.Ping) -> None
-        logging.debug("NODE: got ping, {}".format(msg))
+        logging.debug("NODE: got ping, vk:{}".format(b64encode(msg.vk)))
         assert (self.state == 'SERVER')
         if msg.vk in self.peers.keys():
             logging.debug("NODE: ping found myself in peers.keys")
@@ -184,7 +184,7 @@ class MyProto(ProtobufReceiver):
 
     def handle_pong(self, msg):
         # type: (pb.Pong) -> None
-        logging.debug("NODE: got pong, {}".format(msg))
+        logging.debug("NODE: got pong, vk:{}".format(b64encode(msg.vk)))
         assert (self.state == 'CLIENT')
         if msg.vk in self.peers.keys():
             logging.debug("NODE: pong: found myself in peers.keys")
@@ -246,7 +246,7 @@ class MyFactory(Factory):
         # logging.info("NODE: peers {}".format(self.peers.items()))
         for _vk, addr in nodes.iteritems():
             vk = b64decode(_vk)
-            if vk not in self.peers.keys() and vk != self.vk:
+            if vk not in self.peers.keys():
                 host, port = addr.split(":")
                 self.make_new_connection(host, int(port))
             else:
@@ -262,14 +262,14 @@ class MyFactory(Factory):
     def change_member(self, member):
         logging.warn("NODE: changing member id")
         # port = self.peers[self.vk][1]
-        self.peers.clear
+        self.peers.clear()
         self.chain_runner.change_member(member)
         self.vk = self.chain_runner.member.verify_key_str
 
-        # connect to myself
-        point = TCP4ClientEndpoint(reactor, "localhost", self.config.port, timeout=90)
-        d = connectProtocol(point, MyProto(self))
-        d.addCallback(got_protocol).addErrback(my_err_back)
+        # # connect to myself
+        # point = TCP4ClientEndpoint(reactor, "localhost", self.config.port, timeout=90)
+        # d = connectProtocol(point, MyProto(self))
+        # d.addCallback(got_protocol).addErrback(my_err_back)
 
     def bcast(self, msg):
         """
@@ -469,11 +469,11 @@ def run(config, discovery_addr):
     # d.addCallback(got_protocol).addErrback(my_err_back)
 
     # connect to myself
-    def connect_to_myself():
-        point = TCP4ClientEndpoint(reactor, "localhost", config.port, timeout=90)
-        d = connectProtocol(point, MyProto(f))
-        d.addCallback(got_protocol).addErrback(my_err_back)
-    connect_to_myself()
+    # def connect_to_myself():
+    #     point = TCP4ClientEndpoint(reactor, "localhost", config.port, timeout=90)
+    #     d = connectProtocol(point, MyProto(f))
+    #     d.addCallback(got_protocol).addErrback(my_err_back)
+    # connect_to_myself()
     # call_later(1, connect_to_myself)
 
     logging.info("NODE: reactor starting on port {}".format(config.port))

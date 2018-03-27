@@ -71,14 +71,14 @@ class Discovery(ProtobufReceiver):
                         self.vk = vk
                         self.send_obj(member.pb)
 
+                    # self.factory.lc = task.LoopingCall(self.factory.send_instruction_when_ready)
+                    # self.factory.lc.start(5).addErrback(my_err_back)
+
                 # TODO check addr to be in the form host:port
                 if self.vk not in self.nodes:
                     logging.debug("Discovery: added node {} {}".format(self.vk, self.addr))
                     self.nodes[self.vk] = (self.addr, self)
                     logging.debug("Discovery: connected nodes {}".format(self.nodes.__len__()))
-
-                    # self.factory.lc = task.LoopingCall(self.factory.send_instruction_when_ready)
-                    # self.factory.lc.start(5).addErrback(my_err_back)
 
                 assert isinstance(self.factory, DiscoveryFactory)
                 self.send_obj(pb.DiscoverReply(nodes=self.factory.make_nodes_dict()))
@@ -102,6 +102,8 @@ class Discovery(ProtobufReceiver):
                 logger.addHandler(fh)  
 
                 logging.debug("Discovery: making new clients...")
+                logging.debug("peers: {}".format([ b64encode(s[0]) for s in self.factory.peers.items()]))
+                logging.debug("received peers: {}".format([ (s[0]) for s in obj.nodes.items()]))
                 self.factory.new_connection_if_not_exist(obj.nodes)
 
             elif isinstance(obj, pb.Instruction):
