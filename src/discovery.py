@@ -2,6 +2,8 @@ import argparse
 import logging
 import sys
 
+import random
+
 from twisted.internet import reactor, task
 from twisted.internet.protocol import Factory
 from typing import Union, Dict
@@ -122,11 +124,12 @@ class Discovery(ProtobufReceiver):
 
 
 class DiscoveryFactory(Factory):
-    def __init__(self, n, t, m, inst, load_member):
+    def __init__(self, n, t, m, inst, load_member, fan_out=0):
         self.nodes = {}  # key = vk, val = addr
         self.timeout_called = False
         self.load_member = load_member
         self.member_determined = defaultdict(bool)
+        self.fan_out = fan_out
         # self.pre_members = chain_config.get_members(load_member)
 
         import time
@@ -158,8 +161,15 @@ class DiscoveryFactory(Factory):
             logging.info("Insufficient params to send instructions")
 
     def make_nodes_dict(self):
-        msg = {k: v[0] for k, v in self.nodes.iteritems()}
-        return msg
+        if self.fan_out==0:
+            msg = {k: v[0] for k, v in self.nodes.iteritems()}
+            return msg
+
+        else:
+            fan_out = min(self.fan_out, len(self.nodes.keys()))
+            msg = random.sample(self.nodes.keys(), fan_out)
+            msg = {k: self.nodes[k][0] for k in msg}
+            return msg
 
     def send_instruction_when_ready(self):
 
@@ -198,8 +208,8 @@ def got_discovery(p, id, port):
     p.say_hello(id, port)
 
 
-def run(port, n, t, m, inst, load_member):
-    f = DiscoveryFactory(n, t, m, inst, load_member)
+def run(port, n, t, m, inst, load_member, fan_out):
+    f = DiscoveryFactory(n, t, m, inst, load_member, fan_out)
     reactor.listenTCP(port, f)
     logging.info("Discovery server running on {}".format(port))
     reactor.run()
@@ -252,6 +262,12 @@ if __name__ == '__main__':
         default='log',
         dest='output_dir',
     )
+    parser.add_argument(
+        '--fan-out',
+        type=int,
+        default=0,
+        help='fan-out parameter for gossiping'
+    )
     args = parser.parse_args()
 
     if args.output_dir:
@@ -265,5 +281,5 @@ if __name__ == '__main__':
 
 
     # NOTE: n, t, m and inst must be all or nothing
-    run(args.port, args.n, args.t, args.m, args.inst, args.load_member)
+    run(args.port, args.n, args.t, args.m, args.inst, args.load_member, args.fan_out)
     sys.exit(return_code)

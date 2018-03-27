@@ -73,6 +73,13 @@ class Client(object):
 
     @property
     def senates(self):
+        """
+        senates = {
+            utxo.address: [0, 1, 2],   #(senate serial number, for example)
+            ...
+        }
+        :return:
+        """
         return self.chain.senates
 
     @property
