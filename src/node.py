@@ -298,11 +298,9 @@ class MyFactory(Factory):
         :param msg:
         :return:
         """
-        self.gossip(msg)
-        # for k, v in self.peers.iteritems():
-        #     proto = v[2]
-        #     proto.send_obj(msg)
-
+        for k, v in self.peers.iteritems():
+            proto = v[2]
+            proto.send_obj(msg)
 
     def promoter_cast(self, msg):
         for promoter in self.promoters:

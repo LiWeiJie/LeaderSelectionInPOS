@@ -629,7 +629,7 @@ class Client(object):
         if ct >= failure_boundary:
             block = self.get_cooking_block()
             self.factory.lc.stop()
-            self.broadcast(block.pb)
+            self.gossip(block.pb)
             # self.send(block.director, pb.DirectorShowTime(block=block.pb))
             self.set_client_status(self.ClientStatus.Wait4Block)
             logging.info("send block and wait4block")
@@ -768,6 +768,9 @@ class Client(object):
 
     def broadcast(self, obj):
         self.factory.bcast(obj)
+
+    def gossip(self, obj):
+        self.factory.gossip(obj)
 
     # def send_to_discovery(self,):
 
