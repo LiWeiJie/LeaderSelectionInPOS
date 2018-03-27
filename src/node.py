@@ -21,6 +21,8 @@ from src.discovery import Discovery, got_discovery
 
 from src.chain.config import chain_config
 
+from src.utils.hash_utils import hash_once
+
 class MyProto(ProtobufReceiver):
     """
     Main protocol that handles the Byzantine consensus, one instance is created for each connection
@@ -91,6 +93,9 @@ class MyProto(ProtobufReceiver):
 
         elif isinstance(obj, pb.Block):
             self.factory.chain_runner.handle_block(obj, self.remote_vk)
+
+        elif isinstance(obj, pb.Gossip):
+            self.handle_gossip(obj)
 
         # old
 
@@ -193,6 +198,19 @@ class MyProto(ProtobufReceiver):
         self.remote_vk = msg.vk
         logging.debug("NODE: done pong")
 
+    def handle_gossip(self, msg):
+        logging.debug("NODE: got gossip")
+        assert isinstance(msg, pb.Gossip)
+        true_msg = msg.body
+        hv = hash_once(true_msg)
+        if self.factory.gossip_dict[hv] == 0:
+            self.factory.gossip_dict[hv] = 1
+            obj = self.unpack_string(true_msg)
+            assert not isinstance(obj, pb.Gossip)
+            self.stringReceived(true_msg)
+            self.factory.gossip_except(self.vk, msg)
+        else:
+            logging.info("Node: already handle gossip")
 
 class MyFactory(Factory):
     """
@@ -220,6 +238,9 @@ class MyFactory(Factory):
         # logging message size
         self.recv_message_log = defaultdict(long)
         self.sent_message_log = defaultdict(long)
+
+        # Gossip dict
+        self.gossip_dict = defaultdict(int)
 
         # TODO output this at the end of every round
         task.LoopingCall(self.log_communication_costs).start(5, False).addErrback(my_err_back)
@@ -277,9 +298,11 @@ class MyFactory(Factory):
         :param msg:
         :return:
         """
-        for k, v in self.peers.iteritems():
-            proto = v[2]
-            proto.send_obj(msg)
+        self.gossip(msg)
+        # for k, v in self.peers.iteritems():
+        #     proto = v[2]
+        #     proto.send_obj(msg)
+
 
     def promoter_cast(self, msg):
         for promoter in self.promoters:
@@ -293,6 +316,11 @@ class MyFactory(Factory):
         for node in set(self.peers.keys()) - set(self.promoters):
             self.send(node, msg)
 
+    def _gossip(self, nodes, gossip_obj):
+        assert isinstance(gossip_obj, pb.Gossip)
+        for node in nodes:
+            self.send(node, gossip_obj)
+
     def gossip(self, msg):
         """
         Receivers of the gossiped currently needs to manually decide whether it wants to forward it.
@@ -301,15 +329,22 @@ class MyFactory(Factory):
         :return: 
         """
         fan_out = min(self.config.fan_out, len(self.peers.keys()))
-        for node in random.sample(self.peers.keys(), fan_out):
-            self.send(node, msg)
+        gossip_obj = msg
+        if not isinstance(msg, pb.Gossip):
+            msg = ProtobufReceiver.pack_obj(msg)
+            gossip_obj = pb.Gossip(body=msg)
+        nodes = random.sample(self.peers.keys(), fan_out)
+        self._gossip(nodes=nodes, gossip_obj=gossip_obj)
 
     def gossip_except(self, exception, msg):
         new_set = set(self.peers.keys()) - set(exception)
         fan_out = min(self.config.fan_out, len(new_set))
         nodes = random.sample(new_set, fan_out)
-        for node in nodes:
-            self.send(node, msg)
+        gossip_obj = msg
+        if not isinstance(msg, pb.Gossip):
+            msg = ProtobufReceiver.pack_obj(msg)
+            gossip_obj = pb.Gossip(body=msg)
+        self._gossip(nodes=nodes, gossip_obj=gossip_obj)
 
     def multicast(self, nodes, msg):
         for node in nodes:
@@ -318,6 +353,10 @@ class MyFactory(Factory):
     def send(self, node, msg):
         proto = self.peers[node][2]
         proto.send_obj(msg)
+
+    def send_gossip(self, node, msg):
+        proto = self.peers[node][2]
+        proto.send_gossip(msg)
 
     @property
     def random_node(self):

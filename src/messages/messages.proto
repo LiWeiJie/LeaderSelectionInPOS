@@ -150,3 +150,7 @@ message SenateAnnounce {
     int32 rounds = 2;
     Paths paths = 3;
 }
+
+message Gossip {
+    bytes body = 1;
+}

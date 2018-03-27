@@ -247,12 +247,6 @@ if __name__ == '__main__':
         default=0,
     )
     parser.add_argument(
-        '-l', '--load_member',
-        type=int,
-        help="the first n node will load the member file",
-        default=0,
-    )
-    parser.add_argument(
         '--output_dir',
         help='output dir',
         default='log',
