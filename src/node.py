@@ -86,8 +86,8 @@ class MyProto(ProtobufReceiver):
         elif isinstance(obj, pb.SenateSignature):
             self.factory.chain_runner.handle_senate_signature(obj, self.remote_vk)
 
-        elif isinstance(obj, pb.DirectorShowTime):
-            self.factory.chain_runner.handle_director_show_time(obj, self.remote_vk)
+        # elif isinstance(obj, pb.DirectorShowTime):
+        #     self.factory.chain_runner.handle_director_show_time(obj, self.remote_vk)
 
         elif isinstance(obj, pb.Block):
             self.factory.chain_runner.handle_block(obj, self.remote_vk)

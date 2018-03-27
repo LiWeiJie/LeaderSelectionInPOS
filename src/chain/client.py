@@ -733,19 +733,19 @@ class Client(object):
                              "handle_block in error statue {} from {}".format(self.status,
                                                                               b64encode(remote_vk_str)))
 
-    def handle_director_show_time(self, obj, remote_vk_str):
-        assert (isinstance(obj, pb.DirectorShowTime)), type(obj)
-        client_status = self.ClientStatus
-        if self.status == client_status.Wait4Block:
-            block = block_model.Block(obj.block)
-            signed = self.director_sign(block)
-            logging.info("I am director")
-            if signed:
-                self.broadcast(signed.pb)
-        else:
-            logging.critical("chain_runner: "
-                             "handle_director_show_time in error statue {} from {}".format(self.status,
-                                                                                           b64encode(remote_vk_str)))
+    # def handle_director_show_time(self, obj, remote_vk_str):
+    #     assert (isinstance(obj, pb.DirectorShowTime)), type(obj)
+    #     client_status = self.ClientStatus
+    #     if self.status == client_status.Wait4Block:
+    #         block = block_model.Block(obj.block)
+    #         signed = self.director_sign(block)
+    #         logging.info("I am director")
+    #         if signed:
+    #             self.broadcast(signed.pb)
+    #     else:
+    #         logging.critical("chain_runner: "
+    #                          "handle_director_show_time in error statue {} from {}".format(self.status,
+    #                                                                                        b64encode(remote_vk_str)))
 
     def send(self, remote_vk, obj):
         if remote_vk in self.factory.peers:
