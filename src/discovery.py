@@ -246,9 +246,29 @@ if __name__ == '__main__':
         help="the first n node will load the member file",
         default=0,
     )
+    parser.add_argument(
+        '-l', '--load_member',
+        type=int,
+        help="the first n node will load the member file",
+        default=0,
+    )
+    parser.add_argument(
+        '--output_dir',
+        help='output dir',
+        default='log',
+        dest='output_dir',
+    )
     args = parser.parse_args()
 
-    print sys.argv
+    if args.output_dir:
+        logging.basicConfig(level=logging.DEBUG,
+                            format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+                            datefmt='%a, %d %b %Y %H:%M:%S',
+                            filename= args.output_dir + '/discovery.log',
+                            filemode='w')
+    logging.info("sys argv: {}".format(sys.argv))
+
+
 
     # NOTE: n, t, m and inst must be all or nothing
     run(args.port, args.n, args.t, args.m, args.inst, args.load_member)
