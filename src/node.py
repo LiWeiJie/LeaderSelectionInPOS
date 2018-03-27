@@ -267,7 +267,7 @@ class MyFactory(Factory):
         # logging.info("NODE: peers {}".format(self.peers.items()))
         for _vk, addr in nodes.iteritems():
             vk = b64decode(_vk)
-            if vk not in self.peers.keys():
+            if vk not in self.peers.keys() and vk != self.vk:
                 host, port = addr.split(":")
                 self.make_new_connection(host, int(port))
             else:

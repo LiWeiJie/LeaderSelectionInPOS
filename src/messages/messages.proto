@@ -12,6 +12,8 @@ message Discover {
 message DiscoverReply {
     // they key should be base64 encoded node vk
     map<string, string> nodes = 1;
+    Member member = 2;
+    int32 id = 3;
 }
 
 message Instruction {
