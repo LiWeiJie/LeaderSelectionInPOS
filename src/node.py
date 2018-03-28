@@ -240,7 +240,7 @@ class MyProto(ProtobufReceiver):
             logging.info("Node: already handle gossip")
 
     def handle_directed_message(self, msg):
-        logging.info("received DirectedMessage, paths:{}".format([b64encode(o) for o in msg.paths.node]))
+        # logging.info("received DirectedMessage, paths:{}".format([b64encode(o) for o in msg.paths.node]))
         paths = msg.paths
         if self.vk == paths.node[0]:
             true_msg = msg.body
