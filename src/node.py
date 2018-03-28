@@ -110,7 +110,7 @@ class MyProto(ProtobufReceiver):
                         send_or_not = True
                 else:
                     if senate_vk in self.factory.route:
-                        if obj.paths.node.__len__() - self.factory.route[senate_vk][0].node.__len__() < 2:
+                        if (obj.paths.node.__len__() - self.factory.route[senate_vk][0].node.__len__() < 2) and (self.factory.route[senate_vk].__len__() < 10):
                             self.factory.route[senate_vk].append(obj.paths)
                             send_or_not = True
                     else:
@@ -122,18 +122,7 @@ class MyProto(ProtobufReceiver):
                     self.factory.bcast_except(exceptions, obj)
 
         elif isinstance(obj, pb.DirectedMessage):
-            logging.info("received DirectedMessage, paths:{}, body:{}".format([b64encode(o) for o in obj.paths.node], obj.body))
-            paths = obj.paths
-            if self.vk == paths.node[0]:
-                self.stringReceived(obj.body)
-            else:
-                assert(self.vk in paths.node)
-
-                def get_index_of(lst, element):
-                    return list(map(lambda x: x[0], (list(filter(lambda x: x[1] == element, enumerate(lst))))))
-                idx = get_index_of(paths.node, self.vk)
-                idx = idx[0]
-                self.factory.send(paths.node[idx-1], obj)
+            self.handle_directed_message(obj)
 
         # old
 
@@ -243,12 +232,34 @@ class MyProto(ProtobufReceiver):
         hv = hash_once(true_msg)
         if self.factory.gossip_dict[hv] == 0:
             self.factory.gossip_dict[hv] = 1
-            obj = self.unpack_string(true_msg)
-            assert not isinstance(obj, pb.Gossip)
+            # obj = self.unpack_string(true_msg)
+            # assert not isinstance(obj, pb.Gossip)
             self.stringReceived(true_msg)
             self.factory.gossip_except(self.vk, msg)
         else:
             logging.info("Node: already handle gossip")
+
+    def handle_directed_message(self, msg):
+        logging.info("received DirectedMessage, paths:{}".format([b64encode(o) for o in obj.paths.node]))
+        paths = obj.paths
+        if self.vk == paths.node[0]:
+            true_msg = msg.body
+            hv = hash_once(true_msg)
+            if self.factory.directed_dict[hv] == 0:
+                self.factory.directed_dict[hv] = 1
+                # obj = self.unpack_string(true_msg)
+                # assert not isinstance(obj, pb.Gossip)
+                self.stringReceived(true_msg)
+            else:
+                logging.info("Node: already accepted directed message")
+        else:
+            assert(self.vk in paths.node)
+            def get_index_of(lst, element):
+                return list(map(lambda x: x[0], (list(filter(lambda x: x[1] == element, enumerate(lst))))))
+            idx = get_index_of(paths.node, self.vk)
+            idx = idx[0]
+            self.factory.send(paths.node[idx-1], obj)
+
 
 class MyFactory(Factory):
     """
