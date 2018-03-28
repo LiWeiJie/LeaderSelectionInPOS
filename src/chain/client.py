@@ -236,6 +236,7 @@ class Client(object):
         self._leader_serial_number = 0
         self.pend_to_summit_transactions.clear()
         self.reset_lock_list()
+        self.factory.update_when_new_round()
 
     def reset_lock_list(self):
         print "reset lock list"
@@ -537,10 +538,10 @@ class Client(object):
         self.set_client_status(status)
 
         delay = self.prepare_timeout / 2
-        call_later(delay, self.send_director_competition)
-        call_later(delay, self.send_pend_to_summit_txs)
 
         if self.is_senate:
+            self.send(self.factory.vk, pb.SenateAnnounce(rounds=rounds,
+                                                         paths=pb.Paths(node=[self.factory.vk])))
             # todo: broadcast existence
             if self.is_senate_leader:
                 # set timeout for collect and create block
@@ -553,6 +554,9 @@ class Client(object):
         else:
             status = self.ClientStatus.Wait4Block
             self.set_client_status(status)
+
+        call_later(delay, self.send_director_competition)
+        call_later(delay, self.send_pend_to_summit_txs)
 
     def send_director_competition(self):
         logging.info("chain runner: send_director_competition")
@@ -719,9 +723,10 @@ class Client(object):
                 ret = self.senate_sign(block)
                 if ret:
                     # cli.set_cooking_block(copy.copy(block))
-                    self.send(self.senates_leader, pb.SenateSignature(signed_block_hash=ret[0],
-                                                                      senate_signature=pb.Signature(signer=ret[1],
-                                                                                                    signature=ret[2])))
+                    self.send_to_senate(self.senates_leader, pb.SenateSignature(signed_block_hash=ret[0],
+                                                                                senate_signature=pb.Signature(
+                                                                                    signer=ret[1],
+                                                                                    signature=ret[2])))
                     if not self.is_senate_leader:
                         self.set_client_status(self.ClientStatus.Wait4Block)
             else:
@@ -767,11 +772,14 @@ class Client(object):
             logging.error("chain runner: remote_vk not exist {}".format(b64encode(remote_vk)))
             # raise Exception()
 
+    def send_to_senate(self, remote_vk, obj):
+        self.factory.send_to_senate(remote_vk, obj)
+
     def send_to_senates(self, obj):
         senates = self.senates
         for senate in senates:
             # print(senate)
-            self.send(senate, obj)
+            self.send_to_senate(senate, obj)
 
     def broadcast(self, obj):
         self.factory.bcast(obj)

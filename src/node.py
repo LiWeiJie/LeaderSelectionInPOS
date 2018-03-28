@@ -97,6 +97,44 @@ class MyProto(ProtobufReceiver):
         elif isinstance(obj, pb.Gossip):
             self.handle_gossip(obj)
 
+        elif isinstance(obj, pb.SenateAnnounce):
+            # logging.info("received senateAnnounce: {}".format([b64encode(o) for o in obj.paths.node]))
+            logging.info("received senateAnnounce")
+            senate_vk = obj.paths.node[0]
+            if senate_vk in self.factory.chain_runner.senates:
+                send_or_not = False
+                exceptions = [self.vk, self.remote_vk]
+                if self.vk in obj.paths.node:
+                    if obj.paths.node.__len__() == 1:
+                        self.factory.route[senate_vk] = [obj.paths]
+                        send_or_not = True
+                else:
+                    if senate_vk in self.factory.route:
+                        if obj.paths.node.__len__() - self.factory.route[senate_vk][0].node.__len__() < 2:
+                            self.factory.route[senate_vk].append(obj.paths)
+                            send_or_not = True
+                    else:
+                        self.factory.route[senate_vk] = [obj.paths]
+                        send_or_not = True
+                    obj.paths.node.append(self.vk)
+                if send_or_not:
+                    logging.info("send again senateAnnounce: {}".format([b64encode(o) for o in obj.paths.node]))
+                    self.factory.bcast_except(exceptions, obj)
+
+        elif isinstance(obj, pb.DirectedMessage):
+            logging.info("received DirectedMessage, paths:{}, body:{}".format([b64encode(o) for o in obj.paths.node], obj.body))
+            paths = obj.paths
+            if self.vk == paths.node[0]:
+                self.stringReceived(obj.body)
+            else:
+                assert(self.vk in paths.node)
+
+                def get_index_of(lst, element):
+                    return list(map(lambda x: x[0], (list(filter(lambda x: x[1] == element, enumerate(lst))))))
+                idx = get_index_of(paths.node, self.vk)
+                idx = idx[0]
+                self.factory.send(paths.node[idx-1], obj)
+
         # old
 
         # elif isinstance(obj, pb.ACS):
@@ -222,6 +260,10 @@ class MyFactory(Factory):
         self.promoters = []
         self.config = config
 
+        # Gossip dict
+        self.gossip_dict = defaultdict(int)
+        self.route = {}
+
         # self.tc_runner = TrustChainRunner(self)
         self.chain_runner = ChainRunner(factory=self, senates_number=config.n, blocks_path=config.chain)
         self.vk = self.chain_runner.member.verify_key_str
@@ -239,11 +281,14 @@ class MyFactory(Factory):
         self.recv_message_log = defaultdict(long)
         self.sent_message_log = defaultdict(long)
 
-        # Gossip dict
-        self.gossip_dict = defaultdict(int)
+
 
         # TODO output this at the end of every round
         task.LoopingCall(self.log_communication_costs).start(5, False).addErrback(my_err_back)
+
+    def update_when_new_round(self):
+        self.route.clear()
+
 
     def log_communication_costs(self, heading="NODE:"):
         logging.info('{} messages info {{ "sent": {}, "recv": {} }}'
@@ -302,6 +347,12 @@ class MyFactory(Factory):
             proto = v[2]
             proto.send_obj(msg)
 
+    def bcast_except(self, exception, msg):
+        new_set = set(self.peers.keys()) - set(exception)
+        for key in new_set:
+            proto = self.peers[key][2]
+            proto.send_obj(msg)
+
     def promoter_cast(self, msg):
         for promoter in self.promoters:
             self.send(promoter, msg)
@@ -352,9 +403,19 @@ class MyFactory(Factory):
         proto = self.peers[node][2]
         proto.send_obj(msg)
 
-    def send_gossip(self, node, msg):
-        proto = self.peers[node][2]
-        proto.send_gossip(msg)
+    def best_route_to_senate(self, senate_remote_vk):
+        return self.route[senate_remote_vk][0]
+
+    def send_to_senate(self, senate_remote_vk, msg):
+        logging.info("send to senate: {}".format(b64encode(senate_remote_vk)))
+        string = ProtobufReceiver.pack_obj(msg)
+        for route in self.route[senate_remote_vk]:
+            self.send(route.node[-1], pb.DirectedMessage(paths=route,
+                                                         body=string))
+
+    # def send_gossip(self, node, msg):
+    #     proto = self.peers[node][2]
+    #     proto.send_gossip(msg)
 
     @property
     def random_node(self):

@@ -148,11 +148,15 @@ message Paths {
 }
 
 message SenateAnnounce {
-    bytes vk = 1;
     int32 rounds = 2;
     Paths paths = 3;
 }
 
 message Gossip {
     bytes body = 1;
+}
+
+message DirectedMessage {
+    Paths paths = 1;
+    bytes body = 2;
 }
