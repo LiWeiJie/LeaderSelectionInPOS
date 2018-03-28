@@ -240,8 +240,8 @@ class MyProto(ProtobufReceiver):
             logging.info("Node: already handle gossip")
 
     def handle_directed_message(self, msg):
-        logging.info("received DirectedMessage, paths:{}".format([b64encode(o) for o in obj.paths.node]))
-        paths = obj.paths
+        logging.info("received DirectedMessage, paths:{}".format([b64encode(o) for o in msg.paths.node]))
+        paths = msg.paths
         if self.vk == paths.node[0]:
             true_msg = msg.body
             hv = hash_once(true_msg)
@@ -258,7 +258,7 @@ class MyProto(ProtobufReceiver):
                 return list(map(lambda x: x[0], (list(filter(lambda x: x[1] == element, enumerate(lst))))))
             idx = get_index_of(paths.node, self.vk)
             idx = idx[0]
-            self.factory.send(paths.node[idx-1], obj)
+            self.factory.send(paths.node[idx-1], msg)
 
 
 class MyFactory(Factory):
@@ -273,6 +273,7 @@ class MyFactory(Factory):
 
         # Gossip dict
         self.gossip_dict = defaultdict(int)
+        self.directed_dict = defaultdict(int)
         self.route = {}
 
         # self.tc_runner = TrustChainRunner(self)
