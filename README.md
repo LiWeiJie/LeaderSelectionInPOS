@@ -30,6 +30,37 @@ Leader selection In Proof of Stake
                             output dir
     --fan-out FAN_OUT     fan-out parameter for gossiping
     ```
-2. run several(m) nodes
+2. run several nodes(m nodes)
 
-    `python -m src.node 0 1 0 3 -d --fan-out 10 --ignore-promoter --chain genic &`
+    `python -m src.node 0 1 0 3 -d --fan-out 10 --ignore-promoter --chain genic & `
+
+    ```
+    usage: node.py [-h] [-d] [-v] [-o NAME] [--output_dir OUTPUT_DIR]
+               [--discovery ADDR] [--fan-out FAN_OUT] [--ignore-promoter]
+               [--profile NAME] [--timeout TIMEOUT] [--chain CHAIN]
+               port n t population
+
+    positional arguments:
+    port                  the listener port
+    n                     the total number of promoters
+    t                     the total number of malicious nodes
+    population            the population size
+
+    optional arguments:
+    -h, --help            show this help message and exit
+    -d, --debug           log at debug level
+    -v, --verbose         log at info level
+    -o NAME, --output NAME
+                            location for the default output log file
+    --output_dir OUTPUT_DIR
+                            location for the second output log file, file name
+                            from discovery server
+    --discovery ADDR      address of the discovery server on port 8123
+    --fan-out FAN_OUT     fan-out parameter for gossiping
+    --ignore-promoter     [Deprecated, not in use] do not transact with
+                            promoters
+    --profile NAME        run the node with cProfile
+    --timeout TIMEOUT     force exit after timeout, 0 means continue forever
+    --chain CHAIN         the initial chain path, one of ['genic','10_rich_man','100_rich_man']
+    ```
+

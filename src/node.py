@@ -282,6 +282,8 @@ class MyFactory(Factory):
         self.q = Queue.Queue()  # (str, msg)
         self.first_disconnect_logged = False
 
+        # self.consensus_runner = consensus_machine()
+
         self._neighbour = None
         self._sorted_peer_keys = None
 
@@ -412,6 +414,10 @@ class MyFactory(Factory):
             self.send(node, msg)
 
     def send(self, node, msg):
+        delay = self.config.send_delay
+        call_later(delay, _send, msg)
+
+    def _send(self, node, msg):
         proto = self.peers[node][2]
         proto.send_obj(msg)
 
@@ -630,8 +636,13 @@ if __name__ == '__main__':
         "-o", "--output",
         type=argparse.FileType('w'),
         metavar='NAME',
-
-        help="location for the output file"
+        help="location for the default output log file"
+    )
+    parser.add_argument(
+        '--output_dir',
+        help='location for the second output log file, file name from discovery server ',
+        default='log',
+        dest='output_dir',
     )
     parser.add_argument(
         '--discovery',
@@ -648,7 +659,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--ignore-promoter',
         action='store_true',
-        help='do not transact with promoters'
+        help='[Deprecated, not in use] do not transact with promoters'
     )
     parser.add_argument(
         '--profile',
@@ -663,16 +674,16 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--chain',
-        help='the initial chain path',
+        help='the initial chain path, one of [\'genic\', \'10_rich_man\',\'100_rich_man\']',
         default='genic',
         dest='chain'
     )
-    parser.add_argument(
-        '--output_dir',
-        help='output dir',
-        default='log',
-        dest='output_dir',
-    )
+    # parser.add_argument(
+    #     '--send_delay',
+    #     help='output dir',
+    #     default='log',
+    #     dest='send_delay',
+    # )
     args = parser.parse_args()
 
     if args.chain == 'genic':

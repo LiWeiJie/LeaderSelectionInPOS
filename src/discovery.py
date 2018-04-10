@@ -251,12 +251,12 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '-n',
-        type=int, help='the total number of promoters',
+        type=int, help='the total number of senates',
         nargs='?'
     )
     parser.add_argument(
         '-t',
-        type=int, help='the total number of malicious nodes',
+        type=int, help='the total number of malicious nodes, to be implemented',
         nargs='?'
     )
     parser.add_argument(
