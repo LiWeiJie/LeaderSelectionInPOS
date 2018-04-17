@@ -21,6 +21,8 @@ from src.discovery import Discovery, got_discovery
 
 from src.chain.config import chain_config
 
+from src.utils.hash_utils import hash_once
+
 class MyProto(ProtobufReceiver):
     """
     Main protocol that handles the Byzantine consensus, one instance is created for each connection
@@ -86,11 +88,41 @@ class MyProto(ProtobufReceiver):
         elif isinstance(obj, pb.SenateSignature):
             self.factory.chain_runner.handle_senate_signature(obj, self.remote_vk)
 
-        elif isinstance(obj, pb.DirectorShowTime):
-            self.factory.chain_runner.handle_director_show_time(obj, self.remote_vk)
+        # elif isinstance(obj, pb.DirectorShowTime):
+        #     self.factory.chain_runner.handle_director_show_time(obj, self.remote_vk)
 
         elif isinstance(obj, pb.Block):
             self.factory.chain_runner.handle_block(obj, self.remote_vk)
+
+        elif isinstance(obj, pb.Gossip):
+            self.handle_gossip(obj)
+
+        elif isinstance(obj, pb.SenateAnnounce):
+            # logging.info("received senateAnnounce: {}".format([b64encode(o) for o in obj.paths.node]))
+            logging.info("received senateAnnounce")
+            senate_vk = obj.paths.node[0]
+            if senate_vk in self.factory.chain_runner.senates:
+                send_or_not = False
+                exceptions = [self.vk, self.remote_vk]
+                if self.vk in obj.paths.node:
+                    if obj.paths.node.__len__() == 1:
+                        self.factory.route[senate_vk] = [obj.paths]
+                        send_or_not = True
+                else:
+                    if senate_vk in self.factory.route:
+                        if (obj.paths.node.__len__() - self.factory.route[senate_vk][0].node.__len__() < 2) and (self.factory.route[senate_vk].__len__() < 10):
+                            self.factory.route[senate_vk].append(obj.paths)
+                            send_or_not = True
+                    else:
+                        self.factory.route[senate_vk] = [obj.paths]
+                        send_or_not = True
+                    obj.paths.node.append(self.vk)
+                if send_or_not:
+                    logging.info("send again senateAnnounce: {}".format([b64encode(o) for o in obj.paths.node]))
+                    self.factory.bcast_except(exceptions, obj)
+
+        elif isinstance(obj, pb.DirectedMessage):
+            self.handle_directed_message(obj)
 
         # old
 
@@ -173,7 +205,7 @@ class MyProto(ProtobufReceiver):
 
     def handle_ping(self, msg):
         # type: (pb.Ping) -> None
-        logging.debug("NODE: got ping, {}".format(msg))
+        logging.debug("NODE: got ping, vk:{}".format(b64encode(msg.vk)))
         assert (self.state == 'SERVER')
         if msg.vk in self.peers.keys():
             logging.debug("NODE: ping found myself in peers.keys")
@@ -184,7 +216,7 @@ class MyProto(ProtobufReceiver):
 
     def handle_pong(self, msg):
         # type: (pb.Pong) -> None
-        logging.debug("NODE: got pong, {}".format(msg))
+        logging.debug("NODE: got pong, vk:{}".format(b64encode(msg.vk)))
         assert (self.state == 'CLIENT')
         if msg.vk in self.peers.keys():
             logging.debug("NODE: pong: found myself in peers.keys")
@@ -192,6 +224,41 @@ class MyProto(ProtobufReceiver):
         self.peers[msg.vk] = (self.transport.getPeer().host, msg.port, self)
         self.remote_vk = msg.vk
         logging.debug("NODE: done pong")
+
+    def handle_gossip(self, msg):
+        logging.debug("NODE: got gossip")
+        assert isinstance(msg, pb.Gossip)
+        true_msg = msg.body
+        hv = hash_once(true_msg)
+        if self.factory.gossip_dict[hv] == 0:
+            self.factory.gossip_dict[hv] = 1
+            # obj = self.unpack_string(true_msg)
+            # assert not isinstance(obj, pb.Gossip)
+            self.stringReceived(true_msg)
+            self.factory.gossip_except(self.vk, msg)
+        else:
+            logging.info("Node: already handle gossip")
+
+    def handle_directed_message(self, msg):
+        # logging.info("received DirectedMessage, paths:{}".format([b64encode(o) for o in msg.paths.node]))
+        paths = msg.paths
+        if self.vk == paths.node[0]:
+            true_msg = msg.body
+            hv = hash_once(true_msg)
+            if self.factory.directed_dict[hv] == 0:
+                self.factory.directed_dict[hv] = 1
+                # obj = self.unpack_string(true_msg)
+                # assert not isinstance(obj, pb.Gossip)
+                self.stringReceived(true_msg)
+            else:
+                logging.info("Node: already accepted directed message")
+        else:
+            assert(self.vk in paths.node)
+            def get_index_of(lst, element):
+                return list(map(lambda x: x[0], (list(filter(lambda x: x[1] == element, enumerate(lst))))))
+            idx = get_index_of(paths.node, self.vk)
+            idx = idx[0]
+            self.factory.send(paths.node[idx-1], msg)
 
 
 class MyFactory(Factory):
@@ -204,11 +271,18 @@ class MyFactory(Factory):
         self.promoters = []
         self.config = config
 
+        # Gossip dict
+        self.gossip_dict = defaultdict(int)
+        self.directed_dict = defaultdict(int)
+        self.route = {}
+
         # self.tc_runner = TrustChainRunner(self)
         self.chain_runner = ChainRunner(factory=self, senates_number=config.n, blocks_path=config.chain)
         self.vk = self.chain_runner.member.verify_key_str
         self.q = Queue.Queue()  # (str, msg)
         self.first_disconnect_logged = False
+
+        # self.consensus_runner = consensus_machine()
 
         self._neighbour = None
         self._sorted_peer_keys = None
@@ -221,8 +295,14 @@ class MyFactory(Factory):
         self.recv_message_log = defaultdict(long)
         self.sent_message_log = defaultdict(long)
 
+
+
         # TODO output this at the end of every round
         task.LoopingCall(self.log_communication_costs).start(5, False).addErrback(my_err_back)
+
+    def update_when_new_round(self):
+        self.route.clear()
+
 
     def log_communication_costs(self, heading="NODE:"):
         logging.info('{} messages info {{ "sent": {}, "recv": {} }}'
@@ -262,14 +342,14 @@ class MyFactory(Factory):
     def change_member(self, member):
         logging.warn("NODE: changing member id")
         # port = self.peers[self.vk][1]
-        self.peers.clear
+        self.peers.clear()
         self.chain_runner.change_member(member)
         self.vk = self.chain_runner.member.verify_key_str
 
-        # connect to myself
-        point = TCP4ClientEndpoint(reactor, "localhost", self.config.port, timeout=90)
-        d = connectProtocol(point, MyProto(self))
-        d.addCallback(got_protocol).addErrback(my_err_back)
+        # # connect to myself
+        # point = TCP4ClientEndpoint(reactor, "localhost", self.config.port, timeout=90)
+        # d = connectProtocol(point, MyProto(self))
+        # d.addCallback(got_protocol).addErrback(my_err_back)
 
     def bcast(self, msg):
         """
@@ -279,6 +359,12 @@ class MyFactory(Factory):
         """
         for k, v in self.peers.iteritems():
             proto = v[2]
+            proto.send_obj(msg)
+
+    def bcast_except(self, exception, msg):
+        new_set = set(self.peers.keys()) - set(exception)
+        for key in new_set:
+            proto = self.peers[key][2]
             proto.send_obj(msg)
 
     def promoter_cast(self, msg):
@@ -293,6 +379,11 @@ class MyFactory(Factory):
         for node in set(self.peers.keys()) - set(self.promoters):
             self.send(node, msg)
 
+    def _gossip(self, nodes, gossip_obj):
+        assert isinstance(gossip_obj, pb.Gossip)
+        for node in nodes:
+            self.send(node, gossip_obj)
+
     def gossip(self, msg):
         """
         Receivers of the gossiped currently needs to manually decide whether it wants to forward it.
@@ -301,23 +392,48 @@ class MyFactory(Factory):
         :return: 
         """
         fan_out = min(self.config.fan_out, len(self.peers.keys()))
-        for node in random.sample(self.peers.keys(), fan_out):
-            self.send(node, msg)
+        gossip_obj = msg
+        if not isinstance(msg, pb.Gossip):
+            msg = ProtobufReceiver.pack_obj(msg)
+            gossip_obj = pb.Gossip(body=msg)
+        nodes = random.sample(self.peers.keys(), fan_out)
+        self._gossip(nodes=nodes, gossip_obj=gossip_obj)
 
     def gossip_except(self, exception, msg):
         new_set = set(self.peers.keys()) - set(exception)
         fan_out = min(self.config.fan_out, len(new_set))
         nodes = random.sample(new_set, fan_out)
-        for node in nodes:
-            self.send(node, msg)
+        gossip_obj = msg
+        if not isinstance(msg, pb.Gossip):
+            msg = ProtobufReceiver.pack_obj(msg)
+            gossip_obj = pb.Gossip(body=msg)
+        self._gossip(nodes=nodes, gossip_obj=gossip_obj)
 
     def multicast(self, nodes, msg):
         for node in nodes:
             self.send(node, msg)
 
     def send(self, node, msg):
+        delay = self.config.send_delay
+        call_later(delay, _send, msg)
+
+    def _send(self, node, msg):
         proto = self.peers[node][2]
         proto.send_obj(msg)
+
+    def best_route_to_senate(self, senate_remote_vk):
+        return self.route[senate_remote_vk][0]
+
+    def send_to_senate(self, senate_remote_vk, msg):
+        logging.info("send to senate: {}".format(b64encode(senate_remote_vk)))
+        string = ProtobufReceiver.pack_obj(msg)
+        for route in self.route[senate_remote_vk]:
+            self.send(route.node[-1], pb.DirectedMessage(paths=route,
+                                                         body=string))
+
+    # def send_gossip(self, node, msg):
+    #     proto = self.peers[node][2]
+    #     proto.send_gossip(msg)
 
     @property
     def random_node(self):
@@ -469,11 +585,11 @@ def run(config, discovery_addr):
     # d.addCallback(got_protocol).addErrback(my_err_back)
 
     # connect to myself
-    def connect_to_myself():
-        point = TCP4ClientEndpoint(reactor, "localhost", config.port, timeout=90)
-        d = connectProtocol(point, MyProto(f))
-        d.addCallback(got_protocol).addErrback(my_err_back)
-    connect_to_myself()
+    # def connect_to_myself():
+    #     point = TCP4ClientEndpoint(reactor, "localhost", config.port, timeout=90)
+    #     d = connectProtocol(point, MyProto(f))
+    #     d.addCallback(got_protocol).addErrback(my_err_back)
+    # connect_to_myself()
     # call_later(1, connect_to_myself)
 
     logging.info("NODE: reactor starting on port {}".format(config.port))
@@ -520,8 +636,13 @@ if __name__ == '__main__':
         "-o", "--output",
         type=argparse.FileType('w'),
         metavar='NAME',
-
-        help="location for the output file"
+        help="location for the default output log file"
+    )
+    parser.add_argument(
+        '--output_dir',
+        help='location for the second output log file, file name from discovery server ',
+        default='log',
+        dest='output_dir',
     )
     parser.add_argument(
         '--discovery',
@@ -538,7 +659,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--ignore-promoter',
         action='store_true',
-        help='do not transact with promoters'
+        help='[Deprecated, not in use] do not transact with promoters'
     )
     parser.add_argument(
         '--profile',
@@ -553,16 +674,16 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '--chain',
-        help='the initial chain path',
+        help='the initial chain path, one of [\'genic\', \'10_rich_man\',\'100_rich_man\']',
         default='genic',
         dest='chain'
     )
-    parser.add_argument(
-        '--output_dir',
-        help='output dir',
-        default='log',
-        dest='output_dir',
-    )
+    # parser.add_argument(
+    #     '--send_delay',
+    #     help='output dir',
+    #     default='log',
+    #     dest='send_delay',
+    # )
     args = parser.parse_args()
 
     if args.chain == 'genic':

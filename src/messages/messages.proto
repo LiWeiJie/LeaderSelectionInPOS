@@ -12,6 +12,8 @@ message Discover {
 message DiscoverReply {
     // they key should be base64 encoded node vk
     map<string, string> nodes = 1;
+    Member member = 2;
+    int32 id = 3;
 }
 
 message Instruction {
@@ -146,7 +148,15 @@ message Paths {
 }
 
 message SenateAnnounce {
-    bytes vk = 1;
     int32 rounds = 2;
     Paths paths = 3;
+}
+
+message Gossip {
+    bytes body = 1;
+}
+
+message DirectedMessage {
+    Paths paths = 1;
+    bytes body = 2;
 }

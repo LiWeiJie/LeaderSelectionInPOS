@@ -112,10 +112,10 @@ class Chain(ProtobufWrapper):
 
     @property
     def senates(self):
-        """ senates = {}
+        """ senates = {
             utxo.address: [0, 1, 2],   #(senate serial number, for example)
             ...
-        }
+            }
         """
         if not self._senates:
             self.cal_senates()

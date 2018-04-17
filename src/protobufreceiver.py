@@ -19,9 +19,10 @@ class ProtobufReceiver(Int32StringReceiver):
         self.connection_lost(reason)
 
     def stringReceived(self, string):
-        tag, = unpack("H", string[:2])
-        obj = _PB_TAG_TO_TUPLE[tag][1]()
-        obj.ParseFromString(string[2:])
+        # tag, = unpack("H", string[:2])
+        # obj = _PB_TAG_TO_TUPLE[tag][1]()
+        # obj.ParseFromString(string[2:])
+        obj = self.unpack_string(string)
         self.obj_received(obj)
 
     def obj_received(self, obj):
@@ -41,8 +42,20 @@ class ProtobufReceiver(Int32StringReceiver):
         :param obj: 
         :return: 
         """
-        msg = pack("H", _PB_NAME_TO_TAG[obj.__class__.__name__]) + obj.SerializeToString()
+        msg = self.pack_obj(obj)
         self.sendString(msg)
+
+    @staticmethod
+    def pack_obj(obj):
+        msg = pack("H", _PB_NAME_TO_TAG[obj.__class__.__name__]) + obj.SerializeToString()
+        return msg
+
+    @staticmethod
+    def unpack_string(string):
+        tag, = unpack("H", string[:2])
+        obj = _PB_TAG_TO_TUPLE[tag][1]()
+        obj.ParseFromString(string[2:])
+        return obj
 
     def lengthLimitExceeded(self, length):
         raise IOError("Line length exceeded, len: {}".format(length))

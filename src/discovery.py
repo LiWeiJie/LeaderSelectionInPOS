@@ -2,7 +2,10 @@ import argparse
 import logging
 import sys
 
+import random
+
 from twisted.internet import reactor, task
+from twisted.internet.endpoints import TCP4ClientEndpoint, connectProtocol
 from twisted.internet.protocol import Factory
 from typing import Union, Dict
 
@@ -53,12 +56,18 @@ class Discovery(ProtobufReceiver):
         logging.debug("Discovery : received msg {} from {}"
                       .format(obj, self.transport.getPeer().host).replace('\n', ','))
 
-
         if self.state == 'SERVER':
 
             if isinstance(obj, pb.Discover):
+
+                # dreply = pb.DiscoverReply()
+                id = self.nodes.__len__()
+                # dreply.nodes.extend(self.factory.make_nodes_dict())
+
                 self.vk = obj.vk  # NOTE storing base64 form as is
                 self.addr = self.transport.getPeer().host + ":" + str(obj.port)
+
+                member = None
 
                 if self.nodes.__len__() < self.factory.load_member:
                     idx = self.nodes.__len__()
@@ -69,7 +78,11 @@ class Discovery(ProtobufReceiver):
                         logging.info("Discovery: set a member {}".format(idx))
                         self.factory.member_determined[vk] = True
                         self.vk = vk
-                        self.send_obj(member.pb)
+                        # self.send_obj(member.pb)
+                        # dreply.member.CopyFrom(member.pb)
+
+                    # self.factory.lc = task.LoopingCall(self.factory.send_instruction_when_ready)
+                    # self.factory.lc.start(5).addErrback(my_err_back)
 
                 # TODO check addr to be in the form host:port
                 if self.vk not in self.nodes:
@@ -77,31 +90,42 @@ class Discovery(ProtobufReceiver):
                     self.nodes[self.vk] = (self.addr, self)
                     logging.debug("Discovery: connected nodes {}".format(self.nodes.__len__()))
 
-                    # self.factory.lc = task.LoopingCall(self.factory.send_instruction_when_ready)
-                    # self.factory.lc.start(5).addErrback(my_err_back)
-
                 assert isinstance(self.factory, DiscoveryFactory)
-                self.send_obj(pb.DiscoverReply(nodes=self.factory.make_nodes_dict()))
+                # dreply.nodes = self.factory.make_nodes_dict()
+                self.send_obj(pb.DiscoverReply(nodes=self.factory.make_nodes_dict(), id=id, member=member.pb))
 
             else:
                 raise AssertionError("Discovery: invalid payload type on SERVER")
 
         elif self.state == 'CLIENT':
             if isinstance(obj, pb.DiscoverReply):
-                idx = obj.nodes.__len__()
+                # idx = obj.nodes.__len__()
                 # logging.basicConfig(level=logging.DEBUG,
                 #     format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                 #     datefmt='%a, %d %b %Y %H:%M:%S',
                 #     filename='log/'+str(idx)+'.log',
                 #     filemode='w')
+                from src.utils.encode_utils import b64e
                 logger = logging.getLogger()
-                log_path = self.factory.config.output_dir + '/' +str(idx)+'.log'
+                log_path = self.factory.config.output_dir + '/' + str(obj.id)  +'.log'
                 fh = logging.FileHandler(log_path, "w")
                 formatter = logging.Formatter('%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s')  
                 fh.setFormatter(formatter)  
                 logger.addHandler(fh)  
 
                 logging.debug("Discovery: making new clients...")
+                logging.debug("peers: {}".format([ b64encode(s[0]) for s in self.factory.peers.items()]))
+                logging.debug("received peers: {}".format([ (s[0]) for s in obj.nodes.items()]))
+
+                if obj.member.sk_str != "":
+                    self.factory.change_member(obj.member)
+
+                point = TCP4ClientEndpoint(reactor, "localhost", self.factory.config.port, timeout=90)
+                from src.node import MyProto
+                d = connectProtocol(point, MyProto(self.factory))
+                from src.node import got_protocol
+                d.addCallback(got_protocol).addErrback(my_err_back)
+
                 self.factory.new_connection_if_not_exist(obj.nodes)
 
             elif isinstance(obj, pb.Instruction):
@@ -120,11 +144,12 @@ class Discovery(ProtobufReceiver):
 
 
 class DiscoveryFactory(Factory):
-    def __init__(self, n, t, m, inst, load_member):
+    def __init__(self, n, t, m, inst, load_member, fan_out=0):
         self.nodes = {}  # key = vk, val = addr
         self.timeout_called = False
         self.load_member = load_member
         self.member_determined = defaultdict(bool)
+        self.fan_out = fan_out
         # self.pre_members = chain_config.get_members(load_member)
 
         import time
@@ -156,8 +181,15 @@ class DiscoveryFactory(Factory):
             logging.info("Insufficient params to send instructions")
 
     def make_nodes_dict(self):
-        msg = {k: v[0] for k, v in self.nodes.iteritems()}
-        return msg
+        if self.fan_out==0:
+            msg = {k: v[0] for k, v in self.nodes.iteritems()}
+            return msg
+
+        else:
+            fan_out = min(self.fan_out, len(self.nodes.keys()))
+            msg = random.sample(self.nodes.keys(), fan_out)
+            msg = {k: self.nodes[k][0] for k in msg}
+            return msg
 
     def send_instruction_when_ready(self):
 
@@ -196,8 +228,8 @@ def got_discovery(p, id, port):
     p.say_hello(id, port)
 
 
-def run(port, n, t, m, inst, load_member):
-    f = DiscoveryFactory(n, t, m, inst, load_member)
+def run(port, n, t, m, inst, load_member, fan_out):
+    f = DiscoveryFactory(n, t, m, inst, load_member, fan_out)
     reactor.listenTCP(port, f)
     logging.info("Discovery server running on {}".format(port))
     reactor.run()
@@ -219,12 +251,12 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '-n',
-        type=int, help='the total number of promoters',
+        type=int, help='the total number of senates',
         nargs='?'
     )
     parser.add_argument(
         '-t',
-        type=int, help='the total number of malicious nodes',
+        type=int, help='the total number of malicious nodes, to be implemented',
         nargs='?'
     )
     parser.add_argument(
@@ -244,10 +276,36 @@ if __name__ == '__main__':
         help="the first n node will load the member file",
         default=0,
     )
+    parser.add_argument(
+        '--output_dir',
+        help='output dir',
+        default='log',
+        dest='output_dir',
+    )
+    parser.add_argument(
+        '--fan-out',
+        type=int,
+        default=0,
+        help='fan-out parameter for gossiping'
+    )
     args = parser.parse_args()
 
-    print sys.argv
+    if args.output_dir:
+        # logging.basicConfig(level=logging.DEBUG,
+        #                     format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+        #                     datefmt='%a, %d %b %Y %H:%M:%S',
+        #                     filename= args.output_dir + '/discovery.log',
+        #                     filemode='w')
+        logger = logging.getLogger()
+        log_path = args.output_dir + '/discovery.log'
+        fh = logging.FileHandler(log_path, "w")
+        formatter = logging.Formatter('%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s')
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
+    logging.info("sys argv: {}".format(sys.argv))
+
+
 
     # NOTE: n, t, m and inst must be all or nothing
-    run(args.port, args.n, args.t, args.m, args.inst, args.load_member)
+    run(args.port, args.n, args.t, args.m, args.inst, args.load_member, args.fan_out)
     sys.exit(return_code)
