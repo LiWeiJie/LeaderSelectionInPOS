@@ -9,12 +9,12 @@ Using `virtualenv` is recommended.
 ## Running manually
 * First start the discovery server, and indicates the number of nodes
     * `python -m src.discovery` 
-    * For more information, see the help 'python -m src.discovery -h'
+    * For more information, see the help `python -m src.discovery -h`
 * Then start nodes
     * `python -m src.node PORT N T POPULATION`
     * port means the bind port for the node, N means the numbers of senate, T means the number of malicious node, POPULATION means the number of nodes.
     *  The arguments N, T and POPULATION must be the same on all the nodes
-    * For more information, see the help 'python -m src.node -h'
+    * For more information, see the help `python -m src.node -h`
 
 ## An example on gumby
 * see [My Gumby experiments](https://github.com/LiWeiJie/gumby/tree/testcode/experiments/consensus_wj)  
