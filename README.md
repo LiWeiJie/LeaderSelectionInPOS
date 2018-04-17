@@ -1,66 +1,135 @@
 # LPOS
 
 Leader selection In Proof of Stake
-
-## Unit test
-
+# USAGE
+Using `virtualenv` is recommended.
+## Runing tests
+### Unit Test
 `python -m unittest test`
+## Running manually
+* First start the discovery server, and indicates the number of nodes
+    * `python -m src.discovery` 
+    * For more information, see the help 'python -m src.discovery -h'
+* Then start nodes
+    * `python -m src.node PORT N T POPULATION`
+    * port means the bind port for the node, N means the numbers of senate, T means the number of malicious node, POPULATION means the number of nodes.
+    *  The arguments N, T and POPULATION must be the same on all the nodes
+    * For more information, see the help 'python -m src.node -h'
 
-## Simulator (Not recommended, recommended to run on the cluster)
-1. run discovery server
-    
-    `python -m src.discovery -l 100 --inst 2 tx-rate 3 -n 1 -t 0 --fan-out 10 -m 5 ` 
-
+## An example on gumby
+* see [My Gumby experiments](https://github.com/LiWeiJie/gumby/tree/testcode/experiments/consensus_wj)  
+* The Build Execute shell
     ```
-    usage: discovery.py [-h] [--port PORT] [-n [N]] [-t [T]] [-m [M]]
-                    [--inst [INST [INST ...]]] [-l LOAD_MEMBER]
-                    [--output_dir OUTPUT_DIR] [--fan-out FAN_OUT]
+    #!/bin/bash
 
-    optional arguments:
-    -h, --help            show this help message and exit
-    --port PORT           the listener port, default 8123
-    -n [N]                the total number of promoters
-    -t [T]                the total number of malicious nodes
-    -m [M]                the total number of nodes
-    --inst [INST [INST ...]]
-                            the instruction to send after all nodes are connected
-    -l LOAD_MEMBER, --load_member LOAD_MEMBER
-                            the first n node will load the member file
-    --output_dir OUTPUT_DIR
-                            output dir
-    --fan-out FAN_OUT     fan-out parameter for gossiping
+    set -x
+
+    export WITH_SYSTEMTAP=false
+
+    gumby/scripts/build_virtualenv.sh
+
+    source ~/venv/bin/activate
+
+    env
+
+    export GUMBY_DAS4_NODE_TIMEOUT=600
+    #export GUMBY_das4_instances_to_run=500
+    export GUMBY_das4_instances_to_run=40
+    export GUMBY_das4_node_amount=10
+
+    #export GUMBY_das4_node_amount="$(( GUMBY_das4_instances_to_run / 40 ))"
+    # export GUMBY_das4_node_amount=6
+
+    export GUMBY_LOG_LEVEL=DEBUG
+    export GUMBY_PROFILE_MEMORY=FALSE
+
+    n=1
+    t="$(( n / 4 ))"
+    delay=30
+    experiment="tx-n-outputs"
+    param=20
+    # profile='--profile $OUTPUT_DIR\/$RANDOM.stats'
+    profile=''
+
+
+    #chain="genic"
+    chain="10_rich_man"
+    #chain="100_rich_man"
+
+    OUTPUT_DIR='..\/output'
+
+    node_command="python -m src.node 0 $n $t $GUMBY_das4_instances_to_run -d --discovery $(hostname) --fan-out 10 --chain $chain --output_dir $OUTPUT_DIR --ignore-promoter $profile"
+    discovery_command="python -m src.discovery -n $n -t $t -m $GUMBY_das4_instances_to_run -l 100 --fan-out 5 --output_dir $OUTPUT_DIR --inst $delay $experiment $param"
+
+    sed -i "s/NODE_COMMAND/$node_command/" gumby/experiments/consensus_wj/run.sh
+    sed -i "s/DISCOVERY_COMMAND/$discovery_command/" gumby/experiments/consensus_wj/run_discovery.sh
+
+    mkdir ./consensus-code/log
+
+    pip install --upgrade protobuf
+
+    ./gumby/run.py gumby/experiments/consensus_wj/consensus_wj_das5.conf
     ```
-2. run several nodes(m nodes)
-
-    `python -m src.node 0 1 0 3 -d --fan-out 10 --ignore-promoter --chain genic & `
-
-    ```
-    usage: node.py [-h] [-d] [-v] [-o NAME] [--output_dir OUTPUT_DIR]
-               [--discovery ADDR] [--fan-out FAN_OUT] [--ignore-promoter]
-               [--profile NAME] [--timeout TIMEOUT] [--chain CHAIN]
-               port n t population
-
-    positional arguments:
-    port                  the listener port
-    n                     the total number of promoters
-    t                     the total number of malicious nodes
-    population            the population size
-
-    optional arguments:
-    -h, --help            show this help message and exit
-    -d, --debug           log at debug level
-    -v, --verbose         log at info level
-    -o NAME, --output NAME
-                            location for the default output log file
-    --output_dir OUTPUT_DIR
-                            location for the second output log file, file name
-                            from discovery server
-    --discovery ADDR      address of the discovery server on port 8123
-    --fan-out FAN_OUT     fan-out parameter for gossiping
-    --ignore-promoter     [Deprecated, not in use] do not transact with
-                            promoters
-    --profile NAME        run the node with cProfile
-    --timeout TIMEOUT     force exit after timeout, 0 means continue forever
-    --chain CHAIN         the initial chain path, one of ['genic','10_rich_man','100_rich_man']
-    ```
+# About
+```
+├── README.md
+├── config
+│   ├── blocks.json
+│   ├── config.json
+│   └── long_blocks.json
+├── data
+│   ├── chain_100_rich_man.json
+│   ├── chain_10_rich_man.json
+│   ├── chain_genic.json
+│   └── members
+│       └── members.json
+├── run_chain.py
+├── script_start.sh
+├── simulator_chain.py
+├── single_test.py
+├── src
+│   ├── __init__.py
+│   ├── chain
+│   │   ├── __init__.py
+│   │   ├── client.py
+│   │   ├── config.py
+│   │   ├── model
+│   │   │   ├── __init__.pyache__
+│   │   │   ├── block_model.py
+│   │   │   ├── chain_model.py
+│   │   │   ├── member_model.py
+│   │   │   ├── transaction_model.py
+│   ├── discovery.py
+│   ├── messages
+│   │   ├── __init__.py
+│   │   ├── messages.proto
+│   │   ├── messages_pb2.py
+│   │   └── protoc.sh
+│   ├── node.py
+│   ├── protobufreceiver.py
+│   ├── protobufwrapper.py
+│   ├── utils
+│   │   ├── __init__.py
+│   │   ├── encode_utils.py
+│   │   ├── hash_utils.py
+│   │   ├── message.py
+│   │   ├── network_utils.py
+│   │   ├── random_utils.py
+│   │   ├── script_utils.py
+├── test_chain.py
+```
+## Summary
+This is the summary of the code.
+* [node](src/node.py)
+    * about the network connect, network packet send and receive, protocol analysis and handle
+* [discovery node](src/discovery.py)
+    * store nodes' socket
+* [message](src/messages)
+    * protocol prototype
+    * Protocol Buffers - Google's data interchange format
+* [chain](src/chain)
+    * [client](src/chain/client.py)
+        * chain runner
+    * [model](src/chain/model)
+        * including chain model, block model, transaction model and member model
 
