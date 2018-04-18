@@ -309,12 +309,12 @@ if __name__=="__main__":
     # prof.add_module(ledger_model.Ledger.add_block)
     # prof.add_module(ledger_model.Ledger.add_blocks)
     # line_profiler.LineProfiler()
-    # prof.enable()  # 开始性能分析
+    # prof.enable()  # start profiler
 
     members = load_predine_members()
     clients = load_predine_chains(members, chain_path=chain_config.chain_10_rich_man_path)
     simulation_one_round(clients, verbose=False)
-    # prof.disable()  # 停止性能分析
+    # prof.disable()  # stop profiler
     # prof.print_stats(sys.stdout)
     # with open("analysis.log", 'w') as f:
         # prof.print_stats(f)
