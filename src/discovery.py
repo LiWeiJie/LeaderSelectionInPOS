@@ -24,7 +24,7 @@ return_code = 0
 
 class Discovery(ProtobufReceiver):
     """
-    this is both a discovery server and a coin server, the latter is not implemented yet
+    this is a discovery server
     """
 
     def __init__(self, nodes, factory):
@@ -32,7 +32,7 @@ class Discovery(ProtobufReceiver):
         self.vk = None
         self.addr = None
         self.state = 'SERVER'
-        self.factory = factory  # this changes depending on whether it's a server or client
+        self.factory = factory  
 
     def connection_lost(self, reason):
         if self.vk in self.nodes:
@@ -46,8 +46,9 @@ class Discovery(ProtobufReceiver):
             reactor.stop()
 
     def obj_received(self, obj):
-        # type: (Union[pb.Discover, pb.DiscoverReply]) -> None
         """
+        type: (Union[pb.Discover, pb.DiscoverReply]) -> None
+
         we don't bother with decoding vk here, since we don't use vk in any crypto functions
         :param obj:
         :return:
@@ -99,12 +100,8 @@ class Discovery(ProtobufReceiver):
 
         elif self.state == 'CLIENT':
             if isinstance(obj, pb.DiscoverReply):
-                # idx = obj.nodes.__len__()
-                # logging.basicConfig(level=logging.DEBUG,
-                #     format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
-                #     datefmt='%a, %d %b %Y %H:%M:%S',
-                #     filename='log/'+str(idx)+'.log',
-                #     filemode='w')
+                
+
                 from src.utils.encode_utils import b64e
                 logger = logging.getLogger()
                 log_path = self.factory.config.output_dir + '/' + str(obj.id)  +'.log'

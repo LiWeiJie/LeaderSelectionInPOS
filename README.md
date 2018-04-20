@@ -83,10 +83,7 @@ Using `virtualenv` is recommended.
 │   ├── chain_genic.json
 │   └── members
 │       └── members.json
-├── run_chain.py
-├── script_start.sh
 ├── simulator_chain.py
-├── single_test.py
 ├── src
 │   ├── __init__.py
 │   ├── chain
@@ -120,16 +117,16 @@ Using `virtualenv` is recommended.
 ```
 ## Summary
 This is the summary of the code.
-* [node](src/node.py)
+* [src/node.py](src/node.py)
     * about the network connect, network packet send and receive, protocol analysis and handle
-* [discovery node](src/discovery.py)
+* [src/discovery.py](src/discovery.py)
     * store nodes' socket
-* [message](src/messages)
+* [src/messages](src/messages)
     * protocol prototype
     * Protocol Buffers - Google's data interchange format
-* [chain](src/chain)
-    * [client](src/chain/client.py)
+* [src/chain](src/chain)
+    * [src/chain/client.py](src/chain/client.py)
         * chain runner
-    * [model](src/chain/model)
+    * [src/chain/model](src/chain/model)
         * including chain model, block model, transaction model and member model
 

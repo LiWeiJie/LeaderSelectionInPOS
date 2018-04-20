@@ -25,7 +25,7 @@ from src.utils.hash_utils import hash_once
 
 class MyProto(ProtobufReceiver):
     """
-    Main protocol that handles the Byzantine consensus, one instance is created for each connection
+    Main protocol that handles the chain operation and Byzantine consensus, one instance is created for each connection
     """
     def __init__(self, factory):
         # type: (MyFactory) -> None
@@ -124,40 +124,6 @@ class MyProto(ProtobufReceiver):
         elif isinstance(obj, pb.DirectedMessage):
             self.handle_directed_message(obj)
 
-        # old
-
-        # elif isinstance(obj, pb.ACS):
-        #     if self.factory.config.failure != 'omission':
-        #         res = self.factory.acs.handle(obj, self.remote_vk)
-        #         self.process_acs_res(res, obj)
-        #
-        # elif isinstance(obj, pb.TxReq):
-        #     self.factory.tc_runner.handle_tx_req(obj, self.remote_vk)
-        #
-        # elif isinstance(obj, pb.TxResp):
-        #     self.factory.tc_runner.handle_tx_resp(obj, self.remote_vk)
-        #
-        # elif isinstance(obj, pb.ValidationReq):
-        #     self.factory.tc_runner.handle_validation_req(obj, self.remote_vk)
-        #
-        # elif isinstance(obj, pb.ValidationResp):
-        #     self.factory.tc_runner.handle_validation_resp(obj, self.remote_vk)
-        #
-        # elif isinstance(obj, pb.SigWithRound):
-        #     self.factory.tc_runner.handle_sig(obj, self.remote_vk)
-        #
-        # elif isinstance(obj, pb.CpBlock):
-        #     self.factory.tc_runner.handle_cp(obj, self.remote_vk)
-        #
-        # elif isinstance(obj, pb.Cons):
-        #     self.factory.tc_runner.handle_cons(obj, self.remote_vk)
-        #
-        # elif isinstance(obj, pb.AskCons):
-        #     self.factory.tc_runner.handle_ask_cons(obj, self.remote_vk)
-
-        # NOTE messages below are for testing, bracha/mo14 is normally handled by acs
-
-
         elif isinstance(obj, pb.Dummy):
             logging.info("NODE: got dummy message from {}".format(b64encode(self.remote_vk)))
 
@@ -174,29 +140,6 @@ class MyProto(ProtobufReceiver):
         """
         ProtobufReceiver.send_obj(self, obj)
         self.factory.sent_message_log[obj.__class__.__name__] += obj.ByteSize()
-
-    # def process_acs_res(self, o, m):
-    #     """
-    #     This function checks whether the result is Replay or Handled.
-    #     If it's the former, the message is placed into factory.q and then we replay it (factory.process_queue).
-    #     :param o: the object we're processing
-    #     :param m: the original message
-    #     :return:
-    #     """
-    #     assert o is not None
-
-    #     if isinstance(o, Replay):
-    #         logging.debug("NODE: putting {} into msg queue".format(m))
-    #         self.factory.q.put((self.remote_vk, m))
-    #     elif isinstance(o, Handled):
-    #         if self.factory.config.test == 'acs':
-    #             logging.debug("NODE: testing ACS, not handling the result")
-    #             return
-    #         if o.m is not None:
-    #             logging.debug("NODE: attempting to handle ACS result")
-    #             self.factory.tc_runner.handle_cons_from_acs(o.m)
-    #     else:
-    #         raise AssertionError("instance is not Replay or Handled")
 
     def send_ping(self):
         self.send_obj(pb.Ping(vk=self.vk, port=self.config.port))
@@ -387,7 +330,6 @@ class MyFactory(Factory):
     def gossip(self, msg):
         """
         Receivers of the gossiped currently needs to manually decide whether it wants to forward it.
-        TODO create a special gossip message type and do the gossiping/forwarding on the base class.
         :param msg: 
         :return: 
         """
@@ -415,7 +357,7 @@ class MyFactory(Factory):
 
     def send(self, node, msg):
         delay = self.config.send_delay
-        call_later(delay, _send, msg)
+        call_later(delay, self._send, node, msg)
 
     def _send(self, node, msg):
         proto = self.peers[node][2]
@@ -523,7 +465,7 @@ class Config(object):
     Should be singleton
     """
     def __init__(self, port, n, t, population, fan_out, 
-                 ignore_promoter, chain, output_dir):
+                 ignore_promoter, chain, output_dir, send_delay):
         """
         This only stores the config necessary at runtime, so not necessarily all the information from argparse
         :param port:
@@ -547,6 +489,7 @@ class Config(object):
 
         self.output_dir = output_dir
 
+        self.send_delay = send_delay
 
 def simple_run(member = None, n=4, t=0, population=0, port = 0):
     set_logging(logging.DEBUG)
@@ -678,12 +621,12 @@ if __name__ == '__main__':
         default='genic',
         dest='chain'
     )
-    # parser.add_argument(
-    #     '--send_delay',
-    #     help='output dir',
-    #     default='log',
-    #     dest='send_delay',
-    # )
+    parser.add_argument(
+        '--send_delay',
+        help='delay of every send operations',
+        default=0,
+        dest='send_delay',
+    )
     args = parser.parse_args()
 
     if args.chain == 'genic':
@@ -697,7 +640,7 @@ if __name__ == '__main__':
 
     def _run():
         run(Config(args.port, args.n, args.t, args.population,
-                   args.fan_out,  args.ignore_promoter, args.chain, args.output_dir),
+                   args.fan_out,  args.ignore_promoter, args.chain, args.output_dir, args.send_delay),
             args.discovery)
 
     if args.timeout != 0:
