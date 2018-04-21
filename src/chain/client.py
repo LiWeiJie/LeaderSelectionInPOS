@@ -51,6 +51,11 @@ from base64 import b64encode
 
 
 class Client(object):
+    """"
+    chain runner
+    binding to a specific member
+    """
+    
     ClientStatus = enum.Enum("ClientStatus",
                              ('Sleeping', "Wait4Senates", 'Wait4TxsAndDirector', 'Wait4Consensus', 'Wait4Block'))
 
@@ -225,7 +230,7 @@ class Client(object):
 
         # init models
 
-        self.initiate_protocol_handler()
+        # self.initiate_protocol_handler()
 
     def listen_block_change(self, block):
         if block:
@@ -236,7 +241,9 @@ class Client(object):
         self._leader_serial_number = 0
         self.pend_to_summit_transactions.clear()
         self.reset_lock_list()
-        self.factory.update_when_new_round()
+
+        if self.factory:
+            self.factory.update_when_new_round()
 
     def reset_lock_list(self):
         print "reset lock list"
@@ -511,13 +518,32 @@ class Client(object):
                 return True
         return False
 
-    def initiate_protocol_handler(self):
-        messages = {
-            "senate_broadcast": message.Message(handler=self.on_senate_broadcast,
-                                                payload_class=payload_base.PayloadBase),
-            # "blocks_broadcast": message.Message(handler=on_blocks_broadcast)
-        }
+    # def initiate_protocol_handler(self):
+    #     messages = {
+    #         "senate_broadcast": message.Message(handler=self.on_senate_broadcast,
+    #                                             payload_class=payload_base.PayloadBase),
+    #         # "blocks_broadcast": message.Message(handler=on_blocks_broadcast)
+    #     }
         self._meta_messages = messages
+
+    # def send_senate_broadcast(self):
+    #     logger = logging
+    #     meta_messages = self._meta_messages
+    #     protocol_name = "senate_broadcast"
+    #
+    #     logger.info("send " + protocol_name)
+    #     # logger.info("member ", self.member)
+    #
+    #     dest = member_model.BroadcastMember()
+    #     message = meta_messages[protocol_name].payload_class(
+    #         sender=self.member,
+    #         destination=dest,
+    #         signature=None,
+    #         timestamp=self.timestamp
+    #     )
+    #     message.add_signature()
+    #     #  (destination, protoco_name, message)
+    #     return json.dumps([dest.mid]), protocol_name, json.dumps(message, default=payload_base.PayloadBase.obj2dict)
 
     def start(self, rounds=0):
         """set the status and timestamp """
@@ -645,24 +671,7 @@ class Client(object):
             self.set_client_status(self.ClientStatus.Wait4Block)
             logging.info("send block and wait4block")
 
-    def send_senate_broadcast(self):
-        logger = logging
-        meta_messages = self._meta_messages
-        protocol_name = "senate_broadcast"
 
-        logger.info("send " + protocol_name)
-        # logger.info("member ", self.member)
-
-        dest = member_model.BroadcastMember()
-        message = meta_messages[protocol_name].payload_class(
-            sender=self.member,
-            destination=dest,
-            signature=None,
-            timestamp=self.timestamp
-        )
-        message.add_signature()
-        #  (destination, protoco_name, message)
-        return json.dumps([dest.mid]), protocol_name, json.dumps(message, default=payload_base.PayloadBase.obj2dict)
 
     def handle_protocols(self, dests, protocol_name, data):
         meta_messages = self._meta_messages

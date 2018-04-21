@@ -3,9 +3,7 @@
 Leader selection In Proof of Stake
 # USAGE
 Using `virtualenv` is recommended.
-## Runing tests
-### Unit Test
-`python -m unittest test`
+
 ## Running manually
 * First start the discovery server, and indicates the number of nodes
     * `python -m src.discovery` 
@@ -70,6 +68,11 @@ Using `virtualenv` is recommended.
 
     ./gumby/run.py gumby/experiments/consensus_wj/consensus_wj_das5.conf
     ```
+## Runing tests
+### Unit Test
+`python -m unittest test`
+### Logical presentation
+`python -m simulator_chain`
 # About
 ```
 ├── README.md
